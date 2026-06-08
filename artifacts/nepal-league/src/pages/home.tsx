@@ -22,8 +22,8 @@ export default function Home() {
         <div className="relative p-6 md:p-10 flex flex-col items-center text-center space-y-4">
           <Trophy className="h-16 w-16 text-primary mb-2" />
           <h1 className="text-3xl md:text-5xl font-black tracking-tight uppercase italic">
-            Nepal Summer League
-            <br className="hidden md:block" /> Finland 2026
+            Ostrobothnia Nepal
+            <br className="hidden md:block" /> Super League 2026
           </h1>
           <div className="flex flex-wrap justify-center gap-4 text-sm md:text-base font-medium text-muted-foreground mt-4">
             <span className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-full border">

@@ -26,7 +26,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-card px-4 md:hidden">
         <div className="flex items-center gap-2">
           <Trophy className="h-6 w-6 text-primary" />
-          <span className="font-bold tracking-tight">NSL Finland</span>
+          <span className="font-bold tracking-tight">ONSL 2026</span>
         </div>
         <div className="flex items-center gap-4">
           <button
@@ -76,7 +76,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <aside className="hidden w-64 flex-col border-r bg-card md:flex h-screen sticky top-0">
         <div className="flex h-16 items-center gap-2 border-b px-6">
           <Trophy className="h-6 w-6 text-primary" />
-          <span className="font-bold tracking-tight">NSL Finland</span>
+          <span className="font-bold tracking-tight">ONSL 2026</span>
         </div>
         <nav className="flex-1 space-y-1 p-4">
           {NAV_ITEMS.map((item) => {
