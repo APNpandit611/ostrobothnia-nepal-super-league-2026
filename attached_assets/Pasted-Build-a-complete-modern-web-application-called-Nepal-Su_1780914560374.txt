@@ -1,0 +1,289 @@
+Build a complete modern web application called **Nepal Summer League Finland 2026** for a one-day football (soccer) tournament.
+
+## Purpose
+
+This application will be used during the tournament to:
+
+* Display live fixtures
+* Show live scores
+* Update standings automatically
+* Track match results
+* Provide a public link for spectators
+* Allow tournament organizers to update scores from a phone
+
+## Teams
+
+1. Kokkola Soccer Boys
+2. Jeppis Nepal Klub
+3. Oulu Nepalese Sports
+4. Seinajoki International Society
+5. Vaasan Nepali Ry
+
+## Technical Requirements
+
+Create a full-stack application using:
+
+* React
+* TypeScript
+* Tailwind CSS
+* Node.js
+* Express
+* Supabase Database
+* Realtime updates using Supabase subscriptions
+
+The application must be deployable directly on Replit.
+
+## Pages
+
+### Home Page
+
+Display:
+
+* Tournament logo
+* Tournament name
+* Tournament date
+* Venue
+* Countdown timer
+* Number of teams
+* Number of matches
+* Current league leader
+* Quick navigation cards
+
+### Fixtures Page
+
+Automatically generate a round-robin schedule where every team plays every other team once.
+
+Display:
+
+* Match number
+* Team A
+* Team B
+* Kickoff time
+* Pitch number
+* Match status
+
+Status values:
+
+* Upcoming
+* Live
+* Finished
+
+Provide filters:
+
+* All Matches
+* Upcoming
+* Live
+* Finished
+
+### Live Match Center
+
+For each match display:
+
+* Live score
+* Match clock
+* Goals
+* Yellow cards
+* Red cards
+* Match events timeline
+
+Admin can update events in real time.
+
+Changes should instantly appear for all visitors without refreshing.
+
+### Standings Page
+
+Automatically calculate:
+
+* Position
+* Team
+* Played
+* Won
+* Drawn
+* Lost
+* Goals For
+* Goals Against
+* Goal Difference
+* Points
+
+Ranking rules:
+
+1. Points
+2. Goal Difference
+3. Goals Scored
+4. Head-to-head
+
+Standings must update automatically whenever a result is entered.
+
+### Results Page
+
+Display:
+
+* Completed matches
+* Final score
+* Goal scorers
+* Match statistics
+
+### Teams Page
+
+Display:
+
+* Team name
+* Team logo placeholder
+* Played
+* Wins
+* Draws
+* Losses
+* Goals For
+* Goals Against
+
+### Statistics Page
+
+Show:
+
+* Top Scorers
+* Most Goals Team
+* Best Defense
+* Most Wins
+* Highest Scoring Match
+
+## Admin Panel
+
+Create a secure admin dashboard.
+
+Login credentials:
+
+Username: admin
+
+Password: admin123
+
+Admin functions:
+
+* Create fixtures
+* Edit fixtures
+* Start match
+* Pause match
+* Finish match
+* Enter scores
+* Add goal scorers
+* Add cards
+* Edit team information
+* Reset tournament
+
+## Live Updates
+
+Use Supabase Realtime.
+
+When an admin updates:
+
+* score
+* standings
+* match events
+
+all users should see updates instantly.
+
+No manual refresh should be required.
+
+## Mobile Design
+
+The app must work perfectly on:
+
+* Android phones
+* iPhones
+* Tablets
+* Desktop
+
+Use a modern football tournament design.
+
+Features:
+
+* Dark mode
+* Light mode
+* Responsive layout
+* Fast loading
+
+## Fixture Generator
+
+Generate a complete round-robin schedule for the five teams.
+
+Total teams: 5
+
+Automatically calculate all fixtures.
+
+Use realistic match times for a one-day tournament.
+
+Example:
+
+09:00 Match 1
+09:45 Match 2
+10:30 Match 3
+
+Continue until all matches are completed.
+
+## Database Tables
+
+Create tables:
+
+teams
+matches
+standings
+players
+goals
+cards
+events
+admins
+
+Include proper relationships.
+
+## Public Features
+
+Visitors can:
+
+* View fixtures
+* View live scores
+* View standings
+* View statistics
+* View results
+
+Visitors cannot edit data.
+
+## Extra Features
+
+Add:
+
+* Tournament sponsor section
+* Match countdown
+* QR code for public website
+* Export standings as PDF
+* Export fixtures as PDF
+* Share tournament link
+* Progressive Web App (PWA)
+* Install on mobile device
+
+## UI Design
+
+Create a professional football tournament interface similar to modern sports apps.
+
+Colors:
+
+* Green football theme
+* White
+* Dark gray
+
+Use cards, tables, badges, and modern typography.
+
+## Deliverables
+
+Generate:
+
+1. Full project structure
+2. Frontend code
+3. Backend code
+4. Database schema
+5. Supabase setup instructions
+6. Replit deployment instructions
+7. Sample seeded data for all five teams
+8. Automatic fixture generation logic
+9. Real-time live score system
+10. Complete README documentation
+
+The final result should be a production-ready football tournament management system suitable for a one-day live football event.

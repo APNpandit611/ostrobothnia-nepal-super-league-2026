@@ -1,6 +1,6 @@
-# [Project name]
+# Nepal Summer League Finland 2026
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A full-stack football tournament management app for the Nepal Summer League Finland 2026 — a one-day 5-team round-robin tournament with live scores, standings, real-time match events, and a mobile-friendly admin panel.
 
 ## Run & Operate
 
@@ -9,11 +9,12 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `DATABASE_URL` — Postgres connection string, `SESSION_SECRET` — cookie signing
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
+- Frontend: React + Vite + Tailwind CSS + shadcn/ui + framer-motion + wouter
 - API: Express 5
 - DB: PostgreSQL + Drizzle ORM
 - Validation: Zod (`zod/v4`), `drizzle-zod`
@@ -22,23 +23,42 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `lib/api-spec/openapi.yaml` — single source of truth for all API contracts
+- `lib/db/src/schema/` — Drizzle DB schema (teams, matches, goals, cards, match_events)
+- `artifacts/api-server/src/routes/` — Express route handlers
+- `artifacts/nepal-league/src/` — React frontend
+- `artifacts/nepal-league/src/pages/` — All pages (home, fixtures, live, standings, results, teams, stats, admin)
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Sessions managed via signed cookies (`nepal_admin_session`) — no JWT, no external auth service
+- Standings computed on-the-fly from finished matches (no denormalized standings table)
+- Goals update match scores directly via DB; deleting a goal recalculates score from scratch
+- Round-robin fixtures auto-generated via POST /api/matches/generate (clears old fixtures)
+- Live updates via 5-second polling on the frontend (no WebSocket needed for one-day tournament)
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- **Public**: View fixtures, live scores, standings, results, team info, statistics
+- **Admin panel** (`/admin`): Login with admin/admin123, manage matches (start/finish/reset), add goals & cards in real time, edit teams, generate fixtures, reset tournament
+
+## Teams
+
+1. Kokkola Soccer Boys (KSB) — green
+2. Jeppis Nepal Klub (JNK) — blue
+3. Oulu Nepalese Sports (ONS) — red
+4. Seinajoki International Society (SIS) — purple
+5. Vaasan Nepali Ry (VNR) — orange
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+_Populate as needed._
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- After adding new schema files, run `pnpm run typecheck:libs` before typechecking leaf packages — stale declarations cause TS2305 errors
+- The `goals` route recalculates match score on every delete (counts all remaining goals)
+- Admin credentials are hardcoded: username `admin`, password `admin123`
 
 ## Pointers
 

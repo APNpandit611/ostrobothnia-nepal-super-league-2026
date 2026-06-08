@@ -1,0 +1,125 @@
+import { Router, type IRouter } from "express";
+import { eq } from "drizzle-orm";
+import { db, teamsTable, matchesTable, goalsTable } from "@workspace/db";
+
+const router: IRouter = Router();
+
+router.get("/stats/top-scorers", async (_req, res): Promise<void> => {
+  const goals = await db.select().from(goalsTable).where(eq(goalsTable.isOwnGoal, false));
+  const teams = await db.select().from(teamsTable);
+  const teamsMap = new Map(teams.map(t => [t.id, t]));
+
+  // Aggregate by scorer name + team
+  const scoreMap = new Map<string, { scorerName: string; teamId: number; teamName: string; goals: number }>();
+  for (const goal of goals) {
+    const scorer = goal.scorerName || "Unknown Player";
+    const key = `${scorer}__${goal.teamId}`;
+    const existing = scoreMap.get(key);
+    if (existing) {
+      existing.goals++;
+    } else {
+      scoreMap.set(key, {
+        scorerName: scorer,
+        teamId: goal.teamId,
+        teamName: teamsMap.get(goal.teamId)?.name ?? "Unknown",
+        goals: 1,
+      });
+    }
+  }
+
+  const topScorers = Array.from(scoreMap.values())
+    .sort((a, b) => b.goals - a.goals)
+    .slice(0, 10);
+
+  res.json(topScorers);
+});
+
+router.get("/stats", async (_req, res): Promise<void> => {
+  const teams = await db.select().from(teamsTable);
+  const allMatches = await db.select().from(matchesTable);
+  const finishedMatches = allMatches.filter(m => m.status === "finished");
+  const liveMatches = allMatches.filter(m => m.status === "live");
+  const allGoals = await db.select().from(goalsTable);
+
+  const totalGoals = allGoals.length;
+  const matchesPlayed = finishedMatches.length;
+  const averageGoalsPerMatch = matchesPlayed > 0 ? totalGoals / matchesPlayed : 0;
+
+  // Highest scoring match
+  let highestScoringMatch = null;
+  let maxGoals = 0;
+  for (const m of finishedMatches) {
+    const total = m.homeScore + m.awayScore;
+    if (total > maxGoals) {
+      maxGoals = total;
+      const homeTeam = teams.find(t => t.id === m.homeTeamId);
+      const awayTeam = teams.find(t => t.id === m.awayTeamId);
+      highestScoringMatch = {
+        matchId: m.id,
+        homeTeam: homeTeam?.name ?? "Unknown",
+        awayTeam: awayTeam?.name ?? "Unknown",
+        homeScore: m.homeScore,
+        awayScore: m.awayScore,
+        totalGoals: total,
+      };
+    }
+  }
+
+  // Goals per team (for/against)
+  const teamGoalsFor = new Map<number, number>();
+  const teamGoalsAgainst = new Map<number, number>();
+  const teamWins = new Map<number, number>();
+  for (const t of teams) {
+    teamGoalsFor.set(t.id, 0);
+    teamGoalsAgainst.set(t.id, 0);
+    teamWins.set(t.id, 0);
+  }
+  for (const m of finishedMatches) {
+    teamGoalsFor.set(m.homeTeamId, (teamGoalsFor.get(m.homeTeamId) ?? 0) + m.homeScore);
+    teamGoalsFor.set(m.awayTeamId, (teamGoalsFor.get(m.awayTeamId) ?? 0) + m.awayScore);
+    teamGoalsAgainst.set(m.homeTeamId, (teamGoalsAgainst.get(m.homeTeamId) ?? 0) + m.awayScore);
+    teamGoalsAgainst.set(m.awayTeamId, (teamGoalsAgainst.get(m.awayTeamId) ?? 0) + m.homeScore);
+    if (m.homeScore > m.awayScore) teamWins.set(m.homeTeamId, (teamWins.get(m.homeTeamId) ?? 0) + 1);
+    else if (m.awayScore > m.homeScore) teamWins.set(m.awayTeamId, (teamWins.get(m.awayTeamId) ?? 0) + 1);
+  }
+
+  let mostGoalsTeam = null;
+  let bestDefenseTeam = null;
+  let mostWinsTeam = null;
+  let maxGF = -1;
+  let minGA = Infinity;
+  let maxWins = -1;
+
+  for (const t of teams) {
+    const gf = teamGoalsFor.get(t.id) ?? 0;
+    const ga = teamGoalsAgainst.get(t.id) ?? 0;
+    const wins = teamWins.get(t.id) ?? 0;
+
+    if (gf > maxGF) {
+      maxGF = gf;
+      mostGoalsTeam = { teamId: t.id, teamName: t.name, goals: gf };
+    }
+    if (ga < minGA && matchesPlayed > 0) {
+      minGA = ga;
+      bestDefenseTeam = { teamId: t.id, teamName: t.name, goalsAgainst: ga };
+    }
+    if (wins > maxWins) {
+      maxWins = wins;
+      mostWinsTeam = { teamId: t.id, teamName: t.name, wins };
+    }
+  }
+
+  res.json({
+    totalMatches: allMatches.length,
+    matchesPlayed,
+    liveMatches: liveMatches.length,
+    totalGoals,
+    averageGoalsPerMatch: parseFloat(averageGoalsPerMatch.toFixed(2)),
+    highestScoringMatch,
+    mostGoalsTeam,
+    bestDefenseTeam,
+    mostWinsTeam,
+  });
+});
+
+export default router;

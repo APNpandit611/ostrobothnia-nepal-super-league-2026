@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Nepal Summer League Finland 2026"
+version = "1.0.0"
+id = "artifacts/nepal-league"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25983
+
+[services.development]
+run = "pnpm --filter @workspace/nepal-league run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/nepal-league", "run", "build" ]
+publicDir = "artifacts/nepal-league/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25983"
+BASE_PATH = "/"
