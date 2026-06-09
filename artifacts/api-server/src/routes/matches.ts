@@ -76,33 +76,42 @@ router.post("/matches/generate", async (_req, res): Promise<void> => {
   await db.delete(cardsTable);
   await db.delete(matchesTable);
 
-  // Round-robin: every team plays every other team once
-  const fixtures: Array<{ homeTeamId: number; awayTeamId: number }> = [];
-  for (let i = 0; i < teams.length; i++) {
-    for (let j = i + 1; j < teams.length; j++) {
-      fixtures.push({ homeTeamId: teams[i].id, awayTeamId: teams[j].id });
-    }
-  }
+  // Look up teams by short name for a deterministic schedule
+  const byShortName = new Map(teams.map(t => [t.shortName, t.id]));
+  const KSB = byShortName.get("KSB")!;
+  const JNK = byShortName.get("JNK")!;
+  const ONS = byShortName.get("ONS")!;
+  const SIS = byShortName.get("SIS")!;
+  const VNR = byShortName.get("VNR")!;
 
-  // Shuffle for a balanced schedule
-  for (let i = fixtures.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [fixtures[i], fixtures[j]] = [fixtures[j], fixtures[i]];
-  }
-
-  // Assign times: 09:00, 09:45, 10:30, 11:15, 12:00, 12:45, 13:30, 14:15, 15:00, 15:45
-  const times = [
-    "09:00", "09:45", "10:30", "11:15", "12:00",
-    "12:45", "13:30", "14:15", "15:00", "15:45",
+  // Official ONSL 2026 schedule — Santahaka, Kokkola, 28 June 2026
+  // Time  | Field A (Pitch 1)  | Field B (Pitch 2)
+  // 10:15 | KSB vs JNK         | ONS vs SIS
+  // 10:52 | KSB vs ONS         | VNR vs JNK
+  // 11:29 | KSB vs VNR         | JNK vs SIS
+  // 12:06 | KSB vs SIS         | ONS vs VNR
+  // Lunch break 12:33–13:15
+  // 13:15 | JNK vs ONS         | SIS vs VNR
+  const tournamentDate = "2026-06-28";
+  const schedule = [
+    { matchNumber: 1,  homeTeamId: KSB, awayTeamId: JNK, time: "10:15", pitch: 1 },
+    { matchNumber: 2,  homeTeamId: ONS, awayTeamId: SIS, time: "10:15", pitch: 2 },
+    { matchNumber: 3,  homeTeamId: KSB, awayTeamId: ONS, time: "10:52", pitch: 1 },
+    { matchNumber: 4,  homeTeamId: VNR, awayTeamId: JNK, time: "10:52", pitch: 2 },
+    { matchNumber: 5,  homeTeamId: KSB, awayTeamId: VNR, time: "11:29", pitch: 1 },
+    { matchNumber: 6,  homeTeamId: JNK, awayTeamId: SIS, time: "11:29", pitch: 2 },
+    { matchNumber: 7,  homeTeamId: KSB, awayTeamId: SIS, time: "12:06", pitch: 1 },
+    { matchNumber: 8,  homeTeamId: ONS, awayTeamId: VNR, time: "12:06", pitch: 2 },
+    { matchNumber: 9,  homeTeamId: JNK, awayTeamId: ONS, time: "13:15", pitch: 1 },
+    { matchNumber: 10, homeTeamId: SIS, awayTeamId: VNR, time: "13:15", pitch: 2 },
   ];
 
-  const tournamentDate = "2026-06-27";
-  const inserts = fixtures.map((f, idx) => ({
-    matchNumber: idx + 1,
-    homeTeamId: f.homeTeamId,
-    awayTeamId: f.awayTeamId,
-    scheduledTime: `${tournamentDate}T${times[idx] || "09:00"}:00`,
-    pitch: (idx % 2) + 1,
+  const inserts = schedule.map(s => ({
+    matchNumber: s.matchNumber,
+    homeTeamId: s.homeTeamId,
+    awayTeamId: s.awayTeamId,
+    scheduledTime: `${tournamentDate}T${s.time}:00`,
+    pitch: s.pitch,
     homeScore: 0,
     awayScore: 0,
     status: "upcoming",

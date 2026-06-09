@@ -1,11 +1,11 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { Trophy, CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3, Settings, Menu, X, Sun, Moon } from "lucide-react";
+import { CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3, Settings, Menu, X, Sun, Moon, Home } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "./theme-provider";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Home", icon: Trophy },
+  { href: "/", label: "Home", icon: Home },
   { href: "/fixtures", label: "Fixtures", icon: CalendarDays },
   { href: "/live", label: "Live", icon: Activity },
   { href: "/standings", label: "Standings", icon: ListOrdered },
@@ -25,7 +25,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* Mobile Header */}
       <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-card px-4 md:hidden">
         <div className="flex items-center gap-2">
-          <Trophy className="h-6 w-6 text-primary" />
+          <img src="/onsl-logo.jpeg" alt="ONSL" className="h-8 w-8 rounded-full object-contain" />
           <span className="font-bold tracking-tight">ONSL 2026</span>
         </div>
         <div className="flex items-center gap-4">
@@ -75,7 +75,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 flex-col border-r bg-card md:flex h-screen sticky top-0">
         <div className="flex h-16 items-center gap-2 border-b px-6">
-          <Trophy className="h-6 w-6 text-primary" />
+          <img src="/onsl-logo.jpeg" alt="ONSL" className="h-8 w-8 rounded-full object-contain" />
           <span className="font-bold tracking-tight">ONSL 2026</span>
         </div>
         <nav className="flex-1 space-y-1 p-4">

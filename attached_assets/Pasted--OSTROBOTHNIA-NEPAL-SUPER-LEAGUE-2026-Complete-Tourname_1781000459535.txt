@@ -1,0 +1,913 @@
+ # OSTROBOTHNIA NEPAL SUPER LEAGUE 2026 – Complete Tournament Management System
+
+
+
+Build a production-ready football tournament management web application called **OSTROBOTHNIA NEPAL SUPER LEAGUE 2026**.
+
+
+
+## Tournament Information
+
+
+
+Tournament Name: OSTROBOTHNIA NEPAL SUPER LEAGUE 2026
+
+
+
+Format: One-Day Football Tournament
+
+
+
+Location: Santahaka, Kokkola Finland
+
+Date: 28 June 2026 
+
+
+
+Teams:
+
+
+
+* Kokkola Soccer Boys
+
+* Jeppis Nepal Klub
+
+* Oulu Nepalese Sports
+
+* Seinajoki International Society
+
+* Vaasan Nepali Ry
+
+
+
+## Goal
+
+
+
+Create a modern football tournament web application with live scores, fixtures, standings, statistics, and an admin panel that can be managed entirely from a mobile phone during the event.
+
+
+
+The application must be suitable for public spectators, players, and tournament organizers.
+
+
+
+---
+
+
+
+## Tech Stack
+
+
+
+Frontend:
+
+
+
+* React
+
+* TypeScript
+
+* Tailwind CSS
+
+* React Router
+
+* React Query
+
+
+
+Backend:
+
+
+
+* Node.js
+
+* Express.js
+
+
+
+Database:
+
+
+
+* Supabase PostgreSQL
+
+
+
+Realtime:
+
+
+
+* Supabase Realtime subscriptions
+
+
+
+Authentication:
+
+
+
+* JWT Authentication
+
+* Admin login
+
+
+
+Deployment:
+
+
+
+* Replit Deployments
+
+
+
+---
+
+
+
+# Core Features
+
+
+
+## Public Website
+
+
+
+### Home Page
+
+
+
+Show:
+
+
+
+* Tournament logo
+
+* Tournament banner
+
+* Tournament title
+
+* Venue
+
+* Tournament date
+
+* Countdown timer
+
+* Number of teams
+
+* Number of matches
+
+* Number of completed matches
+
+* Current league leader
+
+* Latest results
+
+* Quick navigation buttons
+
+
+
+---
+
+
+
+## Fixtures Page
+
+
+
+Generate a full round-robin schedule automatically.
+
+
+
+Each team must play every other team once.
+
+
+
+Total teams: 5
+
+
+
+Total matches: 10
+
+
+
+Display:
+
+
+
+* Match number
+
+* Team A
+
+* Team B
+
+* Match start time
+
+* Pitch
+
+* Status badge
+
+
+
+Status:
+
+
+
+* Upcoming
+
+* Live
+
+* Finished
+
+
+
+Add filters:
+
+
+
+* All
+
+* Upcoming
+
+* Live
+
+* Finished
+
+
+
+Add search by team name.
+
+
+
+---
+
+
+
+## Live Match Center
+
+
+
+Display:
+
+
+
+* Team names
+
+* Team logos
+
+* Current score
+
+* Match timer
+
+* First half
+
+* Half time
+
+* Second half
+
+* Full time
+
+
+
+Events:
+
+
+
+* Goals
+
+* Own goals
+
+* Yellow cards
+
+* Red cards
+
+* Substitutions
+
+
+
+Event timeline must update instantly.
+
+
+
+---
+
+
+
+## League Table
+
+
+
+Automatically calculate:
+
+
+
+* Position
+
+* Team
+
+* Played
+
+* Won
+
+* Draw
+
+* Lost
+
+* Goals For
+
+* Goals Against
+
+* Goal Difference
+
+* Points
+
+
+
+Ranking rules:
+
+
+
+1. Points
+
+2. Goal Difference
+
+3. Goals Scored
+
+4. Head-to-head
+
+
+
+Table updates automatically whenever a match result changes.
+
+
+
+---
+
+
+
+## Results Page
+
+
+
+Display:
+
+
+
+* Match result
+
+* Goal scorers
+
+* Cards
+
+* Match summary
+
+* Match statistics
+
+
+
+---
+
+
+
+## Teams Page
+
+
+
+Show:
+
+
+
+* Team logo
+
+* Team name
+
+* Matches played
+
+* Wins
+
+* Draws
+
+* Losses
+
+* Goals scored
+
+* Goals conceded
+
+
+
+---
+
+
+
+## Statistics Page
+
+
+
+Display:
+
+
+
+### Top Scorers
+
+
+
+### Top Assists
+
+
+
+### Most Goals Team
+
+
+
+### Best Defense
+
+
+
+### Most Wins
+
+
+
+### Highest Scoring Match
+
+
+
+### Total Tournament Goals
+
+
+
+### Total Cards
+
+
+
+---
+
+
+
+# Admin Dashboard
+
+
+
+Login Credentials
+
+
+
+Username: admin
+
+
+
+Password: admin123
+
+
+
+Create secure admin authentication.
+
+
+
+---
+
+
+
+## Admin Features
+
+
+
+Manage Teams
+
+
+
+* Add team
+
+* Edit team
+
+* Upload logo
+
+* Delete team
+
+
+
+Manage Fixtures
+
+
+
+* Generate fixtures automatically
+
+* Edit fixture
+
+* Delete fixture
+
+* Change kickoff time
+
+
+
+Match Control
+
+
+
+* Start Match
+
+* Pause Match
+
+* Resume Match
+
+* End Match
+
+
+
+Live Updates
+
+
+
+* Add goal
+
+* Remove goal
+
+* Add yellow card
+
+* Add red card
+
+
+
+* Edit score manually
+
+
+
+Standings
+
+
+
+* Automatically recalculate standings
+
+
+
+Tournament Management
+
+
+
+* Reset tournament
+
+* Export data
+
+
+
+---
+
+
+
+# Realtime Requirements
+
+
+
+When admin updates:
+
+
+
+* Scores
+
+* Match events
+
+* Standings
+
+* Statistics
+
+
+
+All connected users must see updates immediately without refreshing.
+
+
+
+Use Supabase Realtime subscriptions.
+
+
+
+---
+
+
+
+# Fixture Generation
+
+
+
+Automatically generate fixtures for:
+
+
+
+1. Kokkola Soccer Boys
+
+2. Jeppis Nepal Klub
+
+3. Oulu Nepalese Sports
+
+4. Seinajoki International Society
+
+5. Vaasan Nepali Ry
+
+
+
+
+
+
+
+
+
+| Time          | Field A        | Field B    |
+
+| ------------- | -------------- | ---------- |
+
+| 10:15 – 10:42 | KSB vs JNK     | ONS vs SIS |
+
+| 10:52 – 11:19 | KSB vs ONS     | VNR vs JNK |
+
+| 11:29 – 11:56 | KSB vs VNR     | JNK vs SIS |
+
+| 12:06 – 12:33 | KSB vs SIS     | ONS vs VNR |
+
+| 12:33 – 13:15 | 🍴 Lunch Break |            |
+
+| 13:15 – 13:42 | JNK vs ONS     | SIS vs VNR |
+
+
+
+
+
+# Database Schema
+
+
+
+Tables:
+
+
+
+teams
+
+
+
+* id
+
+* name
+
+* logo
+
+* created_at
+
+
+
+matches
+
+
+
+* id
+
+* home_team_id
+
+* away_team_id
+
+* kickoff_time
+
+* status
+
+* home_score
+
+* away_score
+
+
+
+players
+
+
+
+* id
+
+* team_id
+
+* name
+
+
+
+goals
+
+
+
+* id
+
+* player_id
+
+* match_id
+
+* minute
+
+
+
+cards
+
+
+
+* id
+
+* player_id
+
+* match_id
+
+* card_type
+
+
+
+events
+
+
+
+* id
+
+* match_id
+
+* event_type
+
+* minute
+
+* description
+
+
+
+standings
+
+
+
+* team_id
+
+* played
+
+* won
+
+* drawn
+
+* lost
+
+* goals_for
+
+* goals_against
+
+* goal_difference
+
+* points
+
+
+
+admins
+
+
+
+* id
+
+* username
+
+* password_hash
+
+
+
+---
+
+
+
+# Mobile Experience
+
+
+
+Fully responsive.
+
+
+
+Must work perfectly on:
+
+
+
+* Android
+
+* iPhone
+
+* Tablet
+
+* Desktop
+
+
+
+---
+
+
+
+# Additional Features
+
+
+
+* Dark mode
+
+* Light mode
+
+* QR code to public site
+
+* Share tournament link
+
+* Export standings PDF
+
+* Export fixtures PDF
+
+* Progressive Web App (PWA)
+
+* Install on mobile device
+
+* Full-screen TV/Kiosk mode for displaying live standings and scores at the venue
+
+
+
+---
+
+
+
+# UI Design
+
+
+
+Football-themed modern interface.
+
+
+
+Colors:
+
+
+
+* Green
+
+* White
+
+* Dark Gray
+
+
+
+Use:
+
+
+
+* Cards
+
+* Modern tables
+
+* Badges
+
+* Animations
+
+* Loading skeletons
+
+* Toast notifications
+
+
+
+Design should resemble professional tournament apps such as FIFA tournament trackers or Flashscore.
+
+
+
+
+
+PUBLIC URL
+
+
+
+Prepare project for deployment on Replit and generate:
+
+
+
+https://ostrobothnianepalsuperleague.replit.app 
+
+
+
+# Deliverables
+
+
+
+Generate:
+
+
+
+1. Full folder structure
+
+2. Complete frontend code
+
+3. Complete backend code
+
+4. Supabase schema SQL
+
+5. Seed data
+
+6. API routes
+
+7. Realtime subscriptions
+
+8. Authentication system
+
+9. Automatic standings calculations
+
+10. Fixture generation algorithm
+
+11. Deployment guide for Replit
+
+12. Complete README
+
+
+
+Generate all code files and setup instructions required to run the application immediately.
