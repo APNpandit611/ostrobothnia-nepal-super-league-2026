@@ -1,8 +1,11 @@
 import { useGetStandings, useGetTournamentStats, useListMatches } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3, Clock, ArrowRight, MapPin } from "lucide-react";
+import { CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3, Clock, ArrowRight, MapPin, QrCode } from "lucide-react";
 import { Link } from "wouter";
 import { differenceInDays } from "date-fns";
+import { QRCodeSVG } from "qrcode.react";
+
+const APP_URL = "https://nepal-su-app--samikshyakc163.replit.app";
 
 export default function Home() {
   const { data: stats, isLoading: statsLoading } = useGetTournamentStats();
@@ -160,6 +163,46 @@ export default function Home() {
           </Link>
         </div>
       </div>
+
+      {/* QR Code */}
+      <Card className="border-dashed">
+        <CardContent className="p-6 flex flex-col md:flex-row items-center gap-6">
+          <div className="bg-white p-3 rounded-xl shadow-sm flex-shrink-0">
+            <QRCodeSVG
+              value={APP_URL}
+              size={140}
+              bgColor="#ffffff"
+              fgColor="#111827"
+              level="M"
+              imageSettings={{
+                src: "/onsl-logo.jpeg",
+                x: undefined,
+                y: undefined,
+                height: 32,
+                width: 32,
+                excavate: true,
+              }}
+            />
+          </div>
+          <div className="text-center md:text-left space-y-2">
+            <div className="flex items-center justify-center md:justify-start gap-2">
+              <QrCode className="h-5 w-5 text-primary" />
+              <h3 className="font-bold text-lg">Share Live Scores</h3>
+            </div>
+            <p className="text-muted-foreground text-sm">
+              Scan this QR code to follow live scores, fixtures and standings on your phone.
+            </p>
+            <a
+              href={APP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary text-sm font-medium hover:underline break-all"
+            >
+              {APP_URL}
+            </a>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
