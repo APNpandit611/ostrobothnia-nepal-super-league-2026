@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Nepal Summer League Finland 2026"
+title = "ostrobothnianepalsuperleague"
 version = "1.0.0"
 id = "artifacts/nepal-league"
 router = "path"
