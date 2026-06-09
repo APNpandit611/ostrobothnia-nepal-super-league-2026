@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "BViXsfLfx2ViyhvfBtW4B"
+uri = "file://BLUEPRINT.md"
+type = "text"
+title = "ONSL 2026 — Full App Blueprint"
