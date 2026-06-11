@@ -25,7 +25,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* Mobile Header */}
       <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-card px-4 md:hidden">
         <div className="flex items-center gap-2">
-          <img src="/ksb-logo.jpeg" alt="Kokkola Soccer Boys" className="h-8 w-8 rounded-full object-contain flex-shrink-0" />
+          <img src="/onsl-official-logo.png" alt="Kokkola Soccer Boys" className="h-8 w-8 rounded-full object-contain flex-shrink-0" />
           <div className="leading-tight">
             <div className="font-black text-sm tracking-tight">ONSL 2026</div>
             <div className="text-[10px] text-muted-foreground">by Kokkola Soccer Boys</div>
@@ -78,7 +78,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 flex-col border-r bg-card md:flex h-screen sticky top-0">
         <div className="flex h-16 items-center gap-3 border-b px-4">
-          <img src="/ksb-logo.jpeg" alt="Kokkola Soccer Boys" className="h-9 w-9 rounded-full object-contain flex-shrink-0" />
+          <img src="/onsl-official-logo.png" alt="Kokkola Soccer Boys" className="h-9 w-9 rounded-full object-contain flex-shrink-0" />
           <div className="leading-tight min-w-0">
             <div className="font-black text-sm tracking-tight truncate">ONSL 2026</div>
             <div className="text-[10px] text-muted-foreground truncate">by Kokkola Soccer Boys</div>

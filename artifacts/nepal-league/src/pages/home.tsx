@@ -26,7 +26,7 @@ export default function Home() {
 
           {/* Host club logo */}
           <img
-            src="/ksb-logo.jpeg"
+            src="/onsl-official-logo.png"
             alt="Kokkola Soccer Boys"
             className="h-36 w-36 md:h-48 md:w-48 object-contain rounded-full shadow-lg ring-4 ring-primary/20"
           />
@@ -105,7 +105,7 @@ export default function Home() {
         </Card>
         <Card className={leader ? "border-primary/50 bg-primary/5" : ""}>
           <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-2">
-            <img src="/ksb-logo.jpeg" alt="Trophy" className="h-8 w-8 object-contain rounded-full" />
+            <img src="/onsl-official-logo.png" alt="Trophy" className="h-8 w-8 object-contain rounded-full" />
             <div className="text-xl font-bold line-clamp-1 w-full">{standingsLoading ? "-" : leader?.teamName || "-"}</div>
             <p className="text-xs text-primary font-medium uppercase tracking-wider">Current Leader</p>
           </CardContent>
@@ -190,7 +190,7 @@ export default function Home() {
               fgColor="#111827"
               level="M"
               imageSettings={{
-                src: "/ksb-logo.jpeg",
+                src: "/onsl-official-logo.png",
                 x: undefined,
                 y: undefined,
                 height: 32,
