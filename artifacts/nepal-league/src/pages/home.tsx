@@ -5,12 +5,12 @@ import { Link } from "wouter";
 import { differenceInDays } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
 
-const POSITION_ORDER = ["GK", "DEF", "MID", "FWD"];
+const POSITION_ORDER = ["GK", "C", "V.C", "Manager"];
 const POSITION_COLORS: Record<string, string> = {
   GK: "bg-yellow-500/20 text-yellow-500 border-yellow-500/30",
-  DEF: "bg-blue-500/20 text-blue-500 border-blue-500/30",
-  MID: "bg-green-500/20 text-green-500 border-green-500/30",
-  FWD: "bg-red-500/20 text-red-500 border-red-500/30",
+  C: "bg-primary/20 text-primary border-primary/30",
+  "V.C": "bg-blue-500/20 text-blue-500 border-blue-500/30",
+  Manager: "bg-purple-500/20 text-purple-400 border-purple-500/30",
 };
 
 function KSBSquad({ teamId }: { teamId: number }) {

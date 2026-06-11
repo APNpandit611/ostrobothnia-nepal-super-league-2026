@@ -17,7 +17,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader2, Save, Users, UserPlus, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const POSITIONS = ["GK", "DEF", "MID", "FWD"];
+const POSITIONS = ["GK", "C", "V.C", "Manager"];
 
 function PlayerSection({ teamId, teamColor }: { teamId: number; teamColor: string }) {
   const { toast } = useToast();
