@@ -31,10 +31,16 @@ export default function Home() {
             className="h-36 w-36 md:h-48 md:w-48 object-contain rounded-full shadow-lg ring-4 ring-primary/20"
           />
 
-          {/* Hosted by badge */}
-          <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">
-            <span>🏆</span>
-            Hosted by Kokkola Soccer Boys
+          {/* Badges row */}
+          <div className="flex flex-wrap justify-center gap-2">
+            <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">
+              <span>🏆</span>
+              Hosted by Kokkola Soccer Boys
+            </div>
+            <div className="flex items-center gap-2 bg-yellow-500/10 border border-yellow-500/40 text-yellow-500 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">
+              <span>⭐</span>
+              Defending Champions
+            </div>
           </div>
 
           {/* League name */}
