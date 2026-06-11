@@ -5,8 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Trophy, Loader2 } from "lucide-react";
+import { Trophy, Loader2, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "wouter";
 
 export default function AdminLogin() {
   const [, setLocation] = useLocation();
@@ -39,7 +40,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen w-full flex flex-col items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-2xl border-primary/20">
         <CardHeader className="space-y-2 text-center pb-8">
           <div className="mx-auto bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mb-4">
@@ -93,6 +94,12 @@ export default function AdminLogin() {
           </form>
         </CardContent>
       </Card>
+      <Link href="/">
+        <div className="mt-4 flex items-center justify-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+          <ArrowLeft className="h-4 w-4" />
+          Back to public site
+        </div>
+      </Link>
     </div>
   );
 }
