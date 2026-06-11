@@ -5,7 +5,7 @@ import { Link } from "wouter";
 import { differenceInDays } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
 
-const APP_URL = "https://nepal-su-app--samikshyakc163.replit.app";
+const APP_URL = "http://kokkolasoccerboys.cc/";
 
 export default function Home() {
   const { data: stats, isLoading: statsLoading } = useGetTournamentStats();
