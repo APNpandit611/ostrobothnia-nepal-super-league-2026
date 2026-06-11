@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "ONSL2026"
+title = "on2026"
 version = "1.0.0"
 id = "artifacts/nepal-league"
 router = "path"
