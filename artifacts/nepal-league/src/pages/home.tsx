@@ -21,17 +21,32 @@ export default function Home() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Hero Section */}
       <div className="relative overflow-hidden rounded-2xl bg-card border shadow-sm">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 pointer-events-none" />
         <div className="relative p-6 md:p-10 flex flex-col items-center text-center space-y-4">
+
+          {/* Host club logo */}
           <img
             src="/ksb-logo.jpeg"
-            alt="Ostrobothnia Nepal Super League 2026"
-            className="h-36 w-36 md:h-48 md:w-48 object-contain rounded-full shadow-lg"
+            alt="Kokkola Soccer Boys"
+            className="h-36 w-36 md:h-48 md:w-48 object-contain rounded-full shadow-lg ring-4 ring-primary/20"
           />
-          <h1 className="text-3xl md:text-5xl font-black tracking-tight uppercase italic">
+
+          {/* Hosted by badge */}
+          <div className="flex items-center gap-2 bg-primary/10 border border-primary/30 text-primary px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest">
+            <span>🏆</span>
+            Hosted by Kokkola Soccer Boys
+          </div>
+
+          {/* League name */}
+          <h1 className="text-3xl md:text-5xl font-black tracking-tight uppercase italic leading-tight">
             Ostrobothnia Nepal
-            <br className="hidden md:block" /> Super League 2026
+            <br /> Super League 2026
           </h1>
+
+          <p className="text-muted-foreground text-sm md:text-base max-w-md">
+            A joint 5-team football tournament organised and hosted by <span className="text-foreground font-semibold">Kokkola Soccer Boys</span> in partnership with Nepali clubs from across Ostrobothnia.
+          </p>
+
           <div className="flex flex-wrap justify-center gap-3 text-sm md:text-base font-medium text-muted-foreground mt-2">
             <span className="flex items-center gap-2 bg-background px-3 py-1.5 rounded-full border">
               <MapPin className="h-4 w-4 text-primary" />
