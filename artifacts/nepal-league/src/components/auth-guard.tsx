@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 export function AuthGuard({ children }: { children: React.ReactNode }) {
   const [, setLocation] = useLocation();
   const { data, isLoading, isError } = useGetAdminMe({
-    query: { retry: false }
+    query: { retry: false } as never
   });
 
   useEffect(() => {

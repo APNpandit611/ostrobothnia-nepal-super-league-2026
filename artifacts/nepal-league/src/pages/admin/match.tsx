@@ -8,6 +8,7 @@ import {
   useResetMatch,
   useAddGoal,
   useAddCard,
+  useUpdateMatch,
   getGetMatchQueryKey,
   useListMatchEvents,
   getListMatchEventsQueryKey
@@ -18,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Play, Square, RotateCcw, Target, AlertTriangle } from "lucide-react";
+import { Loader2, Play, Square, RotateCcw, Target, AlertTriangle, Clock } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
 
@@ -29,12 +30,23 @@ export default function AdminMatchDetail() {
   const queryClient = useQueryClient();
 
   const { data: match, isLoading } = useGetMatch(matchId, {
-    query: { refetchInterval: 5000 }
+    query: { refetchInterval: 5000 } as never
   });
   
   const { data: events } = useListMatchEvents(matchId, {
-    query: { refetchInterval: 5000 }
+    query: { refetchInterval: 5000 } as never
   });
+
+  // Kickoff time editor state
+  const [kickoffTime, setKickoffTime] = useState("");
+  const [showTimeEditor, setShowTimeEditor] = useState(false);
+
+  useEffect(() => {
+    if (match?.scheduledTime) {
+      // Extract HH:MM from ISO string e.g. "2026-06-28T10:15:00" → "10:15"
+      setKickoffTime(match.scheduledTime.slice(11, 16));
+    }
+  }, [match?.scheduledTime]);
 
   // Goal Form State
   const [scorerName, setScorerName] = useState("");
@@ -99,6 +111,27 @@ export default function AdminMatchDetail() {
       }
     }
   });
+
+  const updateMatchMutation = useUpdateMatch({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: "Kickoff time updated" });
+        setShowTimeEditor(false);
+        invalidateQueries();
+      },
+      onError: () => {
+        toast({ variant: "destructive", title: "Failed to update time" });
+      }
+    }
+  });
+
+  const handleSaveTime = () => {
+    if (!kickoffTime || !match?.scheduledTime) return;
+    // Replace only the time portion of the stored ISO string
+    const datePart = match.scheduledTime.slice(0, 10); // "2026-06-28"
+    const newScheduledTime = `${datePart}T${kickoffTime}:00`;
+    updateMatchMutation.mutate({ id: matchId, data: { scheduledTime: newScheduledTime } });
+  };
 
   const handleAddGoal = (teamId: number) => {
     if (!scorerName || !goalMinute) {
@@ -171,6 +204,38 @@ export default function AdminMatchDetail() {
           <Button size="lg" variant="outline" onClick={() => resetMutation.mutate({ id: matchId })} disabled={resetMutation.isPending}>
             <RotateCcw className="mr-2 h-5 w-5" /> Reset to Upcoming
           </Button>
+        )}
+      </div>
+
+      {/* Kickoff Time Editor */}
+      <div className="bg-muted/30 rounded-xl border p-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="text-muted-foreground">Kickoff time:</span>
+            <span className="font-bold">{match.scheduledTime.slice(11, 16)}</span>
+            <span className="text-muted-foreground">· Pitch {match.pitch}</span>
+          </div>
+          <Button size="sm" variant="outline" onClick={() => setShowTimeEditor(!showTimeEditor)}>
+            {showTimeEditor ? "Cancel" : "Change Time"}
+          </Button>
+        </div>
+        {showTimeEditor && (
+          <div className="mt-4 flex items-end gap-3">
+            <div className="space-y-1 flex-1">
+              <Label htmlFor="kickoff-time">New Kickoff Time</Label>
+              <Input
+                id="kickoff-time"
+                type="time"
+                value={kickoffTime}
+                onChange={(e) => setKickoffTime(e.target.value)}
+                className="w-40"
+              />
+            </div>
+            <Button onClick={handleSaveTime} disabled={updateMatchMutation.isPending}>
+              {updateMatchMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
+            </Button>
+          </div>
         )}
       </div>
 

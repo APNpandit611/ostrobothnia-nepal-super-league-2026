@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { CalendarDays, Clock, MapPin, Loader2 } from "lucide-react";
-import { MatchStatus } from "@workspace/api-zod/src/generated/types";
+type MatchStatus = "upcoming" | "live" | "finished";
 import { Link } from "wouter";
 
 export default function Fixtures() {
