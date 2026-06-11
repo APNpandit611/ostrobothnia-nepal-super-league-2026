@@ -24,7 +24,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none" />
         <div className="relative p-6 md:p-10 flex flex-col items-center text-center space-y-4">
           <img
-            src="/onsl-logo.jpeg"
+            src="/ksb-logo.jpeg"
             alt="Ostrobothnia Nepal Super League 2026"
             className="h-36 w-36 md:h-48 md:w-48 object-contain rounded-full shadow-lg"
           />
@@ -90,7 +90,7 @@ export default function Home() {
         </Card>
         <Card className={leader ? "border-primary/50 bg-primary/5" : ""}>
           <CardContent className="p-6 flex flex-col items-center justify-center text-center space-y-2">
-            <img src="/onsl-logo.jpeg" alt="Trophy" className="h-8 w-8 object-contain rounded-full" />
+            <img src="/ksb-logo.jpeg" alt="Trophy" className="h-8 w-8 object-contain rounded-full" />
             <div className="text-xl font-bold line-clamp-1 w-full">{standingsLoading ? "-" : leader?.teamName || "-"}</div>
             <p className="text-xs text-primary font-medium uppercase tracking-wider">Current Leader</p>
           </CardContent>
@@ -175,7 +175,7 @@ export default function Home() {
               fgColor="#111827"
               level="M"
               imageSettings={{
-                src: "/onsl-logo.jpeg",
+                src: "/ksb-logo.jpeg",
                 x: undefined,
                 y: undefined,
                 height: 32,
