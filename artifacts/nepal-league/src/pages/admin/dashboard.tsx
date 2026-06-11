@@ -20,7 +20,8 @@ import {
   Activity, 
   RefreshCcw,
   Users,
-  AlertTriangle
+  AlertTriangle,
+  Home
 } from "lucide-react";
 import {
   AlertDialog,
@@ -85,10 +86,18 @@ export default function AdminDashboard() {
           </h1>
           <p className="text-muted-foreground mt-1">Manage tournament data and live matches</p>
         </div>
-        <Button variant="outline" onClick={() => logoutMutation.mutate()} className="w-full md:w-auto">
-          <LogOut className="h-4 w-4 mr-2" />
-          Logout
-        </Button>
+        <div className="flex gap-2 w-full md:w-auto">
+          <Link href="/">
+            <Button variant="outline" className="w-full md:w-auto">
+              <Home className="h-4 w-4 mr-2" />
+              Public Site
+            </Button>
+          </Link>
+          <Button variant="outline" onClick={() => logoutMutation.mutate()} className="w-full md:w-auto">
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
+        </div>
       </div>
 
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
