@@ -213,6 +213,25 @@ export interface MatchUpdate {
   status?: MatchUpdateStatus;
 }
 
+export interface Player {
+  id: number;
+  teamId: number;
+  name: string;
+  /** @nullable */
+  number?: number | null;
+  /** @nullable */
+  position?: string | null;
+  createdAt: string;
+}
+
+export interface PlayerInput {
+  name: string;
+  /** @nullable */
+  number?: number | null;
+  /** @nullable */
+  position?: string | null;
+}
+
 export interface GoalInput {
   teamId: number;
   /** @nullable */

@@ -29,6 +29,8 @@ export * from './matchStatus';
 export * from './matchUpdate';
 export * from './matchUpdateStatus';
 export * from './messageResponse';
+export * from './player';
+export * from './playerInput';
 export * from './standingRow';
 export * from './team';
 export * from './teamInput';

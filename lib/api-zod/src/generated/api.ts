@@ -106,6 +106,47 @@ export const UpdateTeamResponse = zod.object({
 
 
 /**
+ * @summary List players for a team
+ */
+export const ListPlayersParams = zod.object({
+  "teamId": zod.coerce.number()
+})
+
+export const ListPlayersResponseItem = zod.object({
+  "id": zod.number(),
+  "teamId": zod.number(),
+  "name": zod.string(),
+  "number": zod.number().nullish(),
+  "position": zod.string().nullish(),
+  "createdAt": zod.string()
+})
+export const ListPlayersResponse = zod.array(ListPlayersResponseItem)
+
+
+/**
+ * @summary Add a player to a team
+ */
+export const AddPlayerParams = zod.object({
+  "teamId": zod.coerce.number()
+})
+
+export const AddPlayerBody = zod.object({
+  "name": zod.string(),
+  "number": zod.number().nullish(),
+  "position": zod.string().nullish()
+})
+
+
+/**
+ * @summary Remove a player from a team
+ */
+export const DeletePlayerParams = zod.object({
+  "teamId": zod.coerce.number(),
+  "playerId": zod.coerce.number()
+})
+
+
+/**
  * @summary List all matches
  */
 export const ListMatchesQueryParams = zod.object({

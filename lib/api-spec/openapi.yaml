@@ -163,6 +163,73 @@ paths:
               schema:
                 $ref: "#/components/schemas/Team"
 
+  # ── Players ───────────────────────────────────────────────────────────
+  /teams/{teamId}/players:
+    get:
+      operationId: listPlayers
+      tags: [teams]
+      summary: List players for a team
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Players list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Player"
+    post:
+      operationId: addPlayer
+      tags: [teams]
+      summary: Add a player to a team
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlayerInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+
+  /teams/{teamId}/players/{playerId}:
+    delete:
+      operationId: deletePlayer
+      tags: [teams]
+      summary: Remove a player from a team
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
   # ── Matches ───────────────────────────────────────────────────────────
   /matches:
     get:
@@ -748,6 +815,35 @@ components:
         status:
           type: string
           enum: [upcoming, live, finished]
+
+    # ── Player ───────────────────────────────────────────────────────
+    Player:
+      type: object
+      required: [id, teamId, name, createdAt]
+      properties:
+        id:
+          type: integer
+        teamId:
+          type: integer
+        name:
+          type: string
+        number:
+          type: ["integer", "null"]
+        position:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+
+    PlayerInput:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+        number:
+          type: ["integer", "null"]
+        position:
+          type: ["string", "null"]
 
     # ── Goal ─────────────────────────────────────────────────────────
     Goal:

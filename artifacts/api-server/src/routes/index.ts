@@ -9,6 +9,7 @@ import matchEventsRouter from "./matchEvents";
 import standingsRouter from "./standings";
 import statsRouter from "./stats";
 import tournamentRouter from "./tournament";
+import playersRouter from "./players";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(matchEventsRouter);
 router.use(standingsRouter);
 router.use(statsRouter);
 router.use(tournamentRouter);
+router.use(playersRouter);
 
 export default router;
