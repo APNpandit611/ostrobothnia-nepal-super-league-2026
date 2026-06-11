@@ -1,9 +1,64 @@
-import { useGetStandings, useGetTournamentStats, useListMatches } from "@workspace/api-client-react";
+import { useGetStandings, useGetTournamentStats, useListMatches, useListTeams, useListPlayers } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3, Clock, ArrowRight, MapPin, QrCode } from "lucide-react";
+import { CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3, Clock, ArrowRight, MapPin, QrCode, ShieldCheck } from "lucide-react";
 import { Link } from "wouter";
 import { differenceInDays } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
+
+const POSITION_ORDER = ["GK", "DEF", "MID", "FWD"];
+const POSITION_COLORS: Record<string, string> = {
+  GK: "bg-yellow-500/20 text-yellow-500 border-yellow-500/30",
+  DEF: "bg-blue-500/20 text-blue-500 border-blue-500/30",
+  MID: "bg-green-500/20 text-green-500 border-green-500/30",
+  FWD: "bg-red-500/20 text-red-500 border-red-500/30",
+};
+
+function KSBSquad({ teamId }: { teamId: number }) {
+  const { data: players, isLoading } = useListPlayers(teamId);
+
+  if (isLoading) return <div className="text-center py-4 text-muted-foreground text-sm">Loading squad…</div>;
+  if (!players || players.length === 0) {
+    return <p className="text-center py-6 text-muted-foreground text-sm italic">Squad will be announced soon</p>;
+  }
+
+  const sorted = [...players].sort((a, b) => {
+    const posA = POSITION_ORDER.indexOf(a.position ?? "");
+    const posB = POSITION_ORDER.indexOf(b.position ?? "");
+    if (posA !== posB) return (posA === -1 ? 99 : posA) - (posB === -1 ? 99 : posB);
+    return (a.number ?? 99) - (b.number ?? 99);
+  });
+
+  const byPosition: Record<string, typeof sorted> = {};
+  for (const p of sorted) {
+    const pos = p.position ?? "Other";
+    if (!byPosition[pos]) byPosition[pos] = [];
+    byPosition[pos].push(p);
+  }
+
+  return (
+    <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+      {[...POSITION_ORDER, "Other"].map((pos) => {
+        const group = byPosition[pos];
+        if (!group?.length) return null;
+        return (
+          <div key={pos}>
+            <div className={`text-[10px] font-black uppercase tracking-widest border rounded px-2 py-0.5 inline-block mb-2 ${POSITION_COLORS[pos] ?? "bg-muted text-muted-foreground"}`}>
+              {pos}
+            </div>
+            <div className="space-y-1.5">
+              {group.map((p) => (
+                <div key={p.id} className="flex items-center gap-2 bg-muted/40 rounded-lg px-2.5 py-1.5">
+                  <span className="text-xs font-black w-5 text-center text-primary opacity-70">{p.number ?? "—"}</span>
+                  <span className="text-sm font-medium truncate">{p.name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 const APP_URL = "http://kokkolasoccerboys.cc/";
 
@@ -11,6 +66,8 @@ export default function Home() {
   const { data: stats, isLoading: statsLoading } = useGetTournamentStats();
   const { data: standings, isLoading: standingsLoading } = useGetStandings();
   const { data: liveMatches } = useListMatches({ status: 'live' });
+  const { data: teams } = useListTeams();
+  const ksb = teams?.find((t) => t.shortName === "KSB");
 
   const tournamentDate = new Date(2026, 5, 28); // June 28, 2026
   const daysUntil = differenceInDays(tournamentDate, new Date());
@@ -184,6 +241,28 @@ export default function Home() {
           </Link>
         </div>
       </div>
+
+      {/* KSB Squad */}
+      {ksb && (
+        <Card className="border-primary/20 overflow-hidden">
+          <div className="h-1.5 w-full bg-gradient-to-r from-primary via-primary/60 to-transparent" />
+          <CardContent className="p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <img src="/onsl-official-logo.png" alt="KSB" className="h-10 w-10 rounded-full object-contain flex-shrink-0" />
+              <div>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-lg font-black uppercase tracking-tight">Kokkola Soccer Boys</h2>
+                  <span className="flex items-center gap-1 text-[10px] font-bold bg-primary/10 border border-primary/30 text-primary px-2 py-0.5 rounded-full uppercase tracking-widest">
+                    <ShieldCheck className="h-3 w-3" /> Host · Defending Champions
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground">ONSL 2026 Squad</p>
+              </div>
+            </div>
+            <KSBSquad teamId={ksb.id} />
+          </CardContent>
+        </Card>
+      )}
 
       {/* QR Code */}
       <Card className="border-dashed">
