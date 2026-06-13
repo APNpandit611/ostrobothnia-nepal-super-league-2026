@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { eq, and } from "drizzle-orm";
-import { db, matchesTable, teamsTable, goalsTable, cardsTable, matchEventsTable } from "@workspace/db";
+import { eq, and, inArray } from "drizzle-orm";
+import { db, matchesTable, teamsTable, goalsTable, cardsTable, matchEventsTable, playersTable } from "@workspace/db";
 import {
   CreateMatchBody,
   UpdateMatchBody,
@@ -31,6 +31,10 @@ router.get("/matches", async (req, res): Promise<void> => {
     return;
   }
 
+  // Only show matches where both teams have at least one registered player
+  const playerRows = await db.selectDistinct({ teamId: playersTable.teamId }).from(playersTable);
+  const registeredIds = new Set(playerRows.map(r => r.teamId));
+
   const teams = await db.select().from(teamsTable);
   const teamsMap = new Map(teams.map(t => [t.id, t]));
 
@@ -45,7 +49,9 @@ router.get("/matches", async (req, res): Promise<void> => {
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(matchesTable.matchNumber);
 
-  const enriched = matches.map(m => enrichMatch(m, teamsMap.get(m.homeTeamId), teamsMap.get(m.awayTeamId)));
+  const enriched = matches
+    .filter(m => registeredIds.has(m.homeTeamId) && registeredIds.has(m.awayTeamId))
+    .map(m => enrichMatch(m, teamsMap.get(m.homeTeamId), teamsMap.get(m.awayTeamId)));
   res.json(enriched);
 });
 
