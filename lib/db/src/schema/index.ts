@@ -4,3 +4,4 @@ export * from "./goals";
 export * from "./cards";
 export * from "./matchEvents";
 export * from "./players";
+export * from "./otpVerifications";
