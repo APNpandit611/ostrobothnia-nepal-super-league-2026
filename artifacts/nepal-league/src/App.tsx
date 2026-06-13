@@ -21,6 +21,7 @@ import AdminMatches from "./pages/admin/matches";
 import AdminMatchDetail from "./pages/admin/match";
 import AdminTeams from "./pages/admin/teams";
 import Register from "./pages/register";
+import SquadPoster from "./pages/squad-poster";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +50,10 @@ function Router() {
         <Layout><Stats /></Layout>
       </Route>
       
+      <Route path="/teams/:id">
+        <SquadPoster />
+      </Route>
+
       <Route path="/register">
         <Register />
       </Route>

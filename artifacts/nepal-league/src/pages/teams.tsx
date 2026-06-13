@@ -1,6 +1,7 @@
 import { useListTeams, useGetStandings, useListPlayers } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Crosshair, Shield, Users } from "lucide-react";
+import { Loader2, Crosshair, Shield, Users, FileText } from "lucide-react";
+import { Link } from "wouter";
 
 const POSITION_ORDER = ["GK", "C", "V.C", "Manager"];
 const POSITION_COLORS: Record<string, string> = {
@@ -72,8 +73,20 @@ export default function Teams() {
             <Card key={team.id} className="overflow-hidden hover:border-primary/50 transition-colors">
               <div className="h-2 w-full" style={{ backgroundColor: color }} />
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl font-bold">{team.name}</CardTitle>
-                <p className="text-muted-foreground font-mono text-sm">{team.shortName}</p>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <CardTitle className="text-xl font-bold">{team.name}</CardTitle>
+                    <p className="text-muted-foreground font-mono text-sm">{team.shortName}</p>
+                  </div>
+                  <Link href={`/teams/${team.id}`}>
+                    <button
+                      className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors hover:text-white"
+                      style={{ borderColor: `${color}60`, color, backgroundColor: `${color}15` }}
+                    >
+                      <FileText className="h-3 w-3" /> Squad
+                    </button>
+                  </Link>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Stats row */}
