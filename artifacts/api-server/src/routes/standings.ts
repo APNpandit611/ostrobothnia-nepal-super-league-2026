@@ -1,11 +1,22 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
-import { db, teamsTable, matchesTable, goalsTable } from "@workspace/db";
+import { eq, inArray } from "drizzle-orm";
+import { db, teamsTable, matchesTable, playersTable } from "@workspace/db";
 
 const router: IRouter = Router();
 
 router.get("/standings", async (_req, res): Promise<void> => {
-  const teams = await db.select().from(teamsTable).orderBy(teamsTable.id);
+  // Only include teams that have at least one registered player
+  const playerRows = await db.selectDistinct({ teamId: playersTable.teamId }).from(playersTable);
+  const registeredTeamIds = playerRows.map(r => r.teamId);
+
+  if (registeredTeamIds.length === 0) {
+    res.json([]);
+    return;
+  }
+
+  const teams = await db.select().from(teamsTable)
+    .where(inArray(teamsTable.id, registeredTeamIds))
+    .orderBy(teamsTable.id);
   const matches = await db.select().from(matchesTable).where(eq(matchesTable.status, "finished"));
 
   // Build standings map
