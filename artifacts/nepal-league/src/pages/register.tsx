@@ -121,16 +121,11 @@ export default function Register() {
       toast({ variant: "destructive", title: "Team name is required" });
       return;
     }
-    if (!managerEmail.trim() && !managerPhone.trim()) {
-      toast({ variant: "destructive", title: "Manager contact required", description: "Provide at least an email or phone number to verify your identity." });
+    if (!managerEmail.trim()) {
+      toast({ variant: "destructive", title: "Manager email is required", description: "A valid email is needed to send your verification code." });
       return;
     }
-    // default OTP method based on what's provided
-    if (managerEmail.trim()) {
-      setOtpMethod("email");
-    } else {
-      setOtpMethod("phone");
-    }
+    setOtpMethod("email");
     setStep(2);
   };
 
@@ -430,7 +425,7 @@ export default function Register() {
                   Manager / Contact
                 </p>
                 <p className="text-xs text-muted-foreground -mt-1">
-                  At least one of email or phone is required — it will be used to verify your identity.
+                  Manager email is required — a verification code will be sent to it.
                 </p>
                 <div className="space-y-1">
                   <Label>Manager Name</Label>
@@ -476,24 +471,8 @@ export default function Register() {
 
               {/* Method toggle */}
               <div className="space-y-2">
-                <Label>Send code via</Label>
-                <div className="flex gap-2">
-                  {hasEmail && (
-                    <button
-                      onClick={() => { setOtpMethod("email"); setOtpSent(false); setOtpCode(""); setDevCode(null); }}
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-semibold transition-all ${otpMethod === "email" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}
-                    >
-                      <Mail className="h-4 w-4" /> Email
-                    </button>
-                  )}
-                  {hasPhone && (
-                    <button
-                      onClick={() => { setOtpMethod("phone"); setOtpSent(false); setOtpCode(""); setDevCode(null); }}
-                      className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-semibold transition-all ${otpMethod === "phone" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}
-                    >
-                      <MessageSquare className="h-4 w-4" /> SMS
-                    </button>
-                  )}
+                <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-primary bg-primary/5 text-primary text-sm font-semibold">
+                  <Mail className="h-4 w-4" /> Verification code sent by Email
                 </div>
               </div>
 
