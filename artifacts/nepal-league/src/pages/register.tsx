@@ -12,7 +12,9 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 
-const POSITIONS = ["GK", "C", "V.C", "Manager"];
+const POSITIONS = ["GK", "C", "V.C", "Player", "Manager"];
+const MIN_PLAYERS = 7;
+const MAX_PLAYERS = 15;
 const CATEGORIES = ["Open", "U18", "U21", "Veterans", "Mixed", "Other"];
 
 interface PlayerRow {
@@ -87,7 +89,7 @@ export default function Register() {
   // ── Step 3: Team + players ──
   const [createdTeamId, setCreatedTeamId] = useState<number | null>(null);
   const [createdTeamName, setCreatedTeamName] = useState("");
-  const [rows, setRows] = useState<PlayerRow[]>([newRow()]);
+  const [rows, setRows] = useState<PlayerRow[]>(Array.from({ length: MIN_PLAYERS }, newRow));
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 

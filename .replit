@@ -33,3 +33,11 @@ externalPort = 3000
 
 [nix]
 channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = "587"
+SMTP_USER = "as300102@gmail.com"
+SMTP_FROM = "ONSL 2026 <as300102@gmail.com>"
