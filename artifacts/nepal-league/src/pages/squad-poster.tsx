@@ -155,7 +155,7 @@ export default function SquadPoster() {
               border: `1px solid rgba(${rgb}, 0.35)`,
             }}
           >
-            {team.shortName} · Nepal Super League 2026
+            {team.shortName} · Ostrobothnia Nepal Super League 2026
           </div>
         </div>
 
