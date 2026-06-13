@@ -118,6 +118,8 @@ export const ListPlayersResponseItem = zod.object({
   "name": zod.string(),
   "number": zod.number().nullish(),
   "position": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish(),
   "createdAt": zod.string()
 })
 export const ListPlayersResponse = zod.array(ListPlayersResponseItem)
@@ -133,7 +135,37 @@ export const AddPlayerParams = zod.object({
 export const AddPlayerBody = zod.object({
   "name": zod.string(),
   "number": zod.number().nullish(),
-  "position": zod.string().nullish()
+  "position": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish()
+})
+
+
+/**
+ * @summary Update a player (admin only)
+ */
+export const UpdatePlayerParams = zod.object({
+  "teamId": zod.coerce.number(),
+  "playerId": zod.coerce.number()
+})
+
+export const UpdatePlayerBody = zod.object({
+  "name": zod.string().optional(),
+  "number": zod.number().nullish(),
+  "position": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish()
+})
+
+export const UpdatePlayerResponse = zod.object({
+  "id": zod.number(),
+  "teamId": zod.number(),
+  "name": zod.string(),
+  "number": zod.number().nullish(),
+  "position": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "createdAt": zod.string()
 })
 
 

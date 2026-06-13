@@ -20,6 +20,7 @@ import AdminDashboard from "./pages/admin/dashboard";
 import AdminMatches from "./pages/admin/matches";
 import AdminMatchDetail from "./pages/admin/match";
 import AdminTeams from "./pages/admin/teams";
+import Register from "./pages/register";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +49,10 @@ function Router() {
         <Layout><Stats /></Layout>
       </Route>
       
+      <Route path="/register">
+        <Register />
+      </Route>
+
       <Route path="/admin">
         <AdminLogin />
       </Route>

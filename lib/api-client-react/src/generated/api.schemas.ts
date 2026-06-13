@@ -221,6 +221,10 @@ export interface Player {
   number?: number | null;
   /** @nullable */
   position?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  phone?: string | null;
   createdAt: string;
 }
 
@@ -230,6 +234,22 @@ export interface PlayerInput {
   number?: number | null;
   /** @nullable */
   position?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  phone?: string | null;
+}
+
+export interface PlayerUpdate {
+  name?: string;
+  /** @nullable */
+  number?: number | null;
+  /** @nullable */
+  position?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  phone?: string | null;
 }
 
 export interface GoalInput {

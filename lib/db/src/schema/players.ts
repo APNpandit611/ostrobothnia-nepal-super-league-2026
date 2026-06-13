@@ -7,5 +7,7 @@ export const playersTable = pgTable("players", {
   name: text("name").notNull(),
   number: integer("number"),
   position: text("position"),
+  email: text("email"),
+  phone: text("phone"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

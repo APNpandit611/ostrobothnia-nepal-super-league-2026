@@ -12,4 +12,8 @@ export interface PlayerInput {
   number?: number | null;
   /** @nullable */
   position?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  phone?: string | null;
 }

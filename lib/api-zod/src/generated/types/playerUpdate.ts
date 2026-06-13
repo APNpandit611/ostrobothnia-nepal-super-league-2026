@@ -6,10 +6,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface Player {
-  id: number;
-  teamId: number;
-  name: string;
+export interface PlayerUpdate {
+  name?: string;
   /** @nullable */
   number?: number | null;
   /** @nullable */
@@ -18,5 +16,4 @@ export interface Player {
   email?: string | null;
   /** @nullable */
   phone?: string | null;
-  createdAt: string;
 }

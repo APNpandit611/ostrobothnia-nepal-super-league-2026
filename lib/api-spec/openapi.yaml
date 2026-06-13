@@ -209,6 +209,36 @@ paths:
                 $ref: "#/components/schemas/Player"
 
   /teams/{teamId}/players/{playerId}:
+    patch:
+      operationId: updatePlayer
+      tags: [teams]
+      summary: Update a player (admin only)
+      parameters:
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: playerId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PlayerUpdate"
+      responses:
+        "200":
+          description: Updated player
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Player"
+        "404":
+          description: Not found
     delete:
       operationId: deletePlayer
       tags: [teams]
@@ -831,6 +861,10 @@ components:
           type: ["integer", "null"]
         position:
           type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
         createdAt:
           type: string
 
@@ -843,6 +877,24 @@ components:
         number:
           type: ["integer", "null"]
         position:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+
+    PlayerUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        number:
+          type: ["integer", "null"]
+        position:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
           type: ["string", "null"]
 
     # ── Goal ─────────────────────────────────────────────────────────

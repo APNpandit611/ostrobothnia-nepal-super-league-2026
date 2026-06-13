@@ -37,6 +37,7 @@ import type {
   MessageResponse,
   Player,
   PlayerInput,
+  PlayerUpdate,
   StandingRow,
   Team,
   TeamInput,
@@ -796,6 +797,80 @@ export const useAddPlayer = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getAddPlayerMutationOptions(options));
+    }
+
+export const getUpdatePlayerUrl = (teamId: number,
+    playerId: number,) => {
+
+
+
+
+  return `/api/teams/${teamId}/players/${playerId}`
+}
+
+/**
+ * @summary Update a player (admin only)
+ */
+export const updatePlayer = async (teamId: number,
+    playerId: number,
+    playerUpdate: PlayerUpdate, options?: RequestInit): Promise<Player> => {
+
+  return customFetch<Player>(getUpdatePlayerUrl(teamId,playerId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      playerUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdatePlayerMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlayer>>, TError,{teamId: number;playerId: number;data: BodyType<PlayerUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePlayer>>, TError,{teamId: number;playerId: number;data: BodyType<PlayerUpdate>}, TContext> => {
+
+const mutationKey = ['updatePlayer'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePlayer>>, {teamId: number;playerId: number;data: BodyType<PlayerUpdate>}> = (props) => {
+          const {teamId,playerId,data} = props ?? {};
+
+          return  updatePlayer(teamId,playerId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePlayerMutationResult = NonNullable<Awaited<ReturnType<typeof updatePlayer>>>
+    export type UpdatePlayerMutationBody = BodyType<PlayerUpdate>
+    export type UpdatePlayerMutationError = ErrorType<void>
+
+    /**
+ * @summary Update a player (admin only)
+ */
+export const useUpdatePlayer = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePlayer>>, TError,{teamId: number;playerId: number;data: BodyType<PlayerUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updatePlayer>>,
+        TError,
+        {teamId: number;playerId: number;data: BodyType<PlayerUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdatePlayerMutationOptions(options));
     }
 
 export const getDeletePlayerUrl = (teamId: number,
