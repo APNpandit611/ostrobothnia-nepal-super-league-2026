@@ -442,7 +442,6 @@ export default function AdminTeams() {
                 </div>
               </div>
               <div className="mt-3 flex gap-3">
-              <div className="hidden md:grid md:grid-cols-[1fr_1fr_auto_auto_auto] gap-4 items-end invisible pointer-events-none" aria-hidden="true">
                 <Button
                   onClick={() => handleSave(team.id)}
                   disabled={updateMutation.isPending && updateMutation.variables?.id === team.id}
