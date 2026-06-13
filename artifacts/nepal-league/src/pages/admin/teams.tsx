@@ -318,17 +318,18 @@ export default function AdminTeams() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { data: teams, isLoading } = useListTeams();
-  const [edits, setEdits] = useState<Record<number, { name: string; shortName: string; primaryColor: string }>>({});
+  const [edits, setEdits] = useState<Record<number, { name: string; shortName: string; primaryColor: string; logoUrl: string }>>({});
   const [expanded, setExpanded] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     if (teams) {
-      const initialEdits: Record<number, { name: string; shortName: string; primaryColor: string }> = {};
+      const initialEdits: Record<number, { name: string; shortName: string; primaryColor: string; logoUrl: string }> = {};
       teams.forEach((team) => {
         initialEdits[team.id] = {
           name: team.name,
           shortName: team.shortName,
           primaryColor: team.primaryColor || "#16a34a",
+          logoUrl: team.logoUrl ?? "",
         };
       });
       setEdits(initialEdits);
@@ -346,7 +347,15 @@ export default function AdminTeams() {
 
   const handleSave = (id: number) => {
     const edit = edits[id];
-    if (edit) updateMutation.mutate({ id, data: edit });
+    if (edit) updateMutation.mutate({
+      id,
+      data: {
+        name: edit.name,
+        shortName: edit.shortName,
+        primaryColor: edit.primaryColor,
+        logoUrl: edit.logoUrl || null,
+      },
+    });
   };
 
   const handleEditChange = (id: number, field: string, value: string) => {
@@ -411,6 +420,29 @@ export default function AdminTeams() {
                     className="w-16 p-1 h-10"
                   />
                 </div>
+              </div>
+              <div className="mt-3 flex flex-col sm:flex-row gap-3 items-end">
+                <div className="flex-1 space-y-2">
+                  <Label htmlFor={`logo-${team.id}`}>Logo URL</Label>
+                  <div className="flex gap-2 items-center">
+                    {edits[team.id]?.logoUrl && (
+                      <img
+                        src={edits[team.id].logoUrl}
+                        alt="logo preview"
+                        className="h-9 w-9 rounded-full object-contain border flex-shrink-0"
+                      />
+                    )}
+                    <Input
+                      id={`logo-${team.id}`}
+                      placeholder="/onsl-official-logo.png or https://…"
+                      value={edits[team.id]?.logoUrl || ""}
+                      onChange={(e) => handleEditChange(team.id, "logoUrl", e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-3 flex gap-3">
+              <div className="hidden md:grid md:grid-cols-[1fr_1fr_auto_auto_auto] gap-4 items-end invisible pointer-events-none" aria-hidden="true">
                 <Button
                   onClick={() => handleSave(team.id)}
                   disabled={updateMutation.isPending && updateMutation.variables?.id === team.id}
