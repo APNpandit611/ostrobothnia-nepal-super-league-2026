@@ -249,7 +249,7 @@ export default function SquadPoster() {
             )}
           </div>
           <p className="text-white/20 text-[10px] uppercase tracking-widest mt-3">
-            Santahaka · Kokkola · 28 June 2026
+            Santahaka Tekonurmikenttä · Kokkola · 28 June 2026
           </p>
         </div>
       </div>

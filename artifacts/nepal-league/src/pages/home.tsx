@@ -120,7 +120,7 @@ export default function Home() {
             </span>
             <span className="flex items-center gap-2 bg-background border px-3 py-1.5 rounded-full">
               <MapPin className="h-4 w-4 text-primary" />
-              Santahaka, Kokkola, Finland
+              Santahaka Tekonurmikenttä, Kokkola
             </span>
             <span className="flex items-center gap-2 bg-background border px-3 py-1.5 rounded-full">
               <Users className="h-4 w-4 text-primary" />
@@ -149,7 +149,7 @@ export default function Home() {
               About the Tournament
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              The <span className="text-foreground font-semibold">Ostrobothnia Nepal Super League 2026</span> is a one-day 5-team football tournament bringing together Nepali football clubs from across Ostrobothnia, Finland. Hosted and organised by Kokkola Soccer Boys at Santahaka stadium on 28 June 2026.
+              The <span className="text-foreground font-semibold">Ostrobothnia Nepal Super League 2026</span> is a one-day 5-team football tournament bringing together Nepali football clubs from across Ostrobothnia, Finland. Hosted and organised by Kokkola Soccer Boys at Santahaka Tekonurmikenttä, Kokkola on 28 June 2026.
             </p>
             <ul className="text-sm space-y-1.5 text-muted-foreground">
               {[
@@ -174,12 +174,12 @@ export default function Home() {
               Venue
             </div>
             <div>
-              <p className="font-bold text-lg">Santahaka Sports Ground</p>
+              <p className="font-bold text-lg">Santahaka Tekonurmikenttä</p>
               <p className="text-sm text-muted-foreground">Kokkola, Finland</p>
             </div>
             <div className="rounded-xl overflow-hidden border h-40 bg-muted flex items-center justify-center">
               <a
-                href="https://maps.google.com/?q=Santahaka+Kokkola+Finland"
+                href="https://maps.google.com/?q=Santahaka+Tekonurmikenttä+Kokkola+Finland"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm font-medium"
