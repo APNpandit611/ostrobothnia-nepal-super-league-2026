@@ -130,11 +130,18 @@ export default function Home() {
 
           {/* Countdown */}
           {!tournamentStarted && (
-            <div className="w-full space-y-4">
+            <div className="w-full space-y-5">
               <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center justify-center gap-2">
                 <Clock className="h-4 w-4" /> Tournament starts in
               </p>
               <Countdown />
+              <Link href="/register">
+                <div className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold px-8 py-3 rounded-xl hover:bg-primary/90 transition-colors cursor-pointer text-sm shadow-lg shadow-primary/30">
+                  <UserPlus className="h-4 w-4" />
+                  Register Your Team Now
+                  <ArrowRight className="h-4 w-4" />
+                </div>
+              </Link>
             </div>
           )}
         </div>
