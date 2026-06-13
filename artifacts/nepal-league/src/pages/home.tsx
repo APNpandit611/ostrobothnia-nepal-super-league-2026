@@ -78,10 +78,15 @@ export default function Home() {
         <div className="absolute -bottom-12 -left-12 h-48 w-48 rounded-full bg-primary/5 pointer-events-none" />
 
         <div className="relative p-6 md:p-12 flex flex-col items-center text-center space-y-6">
-          {/* Badge */}
-          <Badge variant="outline" className="border-primary/40 text-primary font-bold uppercase tracking-widest px-4 py-1.5 text-xs">
-            🏆 Hosting the Tournament
-          </Badge>
+          {/* Badges */}
+          <div className="flex flex-wrap justify-center gap-2">
+            <Badge variant="outline" className="border-primary/40 text-primary font-bold uppercase tracking-widest px-4 py-1.5 text-xs">
+              🏆 Hosting the Tournament
+            </Badge>
+            <Badge variant="outline" className="border-yellow-500/50 text-yellow-400 font-bold uppercase tracking-widest px-4 py-1.5 text-xs bg-yellow-500/10">
+              ⭐ Defending Champions
+            </Badge>
+          </div>
 
           {/* Logo */}
           <img
