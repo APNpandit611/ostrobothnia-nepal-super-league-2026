@@ -28,10 +28,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Link href="/">
           <div className="flex items-center gap-2 cursor-pointer">
             <img src="/onsl-official-logo.png" alt="Kokkola Soccer Boys" className="h-8 w-8 rounded-full object-contain flex-shrink-0" />
-            <div className="leading-tight">
-              <div className="font-black text-sm tracking-tight">KOKKOLA SOCCER BOYS</div>
-              <div className="text-[10px] text-muted-foreground">Nepal Super League 2026</div>
-            </div>
+            <div className="font-black text-sm tracking-tight">KOKKOLA SOCCER BOYS</div>
           </div>
         </Link>
         <div className="flex items-center gap-4">
@@ -83,10 +80,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Link href="/">
           <div className="flex h-16 items-center gap-3 border-b px-4 cursor-pointer hover:bg-muted/50 transition-colors">
             <img src="/onsl-official-logo.png" alt="Kokkola Soccer Boys" className="h-9 w-9 rounded-full object-contain flex-shrink-0" />
-            <div className="leading-tight min-w-0">
-              <div className="font-black text-sm tracking-tight truncate">KOKKOLA SOCCER BOYS</div>
-              <div className="text-[10px] text-muted-foreground truncate">Nepal Super League 2026</div>
-            </div>
+            <div className="font-black text-sm tracking-tight truncate">KOKKOLA SOCCER BOYS</div>
           </div>
         </Link>
         <nav className="flex-1 space-y-1 p-4">
