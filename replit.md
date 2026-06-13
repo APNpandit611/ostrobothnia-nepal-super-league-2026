@@ -40,7 +40,7 @@ A full-stack football tournament management app for the Nepal Summer League Finl
 ## Product
 
 - **Public**: View fixtures, live scores, standings, results, team info, statistics
-- **Admin panel** (`/admin`): Login with admin/admin123, manage matches (start/finish/reset), add goals & cards in real time, edit teams, generate fixtures, reset tournament
+- **Admin panel** (`/admin`): Login with admin/Ksoccerboys@1995!, manage matches (start/finish/reset), add goals & cards in real time, edit teams, generate fixtures, reset tournament
 
 ## Teams
 
@@ -58,7 +58,7 @@ _Populate as needed._
 
 - After adding new schema files, run `pnpm run typecheck:libs` before typechecking leaf packages — stale declarations cause TS2305 errors
 - The `goals` route recalculates match score on every delete (counts all remaining goals)
-- Admin credentials are hardcoded: username `admin`, password `admin123`
+- Admin credentials are hardcoded: username `admin`, password `Ksoccerboys@1995!`
 
 ## Pointers
 
