@@ -478,10 +478,19 @@ export default function Register() {
 
               {/* Contact display */}
               <div className="rounded-lg bg-muted/50 px-4 py-3 flex items-center gap-3">
-                {otpMethod === "email" ? <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" /> : <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+                <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 <div>
-                  <p className="text-xs text-muted-foreground">Sending to</p>
-                  <p className="font-semibold text-sm">{otpContact || <span className="text-muted-foreground italic">not provided</span>}</p>
+                  {otpSent ? (
+                    <>
+                      <p className="text-xs text-muted-foreground">A verification code has been sent to</p>
+                      <p className="font-semibold text-sm">{otpContact}</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-xs text-muted-foreground">Code will be sent to</p>
+                      <p className="font-semibold text-sm">{otpContact || <span className="italic">not provided</span>}</p>
+                    </>
+                  )}
                 </div>
               </div>
 
