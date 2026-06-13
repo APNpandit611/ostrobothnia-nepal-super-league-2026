@@ -8,7 +8,7 @@ import {
 const router: IRouter = Router();
 
 const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "admin123";
+const ADMIN_PASSWORD = "Ksoccerboys@1995!";
 const COOKIE_NAME = "nepal_admin_session";
 const COOKIE_SECRET = "nepal-league-admin-2026";
 
