@@ -30,7 +30,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <img src="/onsl-official-logo.png" alt="Kokkola Soccer Boys" className="h-8 w-8 rounded-full object-contain flex-shrink-0" />
             <div className="leading-tight">
               <div className="font-black text-sm tracking-tight">KOKKOLA SOCCER BOYS</div>
-              <div className="text-[10px] text-muted-foreground">ONSL 2026</div>
+              <div className="text-[10px] text-muted-foreground">Nepal Super League 2026</div>
             </div>
           </div>
         </Link>
@@ -85,7 +85,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <img src="/onsl-official-logo.png" alt="Kokkola Soccer Boys" className="h-9 w-9 rounded-full object-contain flex-shrink-0" />
             <div className="leading-tight min-w-0">
               <div className="font-black text-sm tracking-tight truncate">KOKKOLA SOCCER BOYS</div>
-              <div className="text-[10px] text-muted-foreground truncate">ONSL 2026</div>
+              <div className="text-[10px] text-muted-foreground truncate">Nepal Super League 2026</div>
             </div>
           </div>
         </Link>
@@ -143,7 +143,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <img src="/onsl-official-logo.png" alt="Kokkola Soccer Boys" className="h-10 w-10 rounded-full object-contain flex-shrink-0" />
                 <div>
                   <div className="font-black text-sm tracking-tight">KOKKOLA SOCCER BOYS</div>
-                  <div className="text-xs text-muted-foreground">ONSL 2026 · Santahaka, Kokkola, Finland</div>
+                  <div className="text-xs text-muted-foreground">Nepal Super League 2026 · Santahaka, Kokkola</div>
                 </div>
               </div>
               <div className="flex flex-col gap-2 text-xs text-muted-foreground">
