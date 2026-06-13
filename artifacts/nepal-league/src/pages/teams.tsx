@@ -1,6 +1,6 @@
 import { useListTeams, useGetStandings, useListPlayers } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Crosshair, Shield, Users, FileText } from "lucide-react";
+import { Loader2, Crosshair, Shield, Users, FileText, UserPlus } from "lucide-react";
 import { Link } from "wouter";
 import type { Team } from "@workspace/api-client-react";
 
@@ -117,19 +117,41 @@ export default function Teams() {
     );
   }
 
+  const registeredCount = standings?.length ?? 0;
+  const noTeamsRegistered = !teamsLoading && !standingsLoading && registeredCount === 0;
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <h1 className="text-3xl font-black tracking-tight uppercase italic">Teams</h1>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        {teams?.map((team) => (
-          <TeamCard
-            key={team.id}
-            team={team}
-            stats={standings?.find((s) => s.teamId === team.id)}
-          />
-        ))}
-      </div>
+      {noTeamsRegistered ? (
+        <Card className="border-dashed">
+          <CardContent className="py-16 flex flex-col items-center text-center gap-4">
+            <Users className="h-12 w-12 opacity-20" />
+            <div>
+              <p className="font-bold text-lg">No teams registered yet</p>
+              <p className="text-muted-foreground text-sm mt-1">
+                Teams will appear here once they register their squad.
+              </p>
+            </div>
+            <Link href="/register">
+              <div className="flex items-center gap-2 bg-primary text-primary-foreground font-bold px-5 py-2.5 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer text-sm">
+                <UserPlus className="h-4 w-4" /> Register a Team
+              </div>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-6">
+          {teams?.map((team) => (
+            <TeamCard
+              key={team.id}
+              team={team}
+              stats={standings?.find((s) => s.teamId === team.id)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
