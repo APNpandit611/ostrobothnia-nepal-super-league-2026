@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, UserPlus, Trash2, CheckCircle2, ClipboardList,
-  Shield, ChevronRight, Upload, X, Mail, Phone, KeyRound, RefreshCw, ArrowLeft,
+  Shield, ChevronRight, Upload, X, Mail, Phone, KeyRound, RefreshCw, ArrowLeft, MessageSquare,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -491,7 +491,7 @@ export default function Register() {
                       onClick={() => { setOtpMethod("phone"); setOtpSent(false); setOtpCode(""); setDevCode(null); }}
                       className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border-2 text-sm font-semibold transition-all ${otpMethod === "phone" ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground hover:border-primary/40"}`}
                     >
-                      <Phone className="h-4 w-4" /> Phone
+                      <MessageSquare className="h-4 w-4" /> SMS
                     </button>
                   )}
                 </div>
@@ -499,7 +499,7 @@ export default function Register() {
 
               {/* Contact display */}
               <div className="rounded-lg bg-muted/50 px-4 py-3 flex items-center gap-3">
-                {otpMethod === "email" ? <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" /> : <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
+                {otpMethod === "email" ? <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" /> : <MessageSquare className="h-4 w-4 text-muted-foreground flex-shrink-0" />}
                 <div>
                   <p className="text-xs text-muted-foreground">Sending to</p>
                   <p className="font-semibold text-sm">{otpContact || <span className="text-muted-foreground italic">not provided</span>}</p>
