@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, UserPlus, Trash2, CheckCircle2, ClipboardList,
-  Shield, ChevronRight, Upload, X, Mail, Phone, KeyRound, RefreshCw,
+  Shield, ChevronRight, Upload, X, Mail, Phone, KeyRound, RefreshCw, ArrowLeft,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -564,10 +564,11 @@ export default function Register() {
               )}
 
               <button
-                className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors underline"
+                className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground border border-border hover:border-foreground/30 rounded-xl py-3 transition-colors bg-muted/40 hover:bg-muted"
                 onClick={() => { setStep(1); setOtpSent(false); setOtpCode(""); setDevCode(null); setOtpId(null); }}
               >
-                ← Back to Team Details
+                <ArrowLeft className="h-4 w-4" />
+                Back to Team Details
               </button>
             </CardContent>
           </Card>

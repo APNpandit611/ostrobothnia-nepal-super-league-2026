@@ -96,9 +96,9 @@ export default function SquadPoster() {
 
       {/* Back button */}
       <Link href="/teams">
-        <div className="absolute top-5 left-5 z-20 flex items-center gap-1.5 text-white/40 hover:text-white/80 transition-colors text-xs font-bold uppercase tracking-widest cursor-pointer">
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Teams
+        <div className="absolute top-4 left-4 z-20 flex items-center gap-2 bg-black/50 hover:bg-black/70 text-white transition-colors px-4 py-2.5 rounded-xl cursor-pointer backdrop-blur-sm border border-white/10 font-semibold text-sm">
+          <ArrowLeft className="h-4 w-4" />
+          Back to Teams
         </div>
       </Link>
 
