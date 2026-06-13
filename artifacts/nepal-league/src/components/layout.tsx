@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3, Settings, Menu, X, Sun, Moon, Home, UserPlus } from "lucide-react";
+import { CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3, Settings, Menu, X, Sun, Moon, Home, UserPlus, Mail, Phone, MapPin, Facebook } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "./theme-provider";
 
@@ -132,10 +132,44 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto p-4 md:p-8 max-w-5xl">
+      <main className="flex-1 overflow-y-auto flex flex-col">
+        <div className="flex-1 container mx-auto p-4 md:p-8 max-w-5xl">
           {children}
         </div>
+        <footer className="border-t bg-card mt-8">
+          <div className="container mx-auto max-w-5xl px-4 py-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <img src="/onsl-official-logo.png" alt="Kokkola Soccer Boys" className="h-10 w-10 rounded-full object-contain flex-shrink-0" />
+                <div>
+                  <div className="font-black text-sm tracking-tight">KOKKOLA SOCCER BOYS</div>
+                  <div className="text-xs text-muted-foreground">ONSL 2026 · Santahaka, Kokkola, Finland</div>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2 text-xs text-muted-foreground">
+                <a href="mailto:ksoccerboys@gmail.com" className="flex items-center gap-2 hover:text-foreground transition-colors">
+                  <Mail className="h-3.5 w-3.5" />
+                  ksoccerboys@gmail.com
+                </a>
+                <a href="tel:+358413174494" className="flex items-center gap-2 hover:text-foreground transition-colors">
+                  <Phone className="h-3.5 w-3.5" />
+                  +358 413 174 494
+                </a>
+                <span className="flex items-center gap-2">
+                  <MapPin className="h-3.5 w-3.5" />
+                  Kokkola, Finland
+                </span>
+                <a href="https://www.facebook.com/people/Kokkola-Soccer-Boys/61589834992626/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-foreground transition-colors">
+                  <Facebook className="h-3.5 w-3.5" />
+                  Kokkola Soccer Boys
+                </a>
+              </div>
+            </div>
+            <div className="mt-4 pt-4 border-t text-center text-xs text-muted-foreground">
+              © 2026 Kokkola Soccer Boys · Ostrobothnia Nepal Super League
+            </div>
+          </div>
+        </footer>
       </main>
     </div>
   );
