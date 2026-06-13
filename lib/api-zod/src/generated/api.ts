@@ -48,6 +48,11 @@ export const ListTeamsResponseItem = zod.object({
   "shortName": zod.string(),
   "primaryColor": zod.string(),
   "logoUrl": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "managerName": zod.string().nullish(),
+  "managerPhone": zod.string().nullish(),
+  "managerEmail": zod.string().nullish(),
   "createdAt": zod.string().optional()
 })
 export const ListTeamsResponse = zod.array(ListTeamsResponseItem)
@@ -60,7 +65,12 @@ export const CreateTeamBody = zod.object({
   "name": zod.string(),
   "shortName": zod.string(),
   "primaryColor": zod.string(),
-  "logoUrl": zod.string().nullish()
+  "logoUrl": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "managerName": zod.string().nullish(),
+  "managerPhone": zod.string().nullish(),
+  "managerEmail": zod.string().nullish()
 })
 
 
@@ -77,6 +87,11 @@ export const GetTeamResponse = zod.object({
   "shortName": zod.string(),
   "primaryColor": zod.string(),
   "logoUrl": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "managerName": zod.string().nullish(),
+  "managerPhone": zod.string().nullish(),
+  "managerEmail": zod.string().nullish(),
   "createdAt": zod.string().optional()
 })
 
@@ -92,7 +107,12 @@ export const UpdateTeamBody = zod.object({
   "name": zod.string().optional(),
   "shortName": zod.string().optional(),
   "primaryColor": zod.string().optional(),
-  "logoUrl": zod.string().nullish()
+  "logoUrl": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "managerName": zod.string().nullish(),
+  "managerPhone": zod.string().nullish(),
+  "managerEmail": zod.string().nullish()
 })
 
 export const UpdateTeamResponse = zod.object({
@@ -101,6 +121,11 @@ export const UpdateTeamResponse = zod.object({
   "shortName": zod.string(),
   "primaryColor": zod.string(),
   "logoUrl": zod.string().nullish(),
+  "city": zod.string().nullish(),
+  "category": zod.string().nullish(),
+  "managerName": zod.string().nullish(),
+  "managerPhone": zod.string().nullish(),
+  "managerEmail": zod.string().nullish(),
   "createdAt": zod.string().optional()
 })
 

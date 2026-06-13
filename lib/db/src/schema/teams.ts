@@ -8,6 +8,11 @@ export const teamsTable = pgTable("teams", {
   shortName: text("short_name").notNull(),
   primaryColor: text("primary_color").notNull().default("#16a34a"),
   logoUrl: text("logo_url"),
+  city: text("city"),
+  category: text("category"),
+  managerName: text("manager_name"),
+  managerPhone: text("manager_phone"),
+  managerEmail: text("manager_email"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

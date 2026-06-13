@@ -13,5 +13,15 @@ export interface Team {
   primaryColor: string;
   /** @nullable */
   logoUrl?: string | null;
+  /** @nullable */
+  city?: string | null;
+  /** @nullable */
+  category?: string | null;
+  /** @nullable */
+  managerName?: string | null;
+  /** @nullable */
+  managerPhone?: string | null;
+  /** @nullable */
+  managerEmail?: string | null;
   createdAt?: string;
 }

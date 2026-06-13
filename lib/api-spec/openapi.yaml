@@ -699,6 +699,16 @@ components:
           type: string
         logoUrl:
           type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        managerName:
+          type: ["string", "null"]
+        managerPhone:
+          type: ["string", "null"]
+        managerEmail:
+          type: ["string", "null"]
         createdAt:
           type: string
 
@@ -714,6 +724,16 @@ components:
           type: string
         logoUrl:
           type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        managerName:
+          type: ["string", "null"]
+        managerPhone:
+          type: ["string", "null"]
+        managerEmail:
+          type: ["string", "null"]
 
     TeamUpdate:
       type: object
@@ -725,6 +745,16 @@ components:
         primaryColor:
           type: string
         logoUrl:
+          type: ["string", "null"]
+        city:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        managerName:
+          type: ["string", "null"]
+        managerPhone:
+          type: ["string", "null"]
+        managerEmail:
           type: ["string", "null"]
 
     # ── Match ─────────────────────────────────────────────────────────
