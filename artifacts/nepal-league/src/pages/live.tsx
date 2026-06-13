@@ -12,7 +12,7 @@ export default function Live() {
   useEffect(() => {
     const interval = setInterval(() => {
       queryClient.invalidateQueries({ queryKey: getListMatchesQueryKey() });
-    }, 5000);
+    }, 10000);
     return () => clearInterval(interval);
   }, [queryClient]);
 
