@@ -98,8 +98,8 @@ export default function Register() {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast({ variant: "destructive", title: "Logo too large", description: "Please use an image under 2 MB." });
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ variant: "destructive", title: "Logo too large", description: "Please use an image under 5 MB." });
       return;
     }
     const reader = new FileReader();
