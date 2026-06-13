@@ -183,8 +183,8 @@ export default function Register() {
   /* ── Step 3: Create team + add players ── */
   const handleSubmit = async () => {
     const validRows = rows.filter((r) => r.name.trim());
-    if (validRows.length === 0) {
-      toast({ variant: "destructive", title: "Add at least one player name" });
+    if (validRows.length < MIN_PLAYERS) {
+      toast({ variant: "destructive", title: `At least ${MIN_PLAYERS} players required`, description: `You have ${validRows.length} named. Please fill in at least ${MIN_PLAYERS} player names.` });
       return;
     }
     setSubmitting(true);
@@ -602,18 +602,25 @@ export default function Register() {
 
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <UserPlus className="h-5 w-5 text-primary" />
-                  Register Players
+                <CardTitle className="flex items-center justify-between gap-2">
+                  <span className="flex items-center gap-2">
+                    <UserPlus className="h-5 w-5 text-primary" />
+                    Register Players
+                  </span>
+                  <span className={`text-sm font-semibold tabular-nums ${rows.length >= MAX_PLAYERS ? "text-destructive" : "text-muted-foreground"}`}>
+                    {rows.length} / {MAX_PLAYERS}
+                  </span>
                 </CardTitle>
-                <CardDescription>Name is required. Email and phone are optional.</CardDescription>
+                <CardDescription>
+                  Min {MIN_PLAYERS} players required · Max {MAX_PLAYERS} · Manager can also be a player.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {rows.map((row, idx) => (
                   <div key={row.id} className="border rounded-xl p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Player {idx + 1}</span>
-                      {rows.length > 1 && (
+                      {rows.length > MIN_PLAYERS && (
                         <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive" onClick={() => setRows((r) => r.filter((x) => x.id !== row.id))}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -646,9 +653,14 @@ export default function Register() {
                     </div>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full" onClick={() => setRows((r) => [...r, newRow()])}>
-                  <UserPlus className="h-4 w-4 mr-2" /> Add Another Player
-                </Button>
+                {rows.length < MAX_PLAYERS && (
+                  <Button variant="outline" className="w-full" onClick={() => setRows((r) => [...r, newRow()])}>
+                    <UserPlus className="h-4 w-4 mr-2" /> Add Another Player
+                  </Button>
+                )}
+                {rows.length >= MAX_PLAYERS && (
+                  <p className="text-center text-xs text-muted-foreground">Maximum {MAX_PLAYERS} players reached</p>
+                )}
               </CardContent>
             </Card>
 
