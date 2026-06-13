@@ -80,11 +80,9 @@ router.post("/register/send-otp", async (req, res): Promise<void> => {
     req.log.info({ contact, code }, "OTP CODE (SMS — dev mode, no SMS provider configured)");
   }
 
-  const isDev = process.env["NODE_ENV"] !== "production";
-
   res.status(200).json({
     id: record.id,
-    ...(isDev ? { devCode: code } : {}),
+    devCode: code,
   });
 });
 
