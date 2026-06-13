@@ -1,4 +1,4 @@
-import { useListTeams, useListMatches } from "@workspace/api-client-react";
+import { useListTeams, useListMatches, useGetStandings } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -39,10 +39,13 @@ function Countdown() {
 }
 
 export default function Home() {
-  const { data: teams } = useListTeams();
+  const { data: allTeams } = useListTeams();
+  const { data: standings } = useGetStandings();
   const { data: liveMatches } = useListMatches({ status: "live" });
 
-  const registeredTeams = teams ?? [];
+  // Only show teams that have registered players (cross-reference with standings)
+  const registeredIds = new Set((standings ?? []).map((s) => s.teamId));
+  const registeredTeams = (allTeams ?? []).filter((t) => registeredIds.has(t.id));
   const now = new Date();
   const tournamentStarted = TOURNAMENT_DATE <= now;
 
