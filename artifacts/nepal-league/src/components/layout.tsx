@@ -12,7 +12,7 @@ const NAV_ITEMS = [
   { href: "/results", label: "Results", icon: ClipboardList },
   { href: "/teams", label: "Teams", icon: Users },
   { href: "/stats", label: "Stats", icon: BarChart3 },
-  { href: "/register", label: "Register", icon: UserPlus },
+  { href: "/register", label: "Register Team", icon: UserPlus },
   { href: "/admin/dashboard", label: "Admin", icon: Settings },
 ];
 
