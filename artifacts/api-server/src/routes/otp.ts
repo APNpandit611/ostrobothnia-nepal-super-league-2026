@@ -50,6 +50,8 @@ router.post("/register/send-otp", async (req, res): Promise<void> => {
     .values({ contact, type, code, expiresAt })
     .returning();
 
+  let emailDelivered = false;
+
   if (type === "email") {
     const transporter = getTransporter();
     if (transporter) {
@@ -69,9 +71,10 @@ router.post("/register/send-otp", async (req, res): Promise<void> => {
           `,
         });
         req.log.info({ contact, type }, "OTP email sent");
+        emailDelivered = true;
       } catch (err) {
         req.log.error({ err }, "Failed to send OTP email — falling back to log");
-        req.log.info({ contact, code }, "OTP CODE (email send failed)");
+        req.log.info({ contact, code }, "OTP CODE (email send failed — showing in response)");
       }
     } else {
       req.log.info({ contact, code }, "OTP CODE (no SMTP configured — dev mode)");
@@ -82,7 +85,8 @@ router.post("/register/send-otp", async (req, res): Promise<void> => {
 
   res.status(200).json({
     id: record.id,
-    devCode: code,
+    // Only expose the code in the response when delivery failed (no SMTP or send error)
+    ...(emailDelivered ? {} : { devCode: code }),
   });
 });
 
