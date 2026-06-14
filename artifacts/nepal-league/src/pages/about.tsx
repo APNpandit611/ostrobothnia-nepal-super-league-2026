@@ -2,21 +2,7 @@ import { useGetActiveTournament } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, MapPin, Users, Clock, Trophy, Shield, Info, CheckCircle2 } from "lucide-react";
-
-function InfoCard({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-3 p-4 rounded-xl bg-muted/50 border">
-      <div className="p-2 rounded-lg bg-primary/10">
-        <Icon className="h-4 w-4 text-primary" />
-      </div>
-      <div>
-        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
-        <p className="font-semibold text-sm mt-0.5">{value}</p>
-      </div>
-    </div>
-  );
-}
+import { Trophy, Shield, Info, CheckCircle2 } from "lucide-react";
 
 export default function About() {
   const { data: tournament, isLoading, isError } = useGetActiveTournament();
@@ -69,14 +55,6 @@ export default function About() {
         {tournament.description && (
           <p className="text-muted-foreground leading-relaxed">{tournament.description}</p>
         )}
-      </div>
-
-      {/* Key info grid */}
-      <div className="grid grid-cols-2 gap-3">
-        <InfoCard icon={Calendar} label="Date" value={new Date(tournament.date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })} />
-        <InfoCard icon={Clock} label="Kick-off" value={tournament.kickoffTime ?? "TBC"} />
-        <InfoCard icon={MapPin} label="Venue" value={`${tournament.venue}${tournament.city ? `, ${tournament.city}` : ""}`} />
-        <InfoCard icon={Users} label="Format" value={`${tournament.format} · ${tournament.maxTeams ?? 5} teams`} />
       </div>
 
       {/* Rules */}

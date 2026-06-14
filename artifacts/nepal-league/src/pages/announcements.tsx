@@ -1,7 +1,7 @@
-import { useListPublishedAnnouncements } from "@workspace/api-client-react";
+import { useListPublishedAnnouncements, useGetActiveTournament } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Megaphone, CalendarDays } from "lucide-react";
+import { Megaphone, CalendarDays, Calendar, MapPin, Clock, Users } from "lucide-react";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 
@@ -13,19 +13,67 @@ const CATEGORY_COLORS: Record<string, string> = {
   Membership: "bg-purple-500/15 text-purple-400 border-purple-500/20",
 };
 
+function EventInfoCard({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-3 p-3 rounded-xl bg-muted/50 border">
+      <div className="p-1.5 rounded-lg bg-primary/10">
+        <Icon className="h-4 w-4 text-primary" />
+      </div>
+      <div>
+        <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">{label}</p>
+        <p className="font-semibold text-sm mt-0.5">{value}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function Announcements() {
   const { data: announcements, isLoading } = useListPublishedAnnouncements();
+  const { data: tournament } = useGetActiveTournament();
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
         <h1 className="text-xl font-black tracking-tight uppercase flex items-center gap-2">
-          <Megaphone className="h-6 w-6 text-primary" /> Announcements
+          <Megaphone className="h-6 w-6 text-primary" /> News & Events
         </h1>
         <p className="text-sm text-muted-foreground mt-0.5">
           Latest news and updates from Kokkola Soccer Boys
         </p>
       </div>
+
+      {/* Event info */}
+      {tournament && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground">Upcoming Event</h2>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <p className="font-bold text-base">{tournament.name}</p>
+          <div className="grid grid-cols-2 gap-2">
+            <EventInfoCard
+              icon={Calendar}
+              label="Date"
+              value={new Date(tournament.date + "T00:00:00").toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long", year: "numeric" })}
+            />
+            <EventInfoCard icon={Clock} label="Kick-off" value={tournament.kickoffTime ?? "TBC"} />
+            <EventInfoCard
+              icon={MapPin}
+              label="Venue"
+              value={`${tournament.venue}${tournament.city ? `, ${tournament.city}` : ""}`}
+            />
+            <EventInfoCard icon={Users} label="Format" value={`${tournament.format} · ${tournament.maxTeams ?? 5} teams`} />
+          </div>
+        </div>
+      )}
+
+      {/* Divider */}
+      {tournament && (
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground">Announcements</h2>
+          <div className="flex-1 h-px bg-border" />
+        </div>
+      )}
 
       {isLoading ? (
         <div className="flex justify-center py-16">
