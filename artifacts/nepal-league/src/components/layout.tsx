@@ -5,7 +5,7 @@ import {
   Settings, Menu, X, Sun, Moon, Home, UserPlus, Mail, Phone, MapPin,
   Facebook, Info, Megaphone, ChevronDown, Heart, Shield,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTheme } from "./theme-provider";
 
 interface NavChild {
@@ -177,6 +177,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const mainRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    mainRef.current?.scrollTo({ top: 0, behavior: "instant" });
+    setMobileMenuOpen(false);
+  }, [location]);
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row bg-background text-foreground">
@@ -253,7 +259,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto flex flex-col">
+      <main ref={mainRef} className="flex-1 overflow-y-auto flex flex-col">
         <div className="flex-1 container mx-auto p-4 md:p-8 max-w-5xl">
           {children}
         </div>
