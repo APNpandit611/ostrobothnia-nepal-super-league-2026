@@ -29,6 +29,8 @@ tags:
     description: Tournament info management
   - name: announcements
     description: Announcements management
+  - name: club-applications
+    description: KSB club membership applications
 
 paths:
   /healthz:
@@ -859,6 +861,91 @@ paths:
         "404":
           description: Not found
 
+  # ── Club applications ─────────────────────────────────────────────────
+  /club-applications:
+    post:
+      operationId: submitClubApplication
+      tags: [club-applications]
+      summary: Submit a KSB club membership application (public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClubApplicationInput"
+      responses:
+        "201":
+          description: Application submitted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClubApplication"
+        "400":
+          description: Missing required fields
+
+  /admin/club-applications:
+    get:
+      operationId: listClubApplications
+      tags: [club-applications]
+      summary: List all club applications (admin)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, accepted, rejected]
+      responses:
+        "200":
+          description: List of applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClubApplication"
+
+  /admin/club-applications/{id}:
+    patch:
+      operationId: updateClubApplication
+      tags: [club-applications]
+      summary: Accept or reject a club application (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClubApplicationUpdate"
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClubApplication"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteClubApplication
+      tags: [club-applications]
+      summary: Delete a club application (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
   # ── Tournament control ────────────────────────────────────────────────
   /tournament/reset:
     post:
@@ -1526,6 +1613,61 @@ components:
           type: string
         updatedAt:
           type: string
+
+    # ── Club Applications ───────────────────────────────────────────────
+    ClubApplication:
+      type: object
+      required: [id, name, email, status, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        dob:
+          type: ["string", "null"]
+        position:
+          type: ["string", "null"]
+        message:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [pending, accepted, rejected]
+        adminNote:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    ClubApplicationInput:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        dob:
+          type: string
+        position:
+          type: string
+        message:
+          type: string
+
+    ClubApplicationUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, accepted, rejected]
+        adminNote:
+          type: ["string", "null"]
 
     AnnouncementInput:
       type: object

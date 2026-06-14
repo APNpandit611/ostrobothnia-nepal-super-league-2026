@@ -847,6 +847,77 @@ export const ToggleAnnouncementPublishResponse = zod.object({
 
 
 /**
+ * @summary Submit a KSB club membership application (public)
+ */
+export const SubmitClubApplicationBody = zod.object({
+  "name": zod.string(),
+  "email": zod.string(),
+  "phone": zod.string().optional(),
+  "dob": zod.string().optional(),
+  "position": zod.string().optional(),
+  "message": zod.string().optional()
+})
+
+
+/**
+ * @summary List all club applications (admin)
+ */
+export const ListClubApplicationsQueryParams = zod.object({
+  "status": zod.enum(['pending', 'accepted', 'rejected']).optional()
+})
+
+export const ListClubApplicationsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "phone": zod.string().nullish(),
+  "dob": zod.string().nullish(),
+  "position": zod.string().nullish(),
+  "message": zod.string().nullish(),
+  "status": zod.enum(['pending', 'accepted', 'rejected']),
+  "adminNote": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListClubApplicationsResponse = zod.array(ListClubApplicationsResponseItem)
+
+
+/**
+ * @summary Accept or reject a club application (admin)
+ */
+export const UpdateClubApplicationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateClubApplicationBody = zod.object({
+  "status": zod.enum(['pending', 'accepted', 'rejected']).optional(),
+  "adminNote": zod.string().nullish()
+})
+
+export const UpdateClubApplicationResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "email": zod.string(),
+  "phone": zod.string().nullish(),
+  "dob": zod.string().nullish(),
+  "position": zod.string().nullish(),
+  "message": zod.string().nullish(),
+  "status": zod.enum(['pending', 'accepted', 'rejected']),
+  "adminNote": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Delete a club application (admin)
+ */
+export const DeleteClubApplicationParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
  * @summary Reset the entire tournament (admin only)
  */
 export const ResetTournamentBody = zod.object({

@@ -26,10 +26,14 @@ import type {
   AuthResponse,
   Card,
   CardInput,
+  ClubApplication,
+  ClubApplicationInput,
+  ClubApplicationUpdate,
   Goal,
   GoalInput,
   HealthStatus,
   ListAllAnnouncementsParams,
+  ListClubApplicationsParams,
   ListMatchesParams,
   LoginInput,
   Match,
@@ -3171,6 +3175,303 @@ export const useToggleAnnouncementPublish = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getToggleAnnouncementPublishMutationOptions(options));
+    }
+
+export const getSubmitClubApplicationUrl = () => {
+
+
+
+
+  return `/api/club-applications`
+}
+
+/**
+ * @summary Submit a KSB club membership application (public)
+ */
+export const submitClubApplication = async (clubApplicationInput: ClubApplicationInput, options?: RequestInit): Promise<ClubApplication> => {
+
+  return customFetch<ClubApplication>(getSubmitClubApplicationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      clubApplicationInput,)
+  }
+);}
+
+
+
+
+export const getSubmitClubApplicationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitClubApplication>>, TError,{data: BodyType<ClubApplicationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof submitClubApplication>>, TError,{data: BodyType<ClubApplicationInput>}, TContext> => {
+
+const mutationKey = ['submitClubApplication'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof submitClubApplication>>, {data: BodyType<ClubApplicationInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  submitClubApplication(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SubmitClubApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof submitClubApplication>>>
+    export type SubmitClubApplicationMutationBody = BodyType<ClubApplicationInput>
+    export type SubmitClubApplicationMutationError = ErrorType<void>
+
+    /**
+ * @summary Submit a KSB club membership application (public)
+ */
+export const useSubmitClubApplication = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof submitClubApplication>>, TError,{data: BodyType<ClubApplicationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof submitClubApplication>>,
+        TError,
+        {data: BodyType<ClubApplicationInput>},
+        TContext
+      > => {
+      return useMutation(getSubmitClubApplicationMutationOptions(options));
+    }
+
+export const getListClubApplicationsUrl = (params?: ListClubApplicationsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/admin/club-applications?${stringifiedParams}` : `/api/admin/club-applications`
+}
+
+/**
+ * @summary List all club applications (admin)
+ */
+export const listClubApplications = async (params?: ListClubApplicationsParams, options?: RequestInit): Promise<ClubApplication[]> => {
+
+  return customFetch<ClubApplication[]>(getListClubApplicationsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListClubApplicationsQueryKey = (params?: ListClubApplicationsParams,) => {
+    return [
+    `/api/admin/club-applications`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListClubApplicationsQueryOptions = <TData = Awaited<ReturnType<typeof listClubApplications>>, TError = ErrorType<unknown>>(params?: ListClubApplicationsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listClubApplications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListClubApplicationsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listClubApplications>>> = ({ signal }) => listClubApplications(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listClubApplications>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListClubApplicationsQueryResult = NonNullable<Awaited<ReturnType<typeof listClubApplications>>>
+export type ListClubApplicationsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all club applications (admin)
+ */
+
+export function useListClubApplications<TData = Awaited<ReturnType<typeof listClubApplications>>, TError = ErrorType<unknown>>(
+ params?: ListClubApplicationsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listClubApplications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListClubApplicationsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateClubApplicationUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/club-applications/${id}`
+}
+
+/**
+ * @summary Accept or reject a club application (admin)
+ */
+export const updateClubApplication = async (id: number,
+    clubApplicationUpdate: ClubApplicationUpdate, options?: RequestInit): Promise<ClubApplication> => {
+
+  return customFetch<ClubApplication>(getUpdateClubApplicationUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      clubApplicationUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateClubApplicationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateClubApplication>>, TError,{id: number;data: BodyType<ClubApplicationUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateClubApplication>>, TError,{id: number;data: BodyType<ClubApplicationUpdate>}, TContext> => {
+
+const mutationKey = ['updateClubApplication'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateClubApplication>>, {id: number;data: BodyType<ClubApplicationUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateClubApplication(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateClubApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof updateClubApplication>>>
+    export type UpdateClubApplicationMutationBody = BodyType<ClubApplicationUpdate>
+    export type UpdateClubApplicationMutationError = ErrorType<void>
+
+    /**
+ * @summary Accept or reject a club application (admin)
+ */
+export const useUpdateClubApplication = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateClubApplication>>, TError,{id: number;data: BodyType<ClubApplicationUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateClubApplication>>,
+        TError,
+        {id: number;data: BodyType<ClubApplicationUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateClubApplicationMutationOptions(options));
+    }
+
+export const getDeleteClubApplicationUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/club-applications/${id}`
+}
+
+/**
+ * @summary Delete a club application (admin)
+ */
+export const deleteClubApplication = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteClubApplicationUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteClubApplicationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteClubApplication>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteClubApplication>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteClubApplication'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteClubApplication>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteClubApplication(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteClubApplicationMutationResult = NonNullable<Awaited<ReturnType<typeof deleteClubApplication>>>
+
+    export type DeleteClubApplicationMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete a club application (admin)
+ */
+export const useDeleteClubApplication = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteClubApplication>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteClubApplication>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteClubApplicationMutationOptions(options));
     }
 
 export const getResetTournamentUrl = () => {

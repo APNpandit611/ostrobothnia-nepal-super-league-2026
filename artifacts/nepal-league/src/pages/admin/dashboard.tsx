@@ -25,7 +25,8 @@ import {
   Users,
   AlertTriangle,
   Home,
-  Lock
+  Lock,
+  Heart
 } from "lucide-react";
 import {
   Dialog,
@@ -164,6 +165,19 @@ export default function AdminDashboard() {
               <div>
                 <h3 className="font-bold">Standings</h3>
                 <p className="text-sm text-muted-foreground">View current leaderboard</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/admin/club-applications">
+          <Card className="hover:border-primary cursor-pointer transition-all hover:shadow-md">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 bg-primary/10 text-primary rounded-xl">
+                <Heart className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="font-bold">Club Applications</h3>
+                <p className="text-sm text-muted-foreground">Review membership requests</p>
               </div>
             </CardContent>
           </Card>

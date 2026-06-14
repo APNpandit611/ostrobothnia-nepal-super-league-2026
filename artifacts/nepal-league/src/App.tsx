@@ -24,6 +24,7 @@ import About from "./pages/about";
 import AdminTournament from "./pages/admin/tournament";
 import Announcements from "./pages/announcements";
 import AdminAnnouncements from "./pages/admin/announcements";
+import AdminClubApplications from "./pages/admin/club-applications";
 import Register from "./pages/register";
 import SquadPoster from "./pages/squad-poster";
 
@@ -89,6 +90,9 @@ function Router() {
       </Route>
       <Route path="/admin/announcements">
         <AuthGuard><Layout><AdminAnnouncements /></Layout></AuthGuard>
+      </Route>
+      <Route path="/admin/club-applications">
+        <AuthGuard><Layout><AdminClubApplications /></Layout></AuthGuard>
       </Route>
       
       <Route>

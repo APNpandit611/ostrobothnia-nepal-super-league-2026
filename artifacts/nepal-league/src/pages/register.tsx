@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useCreateTeam, useAddPlayer } from "@workspace/api-client-react";
+import { useCreateTeam, useAddPlayer, useSubmitClubApplication } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,8 +68,6 @@ async function verifyOtp(id: string, code: string): Promise<boolean> {
 function JoinKsbTab() {
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
-  const [sending, setSending] = useState(false);
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -77,17 +75,20 @@ function JoinKsbTab() {
   const [position, setPosition] = useState("");
   const [message, setMessage] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const submitMutation = useSubmitClubApplication({
+    mutation: {
+      onSuccess: () => setSubmitted(true),
+      onError: () => toast({ variant: "destructive", title: "Submission failed", description: "Please try again." }),
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim()) {
       toast({ variant: "destructive", title: "Name and email are required" });
       return;
     }
-    setSending(true);
-    // Simulate a brief async action (no backend endpoint yet — admin sees contact details)
-    await new Promise(r => setTimeout(r, 800));
-    setSending(false);
-    setSubmitted(true);
+    submitMutation.mutate({ data: { name: name.trim(), email: email.trim(), phone: phone || undefined, dob: dob || undefined, position: position || undefined, message: message || undefined } });
   };
 
   if (submitted) {
@@ -169,8 +170,8 @@ function JoinKsbTab() {
               />
             </div>
 
-            <Button type="submit" size="lg" className="w-full font-bold uppercase tracking-wider" disabled={sending || !name.trim() || !email.trim()}>
-              {sending ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Sending…</> : <><Heart className="h-4 w-4 mr-2" /> Submit Application</>}
+            <Button type="submit" size="lg" className="w-full font-bold uppercase tracking-wider" disabled={submitMutation.isPending || !name.trim() || !email.trim()}>
+              {submitMutation.isPending ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Sending…</> : <><Heart className="h-4 w-4 mr-2" /> Submit Application</>}
             </Button>
           </form>
         </CardContent>

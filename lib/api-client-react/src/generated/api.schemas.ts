@@ -547,6 +547,58 @@ export interface Announcement {
   updatedAt: string;
 }
 
+export type ClubApplicationStatus = typeof ClubApplicationStatus[keyof typeof ClubApplicationStatus];
+
+
+export const ClubApplicationStatus = {
+  pending: 'pending',
+  accepted: 'accepted',
+  rejected: 'rejected',
+} as const;
+
+export interface ClubApplication {
+  id: number;
+  name: string;
+  email: string;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  dob?: string | null;
+  /** @nullable */
+  position?: string | null;
+  /** @nullable */
+  message?: string | null;
+  status: ClubApplicationStatus;
+  /** @nullable */
+  adminNote?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ClubApplicationInput {
+  name: string;
+  email: string;
+  phone?: string;
+  dob?: string;
+  position?: string;
+  message?: string;
+}
+
+export type ClubApplicationUpdateStatus = typeof ClubApplicationUpdateStatus[keyof typeof ClubApplicationUpdateStatus];
+
+
+export const ClubApplicationUpdateStatus = {
+  pending: 'pending',
+  accepted: 'accepted',
+  rejected: 'rejected',
+} as const;
+
+export interface ClubApplicationUpdate {
+  status?: ClubApplicationUpdateStatus;
+  /** @nullable */
+  adminNote?: string | null;
+}
+
 export type AnnouncementInputCategory = typeof AnnouncementInputCategory[keyof typeof AnnouncementInputCategory];
 
 
@@ -618,6 +670,19 @@ export type ListAllAnnouncementsStatus = typeof ListAllAnnouncementsStatus[keyof
 export const ListAllAnnouncementsStatus = {
   draft: 'draft',
   published: 'published',
+} as const;
+
+export type ListClubApplicationsParams = {
+status?: ListClubApplicationsStatus;
+};
+
+export type ListClubApplicationsStatus = typeof ListClubApplicationsStatus[keyof typeof ListClubApplicationsStatus];
+
+
+export const ListClubApplicationsStatus = {
+  pending: 'pending',
+  accepted: 'accepted',
+  rejected: 'rejected',
 } as const;
 
 export type ResetTournamentBody = {

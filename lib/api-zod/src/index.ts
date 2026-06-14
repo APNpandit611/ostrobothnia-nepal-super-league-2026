@@ -1,5 +1,12 @@
 export * from "./generated/api";
 export type { ResetTournamentBody } from "./generated/types";
+export * from "./generated/types/clubApplication";
+export * from "./generated/types/clubApplicationInput";
+export * from "./generated/types/clubApplicationStatus";
+export * from "./generated/types/clubApplicationUpdate";
+export * from "./generated/types/clubApplicationUpdateStatus";
+export * from "./generated/types/listClubApplicationsParams";
+export * from "./generated/types/listClubApplicationsStatus";
 export * from "./generated/types/announcementCategory";
 export * from "./generated/types/announcementInputCategory";
 export * from "./generated/types/announcementInput";
