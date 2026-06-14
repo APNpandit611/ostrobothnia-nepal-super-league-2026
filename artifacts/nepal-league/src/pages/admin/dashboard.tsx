@@ -13,7 +13,7 @@ import {
 } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
@@ -403,9 +403,8 @@ export default function AdminDashboard() {
             <Label htmlFor="generate-password" className="flex items-center gap-2">
               <Lock className="h-4 w-4" /> Enter admin password to confirm
             </Label>
-            <Input
+            <PasswordInput
               id="generate-password"
-              type="password"
               placeholder="Admin password"
               value={generatePassword}
               onChange={(e) => { setGeneratePassword(e.target.value); setGeneratePasswordError(false); }}
@@ -447,9 +446,8 @@ export default function AdminDashboard() {
             <Label htmlFor="reset-password" className="flex items-center gap-2">
               <Lock className="h-4 w-4" /> Enter admin password to confirm
             </Label>
-            <Input
+            <PasswordInput
               id="reset-password"
-              type="password"
               placeholder="Admin password"
               value={resetPassword}
               onChange={(e) => { setResetPassword(e.target.value); setResetPasswordError(false); }}
