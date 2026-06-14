@@ -88,54 +88,74 @@ router.post("/matches/generate", async (req, res): Promise<void> => {
     return;
   }
 
-  // Delete existing matches and related data
-  await db.delete(matchEventsTable);
-  await db.delete(goalsTable);
-  await db.delete(cardsTable);
-  await db.delete(matchesTable);
+  // Generate a single round-robin from whatever teams are registered, using the
+  // circle method so it works for any team count (>= 2) and any names.
+  const TOURNAMENT_DATE = "2026-06-28";
+  const FIRST_KICKOFF = "10:15";
+  const SLOT_INTERVAL_MIN = 37; // gap between consecutive time slots
 
-  // Look up teams by short name for a deterministic schedule
-  const byShortName = new Map(teams.map(t => [t.shortName, t.id]));
-  const KSB = byShortName.get("KSB")!;
-  const JNK = byShortName.get("JNK")!;
-  const ONS = byShortName.get("ONS")!;
-  const SIS = byShortName.get("SIS")!;
-  const VNR = byShortName.get("VNR")!;
+  const addMinutes = (time: string, minutes: number): string => {
+    const [h, m] = time.split(":").map(Number);
+    const total = h * 60 + m + minutes;
+    const hh = Math.floor(total / 60) % 24;
+    const mm = total % 60;
+    return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  };
 
-  // Official ONSL 2026 schedule — Santahaka, Kokkola, 28 June 2026
-  // Time  | Field A (Pitch 1)  | Field B (Pitch 2)
-  // 10:15 | KSB vs JNK         | ONS vs SIS
-  // 10:52 | KSB vs ONS         | VNR vs JNK
-  // 11:29 | KSB vs VNR         | JNK vs SIS
-  // 12:06 | KSB vs SIS         | ONS vs VNR
-  // Lunch break 12:33–13:15
-  // 13:15 | JNK vs ONS         | SIS vs VNR
-  const tournamentDate = "2026-06-28";
-  const schedule = [
-    { matchNumber: 1,  homeTeamId: KSB, awayTeamId: JNK, time: "10:15", pitch: 1 },
-    { matchNumber: 2,  homeTeamId: ONS, awayTeamId: SIS, time: "10:15", pitch: 2 },
-    { matchNumber: 3,  homeTeamId: KSB, awayTeamId: ONS, time: "10:52", pitch: 1 },
-    { matchNumber: 4,  homeTeamId: VNR, awayTeamId: JNK, time: "10:52", pitch: 2 },
-    { matchNumber: 5,  homeTeamId: KSB, awayTeamId: VNR, time: "11:29", pitch: 1 },
-    { matchNumber: 6,  homeTeamId: JNK, awayTeamId: SIS, time: "11:29", pitch: 2 },
-    { matchNumber: 7,  homeTeamId: KSB, awayTeamId: SIS, time: "12:06", pitch: 1 },
-    { matchNumber: 8,  homeTeamId: ONS, awayTeamId: VNR, time: "12:06", pitch: 2 },
-    { matchNumber: 9,  homeTeamId: JNK, awayTeamId: ONS, time: "13:15", pitch: 1 },
-    { matchNumber: 10, homeTeamId: SIS, awayTeamId: VNR, time: "13:15", pitch: 2 },
-  ];
+  // Pad with a sentinel "bye" when the team count is odd.
+  const BYE = -1;
+  const ids: number[] = teams.map(t => t.id);
+  if (ids.length % 2 === 1) ids.push(BYE);
+  const slots = ids.length;
+  const roundsCount = slots - 1;
+  const half = slots / 2;
 
-  const inserts = schedule.map(s => ({
-    matchNumber: s.matchNumber,
-    homeTeamId: s.homeTeamId,
-    awayTeamId: s.awayTeamId,
-    scheduledTime: `${tournamentDate}T${s.time}:00`,
-    pitch: s.pitch,
-    homeScore: 0,
-    awayScore: 0,
-    status: "upcoming",
-  }));
+  let rotation = [...ids];
+  const inserts: Array<{
+    matchNumber: number;
+    homeTeamId: number;
+    awayTeamId: number;
+    scheduledTime: string;
+    pitch: number;
+    homeScore: number;
+    awayScore: number;
+    status: string;
+  }> = [];
+  let matchNumber = 1;
 
-  const created = await db.insert(matchesTable).values(inserts).returning();
+  for (let round = 0; round < roundsCount; round++) {
+    const time = addMinutes(FIRST_KICKOFF, round * SLOT_INTERVAL_MIN);
+    let pitch = 1;
+    for (let i = 0; i < half; i++) {
+      const a = rotation[i];
+      const b = rotation[slots - 1 - i];
+      if (a === BYE || b === BYE) continue;
+      // Alternate home/away by round so no team is always "home".
+      const [homeTeamId, awayTeamId] = round % 2 === 0 ? [a, b] : [b, a];
+      inserts.push({
+        matchNumber: matchNumber++,
+        homeTeamId,
+        awayTeamId,
+        scheduledTime: `${TOURNAMENT_DATE}T${time}:00`,
+        pitch: pitch++,
+        homeScore: 0,
+        awayScore: 0,
+        status: "upcoming",
+      });
+    }
+    // Rotate, keeping the first slot fixed (standard circle method).
+    rotation = [rotation[0], rotation[slots - 1], ...rotation.slice(1, slots - 1)];
+  }
+
+  // Replace fixtures atomically: clear old matches and related data, then insert
+  // the new schedule. If the insert fails, the deletes roll back too.
+  const created = await db.transaction(async (tx) => {
+    await tx.delete(matchEventsTable);
+    await tx.delete(goalsTable);
+    await tx.delete(cardsTable);
+    await tx.delete(matchesTable);
+    return tx.insert(matchesTable).values(inserts).returning();
+  });
 
   const teamsMap = new Map(teams.map(t => [t.id, t]));
   const enriched = created.map((m: typeof matchesTable.$inferSelect) => enrichMatch(m, teamsMap.get(m.homeTeamId), teamsMap.get(m.awayTeamId)));
