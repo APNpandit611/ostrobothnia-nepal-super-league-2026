@@ -136,6 +136,11 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
                       {p.number ?? "—"}
                     </span>
                     <span className="text-sm font-medium flex-1">{p.name}</span>
+                    {p.isCaptain && (
+                      <span className="text-[10px] font-black border rounded px-1.5 py-0.5 bg-yellow-500/20 text-yellow-500 border-yellow-500/40">
+                        C
+                      </span>
+                    )}
                     {p.position && (
                       <span className={`text-[10px] font-bold border rounded px-1.5 py-0.5 ${POSITION_COLORS[p.position] ?? "bg-muted text-muted-foreground"}`}>
                         {p.position}

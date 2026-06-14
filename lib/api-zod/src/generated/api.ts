@@ -148,6 +148,7 @@ export const ListPlayersResponseItem = zod.object({
   "position": zod.string().nullish(),
   "email": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "isCaptain": zod.boolean().optional(),
   "createdAt": zod.string()
 })
 export const ListPlayersResponse = zod.array(ListPlayersResponseItem)
@@ -193,6 +194,7 @@ export const UpdatePlayerResponse = zod.object({
   "position": zod.string().nullish(),
   "email": zod.string().nullish(),
   "phone": zod.string().nullish(),
+  "isCaptain": zod.boolean().optional(),
   "createdAt": zod.string()
 })
 

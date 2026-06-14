@@ -264,6 +264,7 @@ router.post("/register/team", async (req, res): Promise<void> => {
 const UpdateSquadBody = z.object({
   teamId: z.number().int().positive(),
   otpId: z.string().min(1),
+  captainIndex: z.number().int().min(0).optional().nullable(),
   players: z.array(z.object({
     name: z.string().min(1).max(100),
     number: z.union([z.number().int().min(1).max(99), z.null()]).optional(),
@@ -278,7 +279,7 @@ router.post("/register/update-squad", async (req, res): Promise<void> => {
     return;
   }
 
-  const { teamId, otpId, players } = parsed.data;
+  const { teamId, otpId, players, captainIndex } = parsed.data;
 
   // Verify OTP and that it was issued for this specific team
   const [otp] = await db
@@ -315,11 +316,12 @@ router.post("/register/update-squad", async (req, res): Promise<void> => {
   await db.delete(playersTable).where(eq(playersTable.teamId, teamId));
 
   await db.insert(playersTable).values(
-    players.map(p => ({
+    players.map((p, i) => ({
       teamId,
       name: p.name.trim(),
       number: p.number ?? null,
       position: p.position ?? null,
+      isCaptain: captainIndex != null ? i === captainIndex : false,
     }))
   );
 

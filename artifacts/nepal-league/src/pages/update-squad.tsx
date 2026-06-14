@@ -48,13 +48,14 @@ async function verifyOtp(id: string, code: string): Promise<boolean> {
   return data.verified === true;
 }
 
-async function submitSquadUpdate(teamId: number, otpId: string, players: PlayerRow[]): Promise<void> {
+async function submitSquadUpdate(teamId: number, otpId: string, players: PlayerRow[], captainIndex: number | null): Promise<void> {
   const res = await fetch("/api/register/update-squad", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       teamId,
       otpId,
+      captainIndex,
       players: players.map(p => ({
         name: p.name.trim(),
         number: p.number ? parseInt(p.number) : null,
@@ -114,6 +115,7 @@ export default function UpdateSquad() {
   const [shownCode, setShownCode] = useState<string | null>(null);
 
   const [rows, setRows] = useState<PlayerRow[]>(Array.from({ length: MIN_PLAYERS }, newRow));
+  const [captainIndex, setCaptainIndex] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -128,8 +130,11 @@ export default function UpdateSquad() {
           name: p.name,
           number: p.number?.toString() ?? "",
         })));
+        const capIdx = currentPlayers.findIndex(p => p.isCaptain);
+        setCaptainIndex(capIdx >= 0 ? capIdx : null);
       } else {
         setRows(Array.from({ length: MIN_PLAYERS }, newRow));
+        setCaptainIndex(null);
       }
     }
   }, [step, currentPlayers]);
@@ -178,9 +183,14 @@ export default function UpdateSquad() {
       toast({ variant: "destructive", title: `At least ${MIN_PLAYERS} players required`, description: `You have ${validRows.length}.` });
       return;
     }
+    // captainIndex refers to index within validRows — find it from the full rows array
+    const validIndexOf = (localId: string) => validRows.findIndex(r => r.localId === localId);
+    const captainValidIndex = captainIndex != null
+      ? validIndexOf(rows.filter(r => r.name.trim())[captainIndex]?.localId ?? "")
+      : null;
     setSubmitting(true);
     try {
-      await submitSquadUpdate(teamId, otpId, validRows);
+      await submitSquadUpdate(teamId, otpId, validRows, captainValidIndex !== -1 ? captainValidIndex : null);
       setSubmitted(true);
     } catch (err) {
       toast({ variant: "destructive", title: "Failed to save squad", description: err instanceof Error ? err.message : "Unknown error" });
@@ -394,36 +404,52 @@ export default function UpdateSquad() {
           ) : (
             <Card>
               <CardContent className="p-4 space-y-3">
-                <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-1">
+                <div className="grid grid-cols-[auto_1fr_auto_auto] gap-2 px-1">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground w-8 text-center">C</span>
                   <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Player Name</span>
                   <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground w-16 text-center">Jersey #</span>
                   <span />
                 </div>
 
-                {rows.map((row, i) => (
-                  <div key={row.localId} className="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
-                    <Input
-                      placeholder={`Player ${i + 1}`}
-                      value={row.name}
-                      onChange={e => updateRow(row.localId, "name", e.target.value)}
-                      className="h-9 text-sm"
-                    />
-                    <Input
-                      placeholder="—"
-                      value={row.number}
-                      onChange={e => updateRow(row.localId, "number", e.target.value.replace(/\D/g, ""))}
-                      className="h-9 text-sm text-center w-16"
-                      maxLength={2}
-                    />
-                    <button
-                      onClick={() => removeRow(row.localId)}
-                      disabled={rows.length <= 1}
-                      className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
+                {rows.map((row, i) => {
+                  const isCap = captainIndex === i;
+                  return (
+                    <div key={row.localId} className={`grid grid-cols-[auto_1fr_auto_auto] gap-2 items-center rounded-lg transition-colors ${isCap ? "bg-yellow-500/8" : ""}`}>
+                      <button
+                        type="button"
+                        title={isCap ? "Captain" : "Set as captain"}
+                        onClick={() => setCaptainIndex(isCap ? null : i)}
+                        className={`w-8 h-9 rounded-md flex items-center justify-center text-xs font-black border transition-colors flex-shrink-0 ${isCap ? "bg-yellow-500/20 text-yellow-500 border-yellow-500/50" : "text-muted-foreground border-border hover:text-yellow-500 hover:border-yellow-500/40"}`}
+                      >
+                        C
+                      </button>
+                      <Input
+                        placeholder={`Player ${i + 1}`}
+                        value={row.name}
+                        onChange={e => updateRow(row.localId, "name", e.target.value)}
+                        className="h-9 text-sm"
+                      />
+                      <Input
+                        placeholder="—"
+                        value={row.number}
+                        onChange={e => updateRow(row.localId, "number", e.target.value.replace(/\D/g, ""))}
+                        className="h-9 text-sm text-center w-16"
+                        maxLength={2}
+                      />
+                      <button
+                        onClick={() => {
+                          if (captainIndex === i) setCaptainIndex(null);
+                          else if (captainIndex != null && captainIndex > i) setCaptainIndex(captainIndex - 1);
+                          removeRow(row.localId);
+                        }}
+                        disabled={rows.length <= 1}
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  );
+                })}
 
                 <button
                   onClick={addRow}

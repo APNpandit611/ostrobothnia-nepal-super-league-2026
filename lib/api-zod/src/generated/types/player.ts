@@ -18,5 +18,6 @@ export interface Player {
   email?: string | null;
   /** @nullable */
   phone?: string | null;
+  isCaptain?: boolean;
   createdAt: string;
 }
