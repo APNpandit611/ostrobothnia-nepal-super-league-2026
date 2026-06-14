@@ -186,9 +186,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="font-black text-sm tracking-tight">KOKKOLA SOCCER BOYS</div>
           </div>
         </Link>
-        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-foreground">
-          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="text-muted-foreground hover:text-foreground transition-colors">
+            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </button>
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-foreground">
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
       </header>
 
       {/* Mobile Navigation */}
@@ -198,7 +203,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {NAV_ITEMS.map(item => (
               <MobileItem key={item.href} item={item} location={location} onClose={() => setMobileMenuOpen(false)} />
             ))}
-            <div className="mt-2 pt-2 border-t space-y-0.5">
+            <div className="mt-2 pt-2 border-t">
               <Link href="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
                 <div className={cn(
                   "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
@@ -208,12 +213,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   Admin
                 </div>
               </Link>
-              <button
-                onClick={() => { setTheme(theme === "dark" ? "light" : "dark"); }}
-                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              >
-                {theme === "dark" ? <><Sun className="h-5 w-5" /> Light Mode</> : <><Moon className="h-5 w-5" /> Dark Mode</>}
-              </button>
             </div>
           </nav>
         </div>
@@ -221,18 +220,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 flex-col border-r bg-card md:flex h-screen sticky top-0">
-        <Link href="/">
-          <div className="flex h-16 items-center gap-3 border-b px-4 cursor-pointer hover:bg-muted/50 transition-colors">
+        <div className="flex h-16 items-center border-b px-4">
+          <Link href="/" className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity">
             <img src="/ksb-logo.png" alt="Kokkola Soccer Boys" className="h-9 w-9 rounded-full object-contain flex-shrink-0" />
             <div className="font-black text-sm tracking-tight truncate">KOKKOLA SOCCER BOYS</div>
-          </div>
-        </Link>
+          </Link>
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="ml-2 flex-shrink-0 p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          </button>
+        </div>
         <nav className="flex-1 space-y-0.5 p-4 overflow-y-auto">
           {NAV_ITEMS.map(item => (
             <SidebarItem key={item.href} item={item} location={location} />
           ))}
         </nav>
-        <div className="border-t p-4 space-y-1">
+        <div className="border-t p-4">
           <Link href="/admin/dashboard">
             <div className={cn(
               "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer",
@@ -242,12 +247,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
               Admin
             </div>
           </Link>
-          <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted transition-colors text-left text-muted-foreground hover:text-foreground"
-          >
-            {theme === "dark" ? <><Sun className="h-4 w-4" /> Light Mode</> : <><Moon className="h-4 w-4" /> Dark Mode</>}
-          </button>
         </div>
       </aside>
 
