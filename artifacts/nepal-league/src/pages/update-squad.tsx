@@ -27,11 +27,11 @@ function newRow(): PlayerRow {
   return { localId: crypto.randomUUID(), name: "", number: "", position: "" };
 }
 
-async function sendOtp(contact: string): Promise<{ id: string; devCode?: string }> {
+async function sendOtp(contact: string, teamId: number): Promise<{ id: string; devCode?: string }> {
   const res = await fetch("/api/register/send-otp", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contact, type: "email" }),
+    body: JSON.stringify({ contact, type: "email", teamId }),
     credentials: "include",
   });
   if (!res.ok) throw new Error("Failed to send OTP");
@@ -142,7 +142,7 @@ export default function UpdateSquad() {
     if (!email.trim()) { toast({ variant: "destructive", title: "Email address is required" }); return; }
     setOtpSending(true);
     try {
-      const result = await sendOtp(email.trim());
+      const result = await sendOtp(email.trim(), teamId);
       setOtpId(result.id);
       setOtpSent(true);
       setOtpCode("");

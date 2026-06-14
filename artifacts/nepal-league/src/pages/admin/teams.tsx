@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  Loader2, Save, Users, UserPlus, Trash2, Pencil, X, Check, ShieldCheck,
+  Loader2, Save, Users, UserPlus, Trash2, Pencil, X, Check, ShieldCheck, AlertTriangle,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -211,6 +211,9 @@ export default function AdminTeams() {
     }
   }, [teams]);
 
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
   const updateMutation = useUpdateTeam({
     mutation: {
       onSuccess: () => {
@@ -220,6 +223,22 @@ export default function AdminTeams() {
       onError: () => toast({ variant: "destructive", title: "Failed to save" }),
     },
   });
+
+  const handleDeleteTeam = async (id: number) => {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/teams/${id}`, { method: "DELETE", credentials: "include" });
+      if (!res.ok) throw new Error("Failed to delete");
+      toast({ title: "Team deleted" });
+      queryClient.invalidateQueries({ queryKey: getListTeamsQueryKey() });
+      setSelectedId(null);
+      setConfirmDeleteId(null);
+    } catch {
+      toast({ variant: "destructive", title: "Failed to delete team" });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const handleSave = (id: number) => {
     const e = edits[id];
@@ -248,31 +267,55 @@ export default function AdminTeams() {
       <div className="flex gap-2 flex-wrap">
         {teams?.map((team) => {
           const isSelected = team.id === selectedId;
+          const isConfirming = confirmDeleteId === team.id;
           return (
-            <button
-              key={team.id}
-              onClick={() => setSelectedId(team.id)}
-              className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border-2 transition-all font-semibold text-sm"
-              style={{
-                borderColor: isSelected ? (edits[team.id]?.primaryColor || team.primaryColor) : "transparent",
-                backgroundColor: isSelected ? `${edits[team.id]?.primaryColor || team.primaryColor}18` : "hsl(var(--muted)/0.5)",
-                color: isSelected ? (edits[team.id]?.primaryColor || team.primaryColor) : undefined,
-              }}
-            >
-              {(edits[team.id]?.logoUrl || team.logoUrl) ? (
-                <img
-                  src={edits[team.id]?.logoUrl || team.logoUrl!}
-                  alt={team.shortName}
-                  className="h-6 w-6 rounded-full object-contain"
-                />
-              ) : (
-                <span
-                  className="h-6 w-6 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: edits[team.id]?.primaryColor || team.primaryColor }}
-                />
-              )}
-              <span>{edits[team.id]?.shortName || team.shortName}</span>
-            </button>
+            <div key={team.id} className="relative group">
+              <button
+                onClick={() => { setSelectedId(team.id); setConfirmDeleteId(null); }}
+                className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border-2 transition-all font-semibold text-sm pr-9"
+                style={{
+                  borderColor: isSelected ? (edits[team.id]?.primaryColor || team.primaryColor) : "transparent",
+                  backgroundColor: isSelected ? `${edits[team.id]?.primaryColor || team.primaryColor}18` : "hsl(var(--muted)/0.5)",
+                  color: isSelected ? (edits[team.id]?.primaryColor || team.primaryColor) : undefined,
+                }}
+              >
+                {(edits[team.id]?.logoUrl || team.logoUrl) ? (
+                  <img
+                    src={edits[team.id]?.logoUrl || team.logoUrl!}
+                    alt={team.shortName}
+                    className="h-6 w-6 rounded-full object-contain"
+                  />
+                ) : (
+                  <span
+                    className="h-6 w-6 rounded-full flex-shrink-0"
+                    style={{ backgroundColor: edits[team.id]?.primaryColor || team.primaryColor }}
+                  />
+                )}
+                <span>{edits[team.id]?.shortName || team.shortName}</span>
+              </button>
+              {/* Delete button */}
+              {isConfirming ? (
+                <div className="absolute -top-8 left-0 z-10 flex items-center gap-1 bg-destructive text-destructive-foreground text-xs rounded-lg px-2 py-1 shadow-lg whitespace-nowrap">
+                  <AlertTriangle className="h-3 w-3" />
+                  <span>Delete?</span>
+                  <button
+                    className="ml-1 font-bold underline hover:opacity-80"
+                    onClick={() => handleDeleteTeam(team.id)}
+                    disabled={deleting}
+                  >
+                    {deleting ? <Loader2 className="h-3 w-3 animate-spin inline" /> : "Yes"}
+                  </button>
+                  <button className="ml-1 hover:opacity-80" onClick={() => setConfirmDeleteId(null)}>✕</button>
+                </div>
+              ) : null}
+              <button
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-6 w-6 rounded-md flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(isConfirming ? null : team.id); }}
+                title="Delete team"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
           );
         })}
       </div>

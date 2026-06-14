@@ -62,4 +62,12 @@ router.patch("/teams/:id", async (req, res): Promise<void> => {
   res.json(team);
 });
 
+router.delete("/teams/:id", async (req, res): Promise<void> => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid team id" }); return; }
+  const [team] = await db.delete(teamsTable).where(eq(teamsTable.id, id)).returning();
+  if (!team) { res.status(404).json({ error: "Team not found" }); return; }
+  res.status(204).send();
+});
+
 export default router;

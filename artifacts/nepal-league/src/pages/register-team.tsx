@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useCreateTeam, useAddPlayer, useGetActiveTournament } from "@workspace/api-client-react";
+import { useGetActiveTournament } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -139,8 +139,6 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const createTeamMutation = useCreateTeam({ mutation: {} });
-  const addPlayerMutation = useAddPlayer({ mutation: {} });
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -208,42 +206,50 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
       toast({ variant: "destructive", title: `At least ${MIN_PLAYERS} players required`, description: `You have ${validRows.length}. Please fill in at least ${MIN_PLAYERS} names.` });
       return;
     }
+    if (!otpId) {
+      toast({ variant: "destructive", title: "Please verify your identity first" });
+      return;
+    }
     setSubmitting(true);
     const sn = shortName.trim() || autoShortName(teamName);
-    let teamId = createdTeamId;
-
-    if (!teamId) {
-      try {
-        await new Promise<void>((resolve, reject) => {
-          createTeamMutation.mutate(
-            { data: { name: teamName.trim(), shortName: sn, primaryColor, logoUrl: logoDataUrl ?? null, city: teamCity.trim() || null, category: category || null, managerName: managerName.trim() || null, managerPhone: managerPhone.trim() || null, managerEmail: managerEmail.trim() || null } },
-            { onSuccess: (team) => { teamId = team.id; setCreatedTeamId(team.id); setCreatedTeamName(team.name); resolve(); }, onError: () => reject() }
-          );
-        });
-      } catch {
-        toast({ variant: "destructive", title: "Failed to register team" });
-        setSubmitting(false);
-        return;
+    try {
+      const res = await fetch("/api/register/team", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          otpId,
+          name: teamName.trim(),
+          shortName: sn,
+          primaryColor,
+          logoUrl: logoDataUrl ?? null,
+          city: teamCity.trim() || null,
+          category: category || null,
+          managerName: managerName.trim() || null,
+          managerPhone: managerPhone.trim() || null,
+          managerEmail: managerEmail.trim() || null,
+          players: validRows.map(r => ({
+            name: r.name.trim(),
+            number: r.number ? parseInt(r.number) : null,
+            position: r.position || null,
+            email: r.email.trim() || null,
+            phone: r.phone.trim() || null,
+          })),
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error((data as { error?: string }).error ?? "Registration failed");
       }
+      const team = await res.json() as { id: number; name: string };
+      setCreatedTeamId(team.id);
+      setCreatedTeamName(team.name);
+      setSubmitted(true);
+    } catch (err) {
+      toast({ variant: "destructive", title: "Failed to register team", description: err instanceof Error ? err.message : "Unknown error" });
+    } finally {
+      setSubmitting(false);
     }
-
-    if (!teamId) { setSubmitting(false); return; }
-    const finalTeamId: number = teamId;
-    let failCount = 0;
-    for (const row of validRows) {
-      try {
-        await new Promise<void>((resolve, reject) => {
-          addPlayerMutation.mutate(
-            { teamId: finalTeamId, data: { name: row.name.trim(), number: row.number ? parseInt(row.number) : null, position: row.position || null, email: row.email.trim() || null, phone: row.phone.trim() || null } },
-            { onSuccess: () => resolve(), onError: () => reject() }
-          );
-        });
-      } catch { failCount++; }
-    }
-
-    setSubmitting(false);
-    if (failCount === 0) setSubmitted(true);
-    else toast({ variant: "destructive", title: `${failCount} player(s) failed` });
   };
 
   if (submitted) {
