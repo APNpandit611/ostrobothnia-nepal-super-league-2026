@@ -30,10 +30,10 @@ const NAV_ITEMS: NavItem[] = [
     icon: CalendarDays,
     children: [
       { href: "/fixtures", label: "All Fixtures", icon: CalendarDays },
-      { href: "/fixtures#live", label: "Live", icon: Activity },
-      { href: "/fixtures#standings", label: "Standings", icon: ListOrdered },
-      { href: "/fixtures#results", label: "Results", icon: ClipboardList },
-      { href: "/fixtures#stats", label: "Stats", icon: BarChart3 },
+      { href: "/live", label: "Live", icon: Activity },
+      { href: "/standings", label: "Standings", icon: ListOrdered },
+      { href: "/results", label: "Results", icon: ClipboardList },
+      { href: "/stats", label: "Stats", icon: BarChart3 },
       { href: "/teams", label: "Teams", icon: Users },
     ],
   },
@@ -51,7 +51,9 @@ const NAV_ITEMS: NavItem[] = [
 
 function isParentActive(item: NavItem, location: string): boolean {
   if (item.href === "/") return location === "/";
-  return location === item.href || location.startsWith(item.href + "/") || location.startsWith(item.href + "#");
+  if (location === item.href || location.startsWith(item.href + "/")) return true;
+  if (item.children) return item.children.some(c => location === c.href || location.startsWith(c.href + "/"));
+  return false;
 }
 
 // ─── Desktop sidebar nav item ─────────────────────────────────────────────────
@@ -98,8 +100,8 @@ function SidebarItem({ item, location }: { item: NavItem; location: string }) {
         <div className="ml-4 mt-0.5 space-y-0.5 border-l border-border pl-3">
           {item.children!.map(child => {
             const CIcon = child.icon;
-            const childActive = location + (typeof window !== "undefined" ? window.location.hash : "") === child.href
-              || (child.href === item.href && (location === item.href) && !window.location.hash);
+            const childActive = location === child.href
+              || (child.href === item.href && location === item.href);
             return (
               <Link key={child.href} href={child.href}>
                 <div className={cn(
