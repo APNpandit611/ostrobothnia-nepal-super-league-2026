@@ -1,4 +1,9 @@
-import { useListTeams, useListMatches, useGetStandings } from "@workspace/api-client-react";
+import {
+  useListTeams,
+  useListMatches,
+  useGetStandings,
+  useGetActiveTournament,
+} from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -6,26 +11,30 @@ import {
   Trophy, Facebook, Mail, Phone, UserPlus, Activity,
 } from "lucide-react";
 import { Link } from "wouter";
-import { differenceInDays, differenceInHours, differenceInMinutes } from "date-fns";
+import { differenceInDays, differenceInHours, differenceInMinutes, format } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
 
-const TOURNAMENT_DATE = new Date(2026, 5, 28, 10, 0, 0); // June 28 2026, 10:00
 const APP_URL = "http://kokkolasoccerboys.cc/";
 
-function Countdown() {
-  const now = new Date();
-  const totalDays = differenceInDays(TOURNAMENT_DATE, now);
-  const totalHours = differenceInHours(TOURNAMENT_DATE, now) % 24;
-  const totalMinutes = differenceInMinutes(TOURNAMENT_DATE, now) % 60;
+function parseTournamentDate(date: string, kickoffTime: string | null | undefined): Date {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, min] = (kickoffTime ?? "10:00").split(":").map(Number);
+  return new Date(year, month - 1, day, hour, min, 0);
+}
 
-  if (TOURNAMENT_DATE <= now) return null;
+function Countdown({ target }: { target: Date }) {
+  const now = new Date();
+  if (target <= now) return null;
+  const days = differenceInDays(target, now);
+  const hours = differenceInHours(target, now) % 24;
+  const minutes = differenceInMinutes(target, now) % 60;
 
   return (
     <div className="flex flex-wrap justify-center gap-4 md:gap-6">
       {[
-        { value: totalDays, label: "Days" },
-        { value: totalHours, label: "Hours" },
-        { value: totalMinutes, label: "Minutes" },
+        { value: days, label: "Days" },
+        { value: hours, label: "Hours" },
+        { value: minutes, label: "Minutes" },
       ].map(({ value, label }) => (
         <div key={label} className="flex flex-col items-center">
           <div className="bg-primary text-primary-foreground font-black text-3xl md:text-5xl w-20 md:w-28 h-20 md:h-28 rounded-2xl flex items-center justify-center shadow-lg shadow-primary/30 tabular-nums">
@@ -42,12 +51,29 @@ export default function Home() {
   const { data: allTeams } = useListTeams();
   const { data: standings } = useGetStandings();
   const { data: liveMatches } = useListMatches({ status: "live" });
+  const { data: tournament } = useGetActiveTournament();
 
-  // Only show teams that have registered players (cross-reference with standings)
   const registeredIds = new Set((standings ?? []).map((s) => s.teamId));
   const registeredTeams = (allTeams ?? []).filter((t) => registeredIds.has(t.id));
-  const now = new Date();
-  const tournamentStarted = TOURNAMENT_DATE <= now;
+
+  const tournamentDate = tournament
+    ? parseTournamentDate(tournament.date, tournament.kickoffTime)
+    : new Date(2026, 5, 28, 10, 0, 0);
+  const tournamentStarted = tournamentDate <= new Date();
+
+  const displayDate = tournament
+    ? format(parseTournamentDate(tournament.date, null), "d MMMM yyyy")
+    : "28 June 2026";
+  const displayVenue = tournament
+    ? [tournament.venue, tournament.city].filter(Boolean).join(", ")
+    : "Santahaka Tekonurmikenttä, Kokkola";
+  const displayName = tournament?.name ?? "Ostrobothnia Nepal Super League 2026";
+  const displayShortName = tournament?.shortName ?? "ONSL 2026";
+  const displayKickoff = tournament?.kickoffTime ?? "10:00";
+  const displayFormat = tournament?.format ?? "7-a-side";
+  const displayMaxTeams = tournament?.maxTeams ?? 5;
+  const displayDescription = tournament?.description ??
+    `The ${displayName} is a one-day ${displayMaxTeams}-team football tournament bringing together Nepali football clubs from across Ostrobothnia, Finland. Hosted and organised by Kokkola Soccer Boys at ${tournament?.venue ?? "Santahaka Tekonurmikenttä"}, ${tournament?.city ?? "Kokkola"} on ${displayDate}.`;
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -73,7 +99,6 @@ export default function Home() {
       {/* Hero */}
       <div className="relative overflow-hidden rounded-2xl border bg-card shadow-sm">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-primary/5 pointer-events-none" />
-        {/* decorative circles */}
         <div className="absolute -top-16 -right-16 h-64 w-64 rounded-full bg-primary/5 pointer-events-none" />
         <div className="absolute -bottom-12 -left-12 h-48 w-48 rounded-full bg-primary/5 pointer-events-none" />
 
@@ -108,7 +133,7 @@ export default function Home() {
           {/* League name */}
           <div className="bg-primary/10 border border-primary/20 rounded-2xl px-6 py-4 max-w-xl">
             <h2 className="text-2xl md:text-3xl font-black uppercase italic tracking-tight text-primary leading-tight">
-              Ostrobothnia Nepal Super League 2026
+              {displayName}
             </h2>
           </div>
 
@@ -116,15 +141,15 @@ export default function Home() {
           <div className="flex flex-wrap justify-center gap-3 text-sm font-medium text-muted-foreground">
             <span className="flex items-center gap-2 bg-background border px-3 py-1.5 rounded-full">
               <CalendarDays className="h-4 w-4 text-primary" />
-              28 June 2026
+              {displayDate}
             </span>
             <span className="flex items-center gap-2 bg-background border px-3 py-1.5 rounded-full">
               <MapPin className="h-4 w-4 text-primary" />
-              Santahaka Tekonurmikenttä, Kokkola
+              {displayVenue}
             </span>
             <span className="flex items-center gap-2 bg-background border px-3 py-1.5 rounded-full">
               <Users className="h-4 w-4 text-primary" />
-              {registeredTeams.length}/5 Teams · Round-Robin
+              {registeredTeams.length}/{displayMaxTeams} Teams · Round-Robin
             </span>
           </div>
 
@@ -134,7 +159,7 @@ export default function Home() {
               <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground flex items-center justify-center gap-2">
                 <Clock className="h-4 w-4" /> Tournament starts in
               </p>
-              <Countdown />
+              <Countdown target={tournamentDate} />
               <Link href="/register">
                 <div className="inline-flex items-center gap-2 bg-primary text-primary-foreground font-bold px-8 py-3 rounded-xl hover:bg-primary/90 transition-colors cursor-pointer text-sm shadow-lg shadow-primary/30">
                   <UserPlus className="h-4 w-4" />
@@ -156,13 +181,13 @@ export default function Home() {
               About the Tournament
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              The <span className="text-foreground font-semibold">Ostrobothnia Nepal Super League 2026</span> is a one-day 5-team football tournament bringing together Nepali football clubs from across Ostrobothnia, Finland. Hosted and organised by Kokkola Soccer Boys at Santahaka Tekonurmikenttä, Kokkola on 28 June 2026.
+              {displayDescription}
             </p>
             <ul className="text-sm space-y-1.5 text-muted-foreground">
               {[
-                "Round-robin format — every team plays each other",
-                "7-a-side football",
-                "Kick-off at 10:00 · Finals in the afternoon",
+                `Round-robin format — every team plays each other`,
+                `${displayFormat} football`,
+                `Kick-off at ${displayKickoff} · Finals in the afternoon`,
                 "Live scores & stats on this app",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2">
@@ -186,12 +211,12 @@ export default function Home() {
               Venue
             </div>
             <div>
-              <p className="font-bold text-lg">Santahaka Tekonurmikenttä</p>
-              <p className="text-sm text-muted-foreground">Kokkola, Finland</p>
+              <p className="font-bold text-lg">{tournament?.venue ?? "Santahaka Tekonurmikenttä"}</p>
+              <p className="text-sm text-muted-foreground">{tournament?.city ?? "Kokkola, Finland"}</p>
             </div>
             <div className="rounded-xl overflow-hidden border h-40 bg-muted flex items-center justify-center">
               <a
-                href="https://maps.google.com/?q=Santahaka+Tekonurmikenttä+Kokkola+Finland"
+                href={`https://maps.google.com/?q=${encodeURIComponent(`${tournament?.venue ?? "Santahaka Tekonurmikenttä"} ${tournament?.city ?? "Kokkola Finland"}`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-col items-center gap-2 text-muted-foreground hover:text-primary transition-colors text-sm font-medium"
@@ -201,7 +226,7 @@ export default function Home() {
               </a>
             </div>
             <p className="text-xs text-muted-foreground">
-              Free entry · All matches on 28 June 2026
+              Free entry · All matches on {displayDate}
             </p>
           </CardContent>
         </Card>
@@ -296,7 +321,7 @@ export default function Home() {
               <UserPlus className="h-5 w-5" />
               Register Your Team
             </div>
-            <h3 className="text-xl md:text-2xl font-black">Is your club joining ONSL 2026?</h3>
+            <h3 className="text-xl md:text-2xl font-black">Is your club joining {displayShortName}?</h3>
             <p className="text-muted-foreground text-sm">
               Register your team and squad before the tournament. You'll need a team manager email for OTP verification and at least 7 players.
             </p>
