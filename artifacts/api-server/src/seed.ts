@@ -51,7 +51,7 @@ const CLUB_SETTINGS = {
   logoUrl: "/ksb-logo.png",
   primaryColor: "#16a34a",
   city: "Kokkola, Finland",
-  email: "info@kokkolasoccerboys.cc",
+  email: "ksoccerboys@gmail.com",
   phone: "+358 413 174 494",
   website: "https://kokkolasoccerboys.cc",
 };
