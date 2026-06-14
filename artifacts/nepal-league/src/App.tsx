@@ -20,6 +20,8 @@ import AdminDashboard from "./pages/admin/dashboard";
 import AdminMatches from "./pages/admin/matches";
 import AdminMatchDetail from "./pages/admin/match";
 import AdminTeams from "./pages/admin/teams";
+import About from "./pages/about";
+import AdminTournament from "./pages/admin/tournament";
 import Register from "./pages/register";
 import SquadPoster from "./pages/squad-poster";
 
@@ -49,7 +51,10 @@ function Router() {
       <Route path="/stats">
         <Layout><Stats /></Layout>
       </Route>
-      
+      <Route path="/about">
+        <Layout><About /></Layout>
+      </Route>
+
       <Route path="/teams/:id">
         <SquadPoster />
       </Route>
@@ -73,6 +78,9 @@ function Router() {
       </Route>
       <Route path="/admin/teams">
         <AuthGuard><Layout><AdminTeams /></Layout></AuthGuard>
+      </Route>
+      <Route path="/admin/tournament">
+        <AuthGuard><Layout><AdminTournament /></Layout></AuthGuard>
       </Route>
       
       <Route>

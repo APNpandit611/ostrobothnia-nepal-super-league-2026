@@ -25,6 +25,8 @@ tags:
     description: Tournament statistics
   - name: auth
     description: Admin authentication
+  - name: tournament
+    description: Tournament info management
 
 paths:
   /healthz:
@@ -635,6 +637,94 @@ paths:
                 items:
                   $ref: "#/components/schemas/TopScorer"
 
+  # ── Tournament Info CRUD ──────────────────────────────────────────────
+  /tournaments:
+    get:
+      operationId: listTournaments
+      tags: [tournament]
+      summary: List all tournaments
+      responses:
+        "200":
+          description: Tournament list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TournamentInfo"
+    post:
+      operationId: createTournamentInfo
+      tags: [tournament]
+      summary: Create a tournament (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TournamentInfoInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentInfo"
+
+  /tournaments/active:
+    get:
+      operationId: getActiveTournament
+      tags: [tournament]
+      summary: Get the currently active tournament
+      responses:
+        "200":
+          description: Active tournament
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentInfo"
+        "404":
+          description: No tournament found
+
+  /tournaments/{id}:
+    patch:
+      operationId: updateTournamentInfo
+      tags: [tournament]
+      summary: Update a tournament (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TournamentInfoUpdate"
+      responses:
+        "200":
+          description: Updated tournament
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TournamentInfo"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteTournamentInfo
+      tags: [tournament]
+      summary: Delete a tournament (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
   # ── Tournament control ────────────────────────────────────────────────
   /tournament/reset:
     post:
@@ -1146,3 +1236,115 @@ components:
               type: string
             wins:
               type: integer
+
+    # ── Tournament Info ────────────────────────────────────────────────
+    TournamentInfo:
+      type: object
+      required: [id, name, date, venue, format, status]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        shortName:
+          type: ["string", "null"]
+        date:
+          type: string
+        venue:
+          type: string
+        city:
+          type: ["string", "null"]
+        format:
+          type: string
+        maxTeams:
+          type: ["integer", "null"]
+        kickoffTime:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        rules:
+          type: ["array", "null"]
+          items:
+            type: string
+        prizes:
+          type: ["array", "null"]
+          items:
+            type: string
+        status:
+          type: string
+          enum: [upcoming, active, completed]
+        isActive:
+          type: ["boolean", "null"]
+        createdAt:
+          type: string
+
+    TournamentInfoInput:
+      type: object
+      required: [name, date, venue]
+      properties:
+        name:
+          type: string
+        shortName:
+          type: ["string", "null"]
+        date:
+          type: string
+        venue:
+          type: string
+        city:
+          type: ["string", "null"]
+        format:
+          type: string
+        maxTeams:
+          type: ["integer", "null"]
+        kickoffTime:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        rules:
+          type: ["array", "null"]
+          items:
+            type: string
+        prizes:
+          type: ["array", "null"]
+          items:
+            type: string
+        status:
+          type: string
+          enum: [upcoming, active, completed]
+        isActive:
+          type: ["boolean", "null"]
+
+    TournamentInfoUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        shortName:
+          type: ["string", "null"]
+        date:
+          type: string
+        venue:
+          type: string
+        city:
+          type: ["string", "null"]
+        format:
+          type: string
+        maxTeams:
+          type: ["integer", "null"]
+        kickoffTime:
+          type: ["string", "null"]
+        description:
+          type: ["string", "null"]
+        rules:
+          type: ["array", "null"]
+          items:
+            type: string
+        prizes:
+          type: ["array", "null"]
+          items:
+            type: string
+        status:
+          type: string
+          enum: [upcoming, active, completed]
+        isActive:
+          type: ["boolean", "null"]

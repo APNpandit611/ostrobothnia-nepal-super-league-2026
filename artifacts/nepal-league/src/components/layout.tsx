@@ -1,11 +1,12 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3, Settings, Menu, X, Sun, Moon, Home, UserPlus, Mail, Phone, MapPin, Facebook } from "lucide-react";
+import { CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3, Settings, Menu, X, Sun, Moon, Home, UserPlus, Mail, Phone, MapPin, Facebook, Info } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "./theme-provider";
 
 const NAV_ITEMS = [
   { href: "/", label: "Home", icon: Home },
+  { href: "/about", label: "About", icon: Info },
   { href: "/fixtures", label: "Fixtures", icon: CalendarDays },
   { href: "/live", label: "Live", icon: Activity },
   { href: "/standings", label: "Standings", icon: ListOrdered },
@@ -27,7 +28,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-card px-4 md:hidden">
         <Link href="/">
           <div className="flex items-center gap-2 cursor-pointer">
-            <img src="/onsl-official-logo.png" alt="Kokkola Soccer Boys" className="h-8 w-8 rounded-full object-contain flex-shrink-0" />
+            <img src="/ksb-logo.jpg" alt="Kokkola Soccer Boys" className="h-8 w-8 rounded-full object-contain flex-shrink-0" />
             <div className="font-black text-sm tracking-tight">KOKKOLA SOCCER BOYS</div>
           </div>
         </Link>
@@ -79,7 +80,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <aside className="hidden w-64 flex-col border-r bg-card md:flex h-screen sticky top-0">
         <Link href="/">
           <div className="flex h-16 items-center gap-3 border-b px-4 cursor-pointer hover:bg-muted/50 transition-colors">
-            <img src="/onsl-official-logo.png" alt="Kokkola Soccer Boys" className="h-9 w-9 rounded-full object-contain flex-shrink-0" />
+            <img src="/ksb-logo.jpg" alt="Kokkola Soccer Boys" className="h-9 w-9 rounded-full object-contain flex-shrink-0" />
             <div className="font-black text-sm tracking-tight truncate">KOKKOLA SOCCER BOYS</div>
           </div>
         </Link>
@@ -134,7 +135,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <div className="container mx-auto max-w-5xl px-4 py-6">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <img src="/onsl-official-logo.png" alt="Kokkola Soccer Boys" className="h-10 w-10 rounded-full object-contain flex-shrink-0" />
+                <img src="/ksb-logo.jpg" alt="Kokkola Soccer Boys" className="h-10 w-10 rounded-full object-contain flex-shrink-0" />
                 <div>
                   <div className="font-black text-sm tracking-tight">KOKKOLA SOCCER BOYS</div>
                 </div>

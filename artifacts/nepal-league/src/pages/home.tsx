@@ -171,6 +171,11 @@ export default function Home() {
                 </li>
               ))}
             </ul>
+            <Link href="/about">
+              <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline cursor-pointer">
+                Full rules & tournament info <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </Link>
           </CardContent>
         </Card>
 

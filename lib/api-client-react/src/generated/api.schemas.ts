@@ -413,6 +413,107 @@ export interface TournamentStats {
   mostWinsTeam?: TournamentStatsMostWinsTeam;
 }
 
+export type TournamentInfoStatus = typeof TournamentInfoStatus[keyof typeof TournamentInfoStatus];
+
+
+export const TournamentInfoStatus = {
+  upcoming: 'upcoming',
+  active: 'active',
+  completed: 'completed',
+} as const;
+
+export interface TournamentInfo {
+  id: number;
+  name: string;
+  /** @nullable */
+  shortName?: string | null;
+  date: string;
+  venue: string;
+  /** @nullable */
+  city?: string | null;
+  format: string;
+  /** @nullable */
+  maxTeams?: number | null;
+  /** @nullable */
+  kickoffTime?: string | null;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  rules?: string[] | null;
+  /** @nullable */
+  prizes?: string[] | null;
+  status: TournamentInfoStatus;
+  /** @nullable */
+  isActive?: boolean | null;
+  createdAt?: string;
+}
+
+export type TournamentInfoInputStatus = typeof TournamentInfoInputStatus[keyof typeof TournamentInfoInputStatus];
+
+
+export const TournamentInfoInputStatus = {
+  upcoming: 'upcoming',
+  active: 'active',
+  completed: 'completed',
+} as const;
+
+export interface TournamentInfoInput {
+  name: string;
+  /** @nullable */
+  shortName?: string | null;
+  date: string;
+  venue: string;
+  /** @nullable */
+  city?: string | null;
+  format?: string;
+  /** @nullable */
+  maxTeams?: number | null;
+  /** @nullable */
+  kickoffTime?: string | null;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  rules?: string[] | null;
+  /** @nullable */
+  prizes?: string[] | null;
+  status?: TournamentInfoInputStatus;
+  /** @nullable */
+  isActive?: boolean | null;
+}
+
+export type TournamentInfoUpdateStatus = typeof TournamentInfoUpdateStatus[keyof typeof TournamentInfoUpdateStatus];
+
+
+export const TournamentInfoUpdateStatus = {
+  upcoming: 'upcoming',
+  active: 'active',
+  completed: 'completed',
+} as const;
+
+export interface TournamentInfoUpdate {
+  name?: string;
+  /** @nullable */
+  shortName?: string | null;
+  date?: string;
+  venue?: string;
+  /** @nullable */
+  city?: string | null;
+  format?: string;
+  /** @nullable */
+  maxTeams?: number | null;
+  /** @nullable */
+  kickoffTime?: string | null;
+  /** @nullable */
+  description?: string | null;
+  /** @nullable */
+  rules?: string[] | null;
+  /** @nullable */
+  prizes?: string[] | null;
+  status?: TournamentInfoUpdateStatus;
+  /** @nullable */
+  isActive?: boolean | null;
+}
+
 export type ListMatchesParams = {
 status?: ListMatchesStatus;
 };

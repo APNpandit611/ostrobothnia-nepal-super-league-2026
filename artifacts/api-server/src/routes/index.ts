@@ -9,6 +9,7 @@ import matchEventsRouter from "./matchEvents";
 import standingsRouter from "./standings";
 import statsRouter from "./stats";
 import tournamentRouter from "./tournament";
+import tournamentInfoRouter from "./tournamentInfo";
 import playersRouter from "./players";
 import otpRouter from "./otp";
 
@@ -24,6 +25,7 @@ router.use(matchEventsRouter);
 router.use(standingsRouter);
 router.use(statsRouter);
 router.use(tournamentRouter);
+router.use(tournamentInfoRouter);
 router.use(playersRouter);
 router.use(otpRouter);
 

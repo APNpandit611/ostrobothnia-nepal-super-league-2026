@@ -614,6 +614,121 @@ export const GetTopScorersResponse = zod.array(GetTopScorersResponseItem)
 
 
 /**
+ * @summary List all tournaments
+ */
+export const ListTournamentsResponseItem = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "shortName": zod.string().nullish(),
+  "date": zod.string(),
+  "venue": zod.string(),
+  "city": zod.string().nullish(),
+  "format": zod.string(),
+  "maxTeams": zod.number().nullish(),
+  "kickoffTime": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "rules": zod.array(zod.string()).nullish(),
+  "prizes": zod.array(zod.string()).nullish(),
+  "status": zod.enum(['upcoming', 'active', 'completed']),
+  "isActive": zod.boolean().nullish(),
+  "createdAt": zod.string().optional()
+})
+export const ListTournamentsResponse = zod.array(ListTournamentsResponseItem)
+
+
+/**
+ * @summary Create a tournament (admin)
+ */
+export const CreateTournamentInfoBody = zod.object({
+  "name": zod.string(),
+  "shortName": zod.string().nullish(),
+  "date": zod.string(),
+  "venue": zod.string(),
+  "city": zod.string().nullish(),
+  "format": zod.string().optional(),
+  "maxTeams": zod.number().nullish(),
+  "kickoffTime": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "rules": zod.array(zod.string()).nullish(),
+  "prizes": zod.array(zod.string()).nullish(),
+  "status": zod.enum(['upcoming', 'active', 'completed']).optional(),
+  "isActive": zod.boolean().nullish()
+})
+
+
+/**
+ * @summary Get the currently active tournament
+ */
+export const GetActiveTournamentResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "shortName": zod.string().nullish(),
+  "date": zod.string(),
+  "venue": zod.string(),
+  "city": zod.string().nullish(),
+  "format": zod.string(),
+  "maxTeams": zod.number().nullish(),
+  "kickoffTime": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "rules": zod.array(zod.string()).nullish(),
+  "prizes": zod.array(zod.string()).nullish(),
+  "status": zod.enum(['upcoming', 'active', 'completed']),
+  "isActive": zod.boolean().nullish(),
+  "createdAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Update a tournament (admin)
+ */
+export const UpdateTournamentInfoParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateTournamentInfoBody = zod.object({
+  "name": zod.string().optional(),
+  "shortName": zod.string().nullish(),
+  "date": zod.string().optional(),
+  "venue": zod.string().optional(),
+  "city": zod.string().nullish(),
+  "format": zod.string().optional(),
+  "maxTeams": zod.number().nullish(),
+  "kickoffTime": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "rules": zod.array(zod.string()).nullish(),
+  "prizes": zod.array(zod.string()).nullish(),
+  "status": zod.enum(['upcoming', 'active', 'completed']).optional(),
+  "isActive": zod.boolean().nullish()
+})
+
+export const UpdateTournamentInfoResponse = zod.object({
+  "id": zod.number(),
+  "name": zod.string(),
+  "shortName": zod.string().nullish(),
+  "date": zod.string(),
+  "venue": zod.string(),
+  "city": zod.string().nullish(),
+  "format": zod.string(),
+  "maxTeams": zod.number().nullish(),
+  "kickoffTime": zod.string().nullish(),
+  "description": zod.string().nullish(),
+  "rules": zod.array(zod.string()).nullish(),
+  "prizes": zod.array(zod.string()).nullish(),
+  "status": zod.enum(['upcoming', 'active', 'completed']),
+  "isActive": zod.boolean().nullish(),
+  "createdAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Delete a tournament (admin)
+ */
+export const DeleteTournamentInfoParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
  * @summary Reset the entire tournament (admin only)
  */
 export const ResetTournamentResponse = zod.object({
