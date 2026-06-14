@@ -44,7 +44,7 @@ const NAV_ITEMS: NavItem[] = [
     icon: UserPlus,
     children: [
       { href: "/register", label: "Join KSB Club", icon: Heart },
-      { href: "/register?tab=team", label: "Register Team", icon: Shield },
+      { href: "/register/team", label: "Register Team", icon: Shield },
     ],
   },
 ];
