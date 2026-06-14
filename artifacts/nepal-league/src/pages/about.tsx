@@ -41,8 +41,8 @@ export default function About() {
       {/* Hero */}
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
         <img
-          src="/onsl-logo.jpeg"
-          alt="ONSL 2026"
+          src="/ksb-logo.png"
+          alt="Kokkola Soccer Boys"
           className="w-28 h-28 rounded-2xl object-contain bg-muted border p-2 flex-shrink-0"
         />
         <div className="text-center sm:text-left space-y-2">

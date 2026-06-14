@@ -337,7 +337,7 @@ export default function Home() {
               fgColor="#111827"
               level="M"
               imageSettings={{
-                src: "/onsl-logo.jpeg",
+                src: "/ksb-logo.png",
                 x: undefined,
                 y: undefined,
                 height: 28,
