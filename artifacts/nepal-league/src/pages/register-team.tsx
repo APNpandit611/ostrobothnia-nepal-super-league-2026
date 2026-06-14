@@ -9,10 +9,10 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, UserPlus, Trash2, CheckCircle2, ClipboardList,
   Shield, ChevronRight, Upload, X, Mail, KeyRound, RefreshCw,
-  CalendarX, Lock,
+  CalendarX, Lock, CalendarDays, MapPin, Users, Swords,
 } from "lucide-react";
 import { Link } from "wouter";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 
 const POSITIONS = ["GK", "C", "V.C", "Player", "Manager"];
 const MIN_PLAYERS = 7;
@@ -98,8 +98,18 @@ function RegistrationClosed({ reason }: { reason: "no-tournament" | "past" }) {
   );
 }
 
+interface RegistrationFormProps {
+  tournamentName: string;
+  tournamentDate: string;
+  venue: string;
+  city: string | null | undefined;
+  format_: string;
+  maxTeams: number | null | undefined;
+  kickoffTime: string | null | undefined;
+}
+
 // ─── Main registration form ───────────────────────────────────────────────────
-function RegistrationForm({ tournamentName, tournamentDate }: { tournamentName: string; tournamentDate: string }) {
+function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_, maxTeams, kickoffTime }: RegistrationFormProps) {
   const { toast } = useToast();
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -107,7 +117,7 @@ function RegistrationForm({ tournamentName, tournamentDate }: { tournamentName: 
 
   const [teamName, setTeamName] = useState("");
   const [shortName, setShortName] = useState("");
-  const [city, setCity] = useState("");
+  const [teamCity, setTeamCity] = useState("");
   const [category, setCategory] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#16a34a");
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
@@ -206,7 +216,7 @@ function RegistrationForm({ tournamentName, tournamentDate }: { tournamentName: 
       try {
         await new Promise<void>((resolve, reject) => {
           createTeamMutation.mutate(
-            { data: { name: teamName.trim(), shortName: sn, primaryColor, logoUrl: logoDataUrl ?? null, city: city.trim() || null, category: category || null, managerName: managerName.trim() || null, managerPhone: managerPhone.trim() || null, managerEmail: managerEmail.trim() || null } },
+            { data: { name: teamName.trim(), shortName: sn, primaryColor, logoUrl: logoDataUrl ?? null, city: teamCity.trim() || null, category: category || null, managerName: managerName.trim() || null, managerPhone: managerPhone.trim() || null, managerEmail: managerEmail.trim() || null } },
             { onSuccess: (team) => { teamId = team.id; setCreatedTeamId(team.id); setCreatedTeamName(team.name); resolve(); }, onError: () => reject() }
           );
         });
@@ -279,22 +289,75 @@ function RegistrationForm({ tournamentName, tournamentDate }: { tournamentName: 
     </div>
   );
 
+  const eventDate = parseTournamentDate(tournamentDate);
+  const daysLeft = differenceInDays(eventDate, new Date());
+  const displayDate = format(eventDate, "EEEE, d MMMM yyyy");
+  const displayVenue = [venue, city].filter(Boolean).join(", ");
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <img src="/onsl-official-logo.png" alt={tournamentName} className="h-14 w-14 rounded-full object-contain mx-auto" />
-        <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-          <Shield className="h-3.5 w-3.5" /> Team Registration
+      {/* ── Event Hero Banner ── */}
+      <div className="relative rounded-2xl overflow-hidden border border-primary/30 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent">
+        {/* decorative ring */}
+        <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full border-[40px] border-primary/10 pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full border-[30px] border-primary/10 pointer-events-none" />
+
+        <div className="relative px-6 py-8 flex flex-col items-center text-center gap-4">
+          {/* Registration Open pill */}
+          <div className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-primary/30">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-foreground opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary-foreground" />
+            </span>
+            Registration Open
+          </div>
+
+          {/* Logo + name */}
+          <div className="flex items-center gap-4">
+            <img src="/onsl-official-logo.png" alt={tournamentName} className="h-16 w-16 rounded-full object-contain ring-2 ring-primary/40 shadow-xl" />
+            <div className="text-left">
+              <p className="text-xs font-bold uppercase tracking-widest text-primary">Team Registration for</p>
+              <h1 className="text-2xl sm:text-3xl font-black uppercase italic tracking-tight leading-tight">{tournamentName}</h1>
+            </div>
+          </div>
+
+          {/* Event detail chips */}
+          <div className="flex flex-wrap justify-center gap-2 mt-1">
+            <div className="flex items-center gap-1.5 bg-background/60 border rounded-full px-3 py-1.5 text-xs font-semibold">
+              <CalendarDays className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+              {displayDate}
+              {kickoffTime && <span className="text-muted-foreground">· Kick-off {kickoffTime}</span>}
+            </div>
+            {displayVenue && (
+              <div className="flex items-center gap-1.5 bg-background/60 border rounded-full px-3 py-1.5 text-xs font-semibold">
+                <MapPin className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                {displayVenue}
+              </div>
+            )}
+            <div className="flex items-center gap-1.5 bg-background/60 border rounded-full px-3 py-1.5 text-xs font-semibold">
+              <Swords className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+              {format_}
+            </div>
+            {maxTeams && (
+              <div className="flex items-center gap-1.5 bg-background/60 border rounded-full px-3 py-1.5 text-xs font-semibold">
+                <Users className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                {maxTeams} Teams
+              </div>
+            )}
+          </div>
+
+          {/* Countdown */}
+          {daysLeft > 0 && (
+            <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-xl px-5 py-2.5 mt-1">
+              <span className="text-3xl font-black text-primary tabular-nums">{daysLeft}</span>
+              <span className="text-sm font-bold text-muted-foreground leading-tight">
+                day{daysLeft !== 1 ? "s" : ""}<br />until event
+              </span>
+            </div>
+          )}
+
+          <p className="text-xs text-muted-foreground">Submit your squad below · Once registered, only admin can make changes</p>
         </div>
-        <h1 className="text-2xl font-black uppercase italic tracking-tight">{tournamentName}</h1>
-        <p className="text-muted-foreground text-sm">
-          Register your team to compete · Tournament date:{" "}
-          <span className="font-semibold text-foreground">
-            {format(parseTournamentDate(tournamentDate), "d MMMM yyyy")}
-          </span>
-        </p>
-        <p className="text-xs text-muted-foreground">Once submitted, only admin can make changes.</p>
       </div>
 
       <div className="max-w-2xl mx-auto">
@@ -349,7 +412,7 @@ function RegistrationForm({ tournamentName, tournamentDate }: { tournamentName: 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <Label>City / Club</Label>
-                  <Input placeholder="e.g. Kokkola" value={city} onChange={(e) => setCity(e.target.value)} />
+                  <Input placeholder="e.g. Kokkola" value={teamCity} onChange={(e) => setTeamCity(e.target.value)} />
                 </div>
                 <div className="space-y-1">
                   <Label>Category</Label>
@@ -560,6 +623,11 @@ export default function RegisterTeam() {
     <RegistrationForm
       tournamentName={tournament.name}
       tournamentDate={tournament.date}
+      venue={tournament.venue}
+      city={tournament.city}
+      format_={tournament.format}
+      maxTeams={tournament.maxTeams}
+      kickoffTime={tournament.kickoffTime}
     />
   );
 }
