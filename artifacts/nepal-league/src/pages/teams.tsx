@@ -14,7 +14,6 @@ const POSITION_COLORS: Record<string, string> = {
 
 function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsFor: number; goalsAgainst: number; teamId: number } | undefined }) {
   const { data: players, isLoading } = useListPlayers(team.id);
-  const color = team.primaryColor || "hsl(var(--primary))";
 
   const sorted = isLoading ? [] : [...(players ?? [])].sort((a, b) => {
     const posA = POSITION_ORDER.indexOf(a.position ?? "");
@@ -24,18 +23,17 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
   });
 
   const hasPlayers = !isLoading && (players?.length ?? 0) > 0;
-
   const logoUrl = team.logoUrl;
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow border-0 shadow-sm relative">
-      {/* Brand colour top bar */}
-      <div className="h-3 w-full" style={{ backgroundColor: color }} />
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow border-0 shadow-sm relative bg-slate-900 text-white">
+      {/* Subtle gradient top bar */}
+      <div className="h-1.5 w-full bg-gradient-to-r from-primary via-emerald-400 to-primary" />
 
       {/* Background logo watermark */}
       {logoUrl && (
         <div
-          className="absolute inset-0 opacity-[0.06] pointer-events-none bg-no-repeat bg-right-top bg-contain"
+          className="absolute inset-0 opacity-[0.05] pointer-events-none bg-no-repeat bg-right-top bg-contain"
           style={{ backgroundImage: `url(${logoUrl})` }}
         />
       )}
@@ -49,23 +47,19 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
               <img
                 src={logoUrl}
                 alt={team.name}
-                className="w-14 h-14 rounded-xl object-cover bg-white shadow-sm flex-shrink-0 border"
-                style={{ borderColor: `${color}30` }}
+                className="w-14 h-14 rounded-xl object-cover bg-white/10 shadow-sm flex-shrink-0 border border-white/10"
                 onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
               />
             ) : (
-              <div
-                className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-black text-xl flex-shrink-0 shadow-sm"
-                style={{ backgroundColor: color }}
-              >
+              <div className="w-14 h-14 rounded-xl flex items-center justify-center bg-white/10 text-white font-black text-xl flex-shrink-0 shadow-sm border border-white/10">
                 {team.shortName.slice(0, 2).toUpperCase()}
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <h3 className="font-black text-lg leading-tight truncate">{team.name}</h3>
-              <p className="text-muted-foreground font-mono text-xs mt-0.5">{team.shortName}</p>
+              <h3 className="font-black text-lg leading-tight truncate text-white">{team.name}</h3>
+              <p className="text-slate-400 font-mono text-xs mt-0.5">{team.shortName}</p>
               {team.city && (
-                <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1.5">
+                <div className="flex items-center gap-1 text-xs text-slate-400 mt-1.5">
                   <MapPin className="h-3 w-3" />
                   {team.city}
                 </div>
@@ -77,35 +71,35 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
         {/* Content */}
         <div className="px-5 pb-5 space-y-5">
           {!hasPlayers && !isLoading ? (
-            <div className="flex flex-col items-center gap-2 py-6 text-center border border-dashed rounded-xl bg-muted/30">
-              <Users className="h-6 w-6 text-muted-foreground/40" />
-              <p className="text-sm font-semibold">Squad not submitted yet</p>
-              <p className="text-xs text-muted-foreground">The roster will be published before the tournament.</p>
+            <div className="flex flex-col items-center gap-2 py-6 text-center border border-dashed border-white/10 rounded-xl bg-white/5">
+              <Users className="h-6 w-6 text-slate-500" />
+              <p className="text-sm font-semibold text-slate-300">Squad not submitted yet</p>
+              <p className="text-xs text-slate-500">The roster will be published before the tournament.</p>
             </div>
           ) : (
             <>
               {/* Stats row */}
               {stats ? (
                 <div className="grid grid-cols-3 gap-2">
-                  <div className="rounded-lg bg-muted/50 p-2.5 text-center">
-                    <div className="text-xl font-black">{stats.points}</div>
-                    <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mt-0.5">Pts</div>
+                  <div className="rounded-lg bg-white/5 p-2.5 text-center">
+                    <div className="text-xl font-black text-white">{stats.points}</div>
+                    <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5">Pts</div>
                   </div>
-                  <div className="rounded-lg bg-muted/50 p-2.5 text-center">
-                    <div className="text-xl font-black">{stats.goalsFor}</div>
-                    <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mt-0.5 flex items-center justify-center gap-1">
+                  <div className="rounded-lg bg-white/5 p-2.5 text-center">
+                    <div className="text-xl font-black text-white">{stats.goalsFor}</div>
+                    <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5 flex items-center justify-center gap-1">
                       <Crosshair className="h-3 w-3" /> GF
                     </div>
                   </div>
-                  <div className="rounded-lg bg-muted/50 p-2.5 text-center">
-                    <div className="text-xl font-black">{stats.goalsAgainst}</div>
-                    <div className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider mt-0.5 flex items-center justify-center gap-1">
+                  <div className="rounded-lg bg-white/5 p-2.5 text-center">
+                    <div className="text-xl font-black text-white">{stats.goalsAgainst}</div>
+                    <div className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-0.5 flex items-center justify-center gap-1">
                       <Shield className="h-3 w-3" /> GA
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-3 text-muted-foreground text-sm border border-dashed rounded-lg bg-muted/20">
+                <div className="text-center py-3 text-slate-400 text-sm border border-dashed border-white/10 rounded-lg bg-white/5">
                   No stats yet
                 </div>
               )}
@@ -113,8 +107,8 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
               {/* Squad */}
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
-                  <Shirt className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  <Shirt className="h-3.5 w-3.5 text-slate-400" />
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
                     Squad {players?.length ? `(${players.length})` : ""}
                   </span>
                 </div>
@@ -122,23 +116,20 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
                   {sorted.map((p) => (
                     <div
                       key={p.id}
-                      className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-muted/40 transition-colors"
+                      className="flex items-center gap-2 py-1.5 px-2 rounded-md hover:bg-white/5 transition-colors"
                     >
-                      <span
-                        className="text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center text-white flex-shrink-0"
-                        style={{ backgroundColor: p.number != null ? color : "transparent", border: p.number == null ? `1px dashed ${color}` : "none" }}
-                      >
+                      <span className="text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center text-white flex-shrink-0 bg-white/10 border border-white/10">
                         {p.number ?? "—"}
                       </span>
-                      <span className="text-xs font-semibold truncate flex-1 min-w-0">{p.name}</span>
+                      <span className="text-xs font-semibold truncate flex-1 min-w-0 text-slate-200">{p.name}</span>
                       <div className="flex items-center gap-1 flex-shrink-0">
                         {p.isCaptain && (
-                          <span className="text-[9px] font-black border rounded px-1 py-0 bg-yellow-500/15 text-yellow-600 border-yellow-500/30">
+                          <span className="text-[9px] font-black border rounded px-1 py-0 bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
                             C
                           </span>
                         )}
                         {p.position && (
-                          <span className={`text-[9px] font-bold border rounded px-1 py-0 ${POSITION_COLORS[p.position] ?? "bg-muted text-muted-foreground"}`}>
+                          <span className={`text-[9px] font-bold border rounded px-1 py-0 ${POSITION_COLORS[p.position] ?? "bg-white/10 text-slate-300 border-white/10"}`}>
                             {p.position}
                           </span>
                         )}
@@ -149,12 +140,12 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
 
                 {/* Manager */}
                 {team.managerName && (
-                  <div className="flex items-center gap-2 py-1.5 px-2 mt-2 border-t border-dashed border-border/40">
-                    <span className="text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center bg-muted text-muted-foreground flex-shrink-0">
+                  <div className="flex items-center gap-2 py-1.5 px-2 mt-2 border-t border-dashed border-white/10">
+                    <span className="text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center bg-white/10 text-slate-400 flex-shrink-0">
                       M
                     </span>
-                    <span className="text-xs font-semibold truncate flex-1 min-w-0">{team.managerName}</span>
-                    <span className="text-[9px] font-bold border rounded px-1 py-0 bg-purple-500/15 text-purple-600 border-purple-500/30">
+                    <span className="text-xs font-semibold truncate flex-1 min-w-0 text-slate-200">{team.managerName}</span>
+                    <span className="text-[9px] font-bold border rounded px-1 py-0 bg-purple-500/20 text-purple-400 border-purple-500/30">
                       Manager
                     </span>
                   </div>
