@@ -9,7 +9,7 @@ import { Link } from "wouter";
 import { differenceInDays, differenceInHours, differenceInMinutes } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
 
-const TOURNAMENT_DATE = new Date(2026, 5, 28, 9, 0, 0); // June 28 2026, 09:00
+const TOURNAMENT_DATE = new Date(2026, 5, 28, 10, 0, 0); // June 28 2026, 10:00
 const APP_URL = "http://kokkolasoccerboys.cc/";
 
 function Countdown() {
@@ -161,8 +161,8 @@ export default function Home() {
             <ul className="text-sm space-y-1.5 text-muted-foreground">
               {[
                 "Round-robin format — every team plays each other",
-                "5-a-side / small-sided football",
-                "Kick-off at 09:00 · Finals in the afternoon",
+                "7-a-side football",
+                "Kick-off at 10:00 · Finals in the afternoon",
                 "Live scores & stats on this app",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2">
