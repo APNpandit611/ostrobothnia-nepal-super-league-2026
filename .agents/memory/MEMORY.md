@@ -1,1 +1,2 @@
 - [Custom fetch credentials](custom-fetch-credentials.md) — all API calls must use `credentials: "include"` or session cookies are never sent and auth always returns 401.
+- [Clerk OAuth integration](clerk-oauth.md) — Clerk replaces OTP for team registration/squad update; key setup quirks documented.

@@ -3,6 +3,7 @@ import { eq, and, gt } from "drizzle-orm";
 import { db, otpVerificationsTable, teamsTable, playersTable } from "@workspace/db";
 import { z } from "zod";
 import nodemailer from "nodemailer";
+import { getAuth, clerkClient } from "@clerk/express";
 import { requireAuth } from "../middleware/requireAuth";
 
 const router: IRouter = Router();
@@ -189,7 +190,6 @@ const RegisterPlayerInput = z.object({
 });
 
 const RegisterTeamBody = z.object({
-  otpId: z.string().min(1),
   name: z.string().min(1).max(100),
   shortName: z.string().min(1).max(10),
   primaryColor: z.string().max(20).optional().nullable(),
@@ -209,23 +209,23 @@ router.post("/register/team", async (req, res): Promise<void> => {
     return;
   }
 
-  const { otpId, players, ...teamData } = parsed.data;
-
-  // Verify OTP
-  const [otp] = await db
-    .select()
-    .from(otpVerificationsTable)
-    .where(and(
-      eq(otpVerificationsTable.id, otpId),
-      eq(otpVerificationsTable.verified, true),
-    ));
-
-  if (!otp) {
-    res.status(403).json({ error: "OTP not verified — please verify your identity first" });
+  const { userId } = getAuth(req);
+  if (!userId) {
+    res.status(401).json({ error: "Sign in required to register a team" });
     return;
   }
 
-  // Create team
+  const { players, ...teamData } = parsed.data;
+
+  let clerkEmail: string | null = null;
+  try {
+    const clerkUser = await clerkClient.users.getUser(userId);
+    clerkEmail = clerkUser.emailAddresses.find(e => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ?? null;
+  } catch (err) {
+    req.log.warn({ err }, "Failed to fetch Clerk user for team registration");
+  }
+
+  // Create team — manager email comes from the verified Clerk identity
   const [team] = await db
     .insert(teamsTable)
     .values({
@@ -237,7 +237,7 @@ router.post("/register/team", async (req, res): Promise<void> => {
       category: teamData.category ?? null,
       managerName: teamData.managerName ?? null,
       managerPhone: teamData.managerPhone ?? null,
-      managerEmail: teamData.managerEmail ?? null,
+      managerEmail: clerkEmail ?? teamData.managerEmail ?? null,
     })
     .returning();
 
@@ -258,7 +258,6 @@ router.post("/register/team", async (req, res): Promise<void> => {
 
 const UpdateSquadBody = z.object({
   teamId: z.number().int().positive(),
-  otpId: z.string().min(1),
   captainIndex: z.number().int().min(0).optional().nullable(),
   players: z.array(z.object({
     name: z.string().min(1).max(100),
@@ -274,26 +273,20 @@ router.post("/register/update-squad", async (req, res): Promise<void> => {
     return;
   }
 
-  const { teamId, otpId, players, captainIndex } = parsed.data;
-
-  // Verify OTP and that it was issued for this specific team
-  const [otp] = await db
-    .select()
-    .from(otpVerificationsTable)
-    .where(and(
-      eq(otpVerificationsTable.id, otpId),
-      eq(otpVerificationsTable.verified, true),
-    ));
-
-  if (!otp) {
-    res.status(403).json({ error: "OTP not verified — please verify your identity first" });
+  const { userId } = getAuth(req);
+  if (!userId) {
+    res.status(401).json({ error: "Sign in required to update squad" });
     return;
   }
 
-  // Ensure the OTP was issued for this exact team
-  if (otp.teamId !== null && otp.teamId !== teamId) {
-    res.status(403).json({ error: "OTP was not issued for this team" });
-    return;
+  const { teamId, players, captainIndex } = parsed.data;
+
+  let clerkEmail: string | null = null;
+  try {
+    const clerkUser = await clerkClient.users.getUser(userId);
+    clerkEmail = clerkUser.emailAddresses.find(e => e.id === clerkUser.primaryEmailAddressId)?.emailAddress ?? null;
+  } catch (err) {
+    req.log.warn({ err }, "Failed to fetch Clerk user for squad update");
   }
 
   const [team] = await db.select().from(teamsTable).where(eq(teamsTable.id, teamId));
@@ -302,10 +295,21 @@ router.post("/register/update-squad", async (req, res): Promise<void> => {
     return;
   }
 
+  // If team has a registered manager email, only that manager can update
+  if (team.managerEmail && clerkEmail && team.managerEmail !== clerkEmail) {
+    res.status(403).json({ error: "This account is not registered as the manager for this team." });
+    return;
+  }
+
   // Lock squad once admin has approved — only admin can edit after that
   if (team.squadStatus === "approved") {
     res.status(403).json({ error: "Squad is locked after admin approval. Contact the admin to make changes." });
     return;
+  }
+
+  // First-time claim: if team has no manager email, assign the current user
+  if (!team.managerEmail && clerkEmail) {
+    await db.update(teamsTable).set({ managerEmail: clerkEmail }).where(eq(teamsTable.id, teamId));
   }
 
   await db.delete(playersTable).where(eq(playersTable.teamId, teamId));

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearch, Link } from "wouter";
 import { useListTeams, useListPlayers } from "@workspace/api-client-react";
+import { useUser } from "@clerk/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,11 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, CheckCircle2, ChevronRight, Shield, Users,
-  UserPlus, Trash2, Mail, KeyRound, RefreshCw, Pencil, Lock,
+  UserPlus, Trash2, Pencil, Lock, LogIn,
 } from "lucide-react";
 
 const MIN_PLAYERS = 7;
 const MAX_PLAYERS = 15;
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 interface PlayerRow {
   localId: string;
@@ -25,36 +27,12 @@ function newRow(): PlayerRow {
   return { localId: crypto.randomUUID(), name: "", number: "" };
 }
 
-async function sendOtp(contact: string, teamId: number): Promise<{ id: string; code?: string }> {
-  const res = await fetch("/api/register/send-otp", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contact, type: "email", teamId }),
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Failed to send OTP");
-  return res.json();
-}
-
-async function verifyOtp(id: string, code: string): Promise<boolean> {
-  const res = await fetch("/api/register/verify-otp", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id, code }),
-    credentials: "include",
-  });
-  if (!res.ok) return false;
-  const data = await res.json();
-  return data.verified === true;
-}
-
-async function submitSquadUpdate(teamId: number, otpId: string, players: PlayerRow[], captainIndex: number | null): Promise<void> {
+async function submitSquadUpdate(teamId: number, players: PlayerRow[], captainIndex: number | null): Promise<void> {
   const res = await fetch("/api/register/update-squad", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       teamId,
-      otpId,
       captainIndex,
       players: players.map(p => ({
         name: p.name.trim(),
@@ -70,13 +48,13 @@ async function submitSquadUpdate(teamId: number, otpId: string, players: PlayerR
   }
 }
 
-const steps = ["Select Team", "Verify Identity", "Update Squad"];
+const steps = ["Select Team", "Update Squad"];
 
-function StepIndicator({ step }: { step: 1 | 2 | 3 }) {
+function StepIndicator({ step }: { step: 1 | 2 }) {
   return (
     <div className="flex items-center gap-1 justify-center text-sm mb-6 flex-wrap">
       {steps.map((label, i) => {
-        const num = (i + 1) as 1 | 2 | 3;
+        const num = (i + 1) as 1 | 2;
         const active = step === num;
         const done = step > num;
         return (
@@ -100,100 +78,49 @@ export default function UpdateSquad() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const preTeamId = params.get("team") ? parseInt(params.get("team")!) : null;
+  const { isLoaded, isSignedIn, user } = useUser();
 
   const { data: teams, isLoading: teamsLoading } = useListTeams();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
-
+  const [step, setStep] = useState<1 | 2>(1);
   const [teamId, setTeamId] = useState<number | null>(preTeamId);
-  const [email, setEmail] = useState("");
-
-  const [otpId, setOtpId] = useState<string | null>(null);
-  const [otpCode, setOtpCode] = useState("");
-  const [otpSending, setOtpSending] = useState(false);
-  const [otpVerifying, setOtpVerifying] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-
-  const [rows, setRows] = useState<PlayerRow[]>(Array.from({ length: MIN_PLAYERS }, newRow));
   const [captainIndex, setCaptainIndex] = useState<number | null>(null);
+  const [rows, setRows] = useState<PlayerRow[]>(Array.from({ length: MIN_PLAYERS }, newRow));
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const { data: currentPlayers, isLoading: playersLoading } = useListPlayers(teamId ?? 0);
   const selectedTeam = teams?.find(t => t.id === teamId);
+  const { data: currentPlayers, isLoading: playersLoading } = useListPlayers(teamId ?? 0);
 
   useEffect(() => {
-    if (step === 3 && currentPlayers) {
-      if (currentPlayers.length > 0) {
-        setRows(currentPlayers.map(p => ({
-          localId: crypto.randomUUID(),
-          name: p.name,
-          number: p.number?.toString() ?? "",
-        })));
-        const capIdx = currentPlayers.findIndex(p => p.isCaptain);
-        setCaptainIndex(capIdx >= 0 ? capIdx : null);
-      } else {
-        setRows(Array.from({ length: MIN_PLAYERS }, newRow));
-        setCaptainIndex(null);
-      }
+    if (teamId && step === 2 && currentPlayers) {
+      setRows(currentPlayers.length > 0
+        ? currentPlayers.map(p => ({ localId: crypto.randomUUID(), name: p.name, number: p.number?.toString() ?? "" }))
+        : Array.from({ length: MIN_PLAYERS }, newRow)
+      );
+      const capIdx = currentPlayers.findIndex(p => p.isCaptain);
+      setCaptainIndex(capIdx >= 0 ? capIdx : null);
     }
   }, [step, currentPlayers]);
 
-  const handleSendOtp = async () => {
+  const handleStep1Next = () => {
     if (!teamId) { toast({ variant: "destructive", title: "Please select your team" }); return; }
-    const emailVal = email.trim();
-    if (!emailVal) { toast({ variant: "destructive", title: "Email address is required" }); return; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
-      toast({ variant: "destructive", title: "Please enter a valid email address" });
-      return;
-    }
-    setOtpSending(true);
-    try {
-      const result = await sendOtp(emailVal, teamId);
-      setOtpId(result.id);
-      setOtpSent(true);
-      setOtpCode("");
-      toast({ title: "Code sent!", description: `Check your inbox at ${emailVal}` });
-      setStep(2);
-    } catch {
-      toast({ variant: "destructive", title: "Failed to send code. Try again." });
-    } finally {
-      setOtpSending(false);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (!otpId || otpCode.length !== 6) { toast({ variant: "destructive", title: "Enter the 6-digit code" }); return; }
-    setOtpVerifying(true);
-    try {
-      const ok = await verifyOtp(otpId, otpCode);
-      if (ok) {
-        setStep(3);
-        toast({ title: "Identity verified!", description: "Now update your squad." });
-      } else {
-        toast({ variant: "destructive", title: "Incorrect or expired code" });
-      }
-    } catch {
-      toast({ variant: "destructive", title: "Verification failed" });
-    } finally {
-      setOtpVerifying(false);
-    }
+    setStep(2);
   };
 
   const handleSubmit = async () => {
-    if (!teamId || !otpId) return;
+    if (!teamId) return;
     const validRows = rows.filter(r => r.name.trim());
     if (validRows.length < MIN_PLAYERS) {
       toast({ variant: "destructive", title: `At least ${MIN_PLAYERS} players required`, description: `You have ${validRows.length}.` });
       return;
     }
-    // captainIndex refers to index within validRows — find it from the full rows array
     const validIndexOf = (localId: string) => validRows.findIndex(r => r.localId === localId);
     const captainValidIndex = captainIndex != null
       ? validIndexOf(rows.filter(r => r.name.trim())[captainIndex]?.localId ?? "")
       : null;
     setSubmitting(true);
     try {
-      await submitSquadUpdate(teamId, otpId, validRows, captainValidIndex !== -1 ? captainValidIndex : null);
+      await submitSquadUpdate(teamId, validRows, captainValidIndex !== -1 ? captainValidIndex : null);
       setSubmitted(true);
     } catch (err) {
       toast({ variant: "destructive", title: "Failed to save squad", description: err instanceof Error ? err.message : "Unknown error" });
@@ -214,7 +141,30 @@ export default function UpdateSquad() {
     setRows(rs => [...rs, newRow()]);
   };
 
-  // Squad locked once admin has approved — show locked message instead of form
+  // Sign-in guard
+  if (isLoaded && !isSignedIn) {
+    return (
+      <div className="flex flex-col items-center text-center gap-6 py-20 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-md mx-auto">
+        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+          <LogIn className="h-9 w-9 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-black">Sign In Required</h2>
+          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+            Sign in with Google or Facebook to verify your identity and update your team's squad.
+          </p>
+        </div>
+        <Link href={`${basePath}/sign-in?redirect_url=${basePath}/update-squad${teamId ? `?team=${teamId}` : ""}`}>
+          <Button size="lg" className="font-bold">
+            <LogIn className="h-4 w-4 mr-2" /> Sign In to Continue
+          </Button>
+        </Link>
+        <Link href="/" className="text-xs text-muted-foreground hover:text-foreground">← Back to home</Link>
+      </div>
+    );
+  }
+
+  // Squad locked once admin has approved
   if (selectedTeam?.squadStatus === "approved") {
     return (
       <div className="flex flex-col items-center text-center gap-6 py-20 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-md mx-auto">
@@ -265,11 +215,17 @@ export default function UpdateSquad() {
         <p className="text-muted-foreground mt-1 text-sm">
           Already registered? Update your team's player list for the upcoming tournament.
         </p>
+        {isSignedIn && user && (
+          <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1.5">
+            <Shield className="h-3 w-3 text-primary" />
+            Signed in as <span className="font-semibold text-foreground ml-1">{user.primaryEmailAddress?.emailAddress}</span>
+          </p>
+        )}
       </div>
 
       <StepIndicator step={step} />
 
-      {/* ── Step 1: Select team & email ──────────────────────────────── */}
+      {/* ── Step 1: Select team ───────────────────────────────────────── */}
       {step === 1 && (
         <Card>
           <CardContent className="p-6 space-y-5">
@@ -301,87 +257,15 @@ export default function UpdateSquad() {
               )}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="manager-email" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" /> Manager Email
-              </Label>
-              <Input
-                id="manager-email"
-                type="email"
-                placeholder="your@email.com"
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                onKeyDown={e => { if (e.key === "Enter") handleSendOtp(); }}
-              />
-              <p className="text-xs text-muted-foreground">
-                We'll send a verification code to confirm your identity.
-              </p>
-            </div>
-
-            <Button onClick={handleSendOtp} disabled={otpSending || !teamId || !email.trim()} className="w-full">
-              {otpSending
-                ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Sending…</>
-                : <><Mail className="h-4 w-4 mr-2" /> Send Verification Code</>}
+            <Button onClick={handleStep1Next} disabled={!teamId} className="w-full">
+              <ChevronRight className="h-4 w-4 mr-2" /> Continue to Squad Editor
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* ── Step 2: Verify OTP ───────────────────────────────────────── */}
+      {/* ── Step 2: Squad editor ─────────────────────────────────────── */}
       {step === 2 && (
-        <Card>
-          <CardContent className="p-6 space-y-5">
-            <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 text-sm flex items-start gap-3">
-              <Mail className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-              <div>
-                <p>A 6-digit code was sent to <span className="font-bold">{email}</span>.</p>
-                <p className="text-muted-foreground text-xs mt-1">Check your inbox (and spam folder). Code expires in 10 minutes.</p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="otp-code" className="flex items-center gap-2">
-                <KeyRound className="h-4 w-4" /> Verification Code
-              </Label>
-              <Input
-                id="otp-code"
-                placeholder="000000"
-                value={otpCode}
-                maxLength={6}
-                onChange={e => setOtpCode(e.target.value.replace(/\D/g, ""))}
-                onKeyDown={e => { if (e.key === "Enter") handleVerifyOtp(); }}
-                className="font-mono text-center text-xl tracking-widest"
-                autoFocus
-              />
-            </div>
-
-            <div className="flex gap-3">
-              <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                Back
-              </Button>
-              <Button onClick={handleVerifyOtp} disabled={otpVerifying || otpCode.length !== 6} className="flex-1">
-                {otpVerifying
-                  ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Verifying…</>
-                  : "Verify & Continue"}
-              </Button>
-            </div>
-
-            <button
-              onClick={async () => {
-                setOtpSent(false);
-                setOtpCode("");
-                await handleSendOtp();
-              }}
-              className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 py-1"
-            >
-              <RefreshCw className="h-3 w-3" /> Resend code
-            </button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ── Step 3: Squad editor ─────────────────────────────────────── */}
-      {step === 3 && (
         <div className="space-y-4">
           {selectedTeam && (
             <div className="flex items-center gap-3 p-4 rounded-xl border" style={{ borderColor: `${selectedTeam.primaryColor ?? "#888"}40`, background: `${selectedTeam.primaryColor ?? "#888"}08` }}>
@@ -390,6 +274,7 @@ export default function UpdateSquad() {
                 <p className="font-bold text-sm">{selectedTeam.name}</p>
                 <p className="text-xs text-muted-foreground">Edit your squad below. Changes replace the full current list.</p>
               </div>
+              <button onClick={() => setStep(1)} className="ml-auto text-xs text-muted-foreground hover:text-foreground underline">Change team</button>
             </div>
           )}
 

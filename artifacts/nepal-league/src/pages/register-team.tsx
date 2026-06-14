@@ -1,5 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useGetActiveTournament } from "@workspace/api-client-react";
+import { useUser } from "@clerk/react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,8 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, UserPlus, Trash2, CheckCircle2, ClipboardList,
-  Shield, ChevronRight, Upload, X, Mail, KeyRound, RefreshCw,
-  CalendarX, Lock, CalendarDays, MapPin, Users, Swords,
+  Shield, ChevronRight, Upload, X,
+  CalendarX, Lock, CalendarDays, MapPin, Users, Swords, LogIn,
 } from "lucide-react";
 import { Link } from "wouter";
 import { format, differenceInDays } from "date-fns";
@@ -18,6 +19,7 @@ const POSITIONS = ["GK", "C", "V.C", "Player", "Manager"];
 const MIN_PLAYERS = 7;
 const MAX_PLAYERS = 15;
 const CATEGORIES = ["Open", "U18", "U21", "Veterans", "Mixed", "Other"];
+const basePath = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 interface PlayerRow {
   id: string;
@@ -42,29 +44,6 @@ function autoShortName(name: string): string {
 function parseTournamentDate(date: string): Date {
   const [year, month, day] = date.split("-").map(Number);
   return new Date(year, month - 1, day, 23, 59, 59);
-}
-
-async function sendOtp(contact: string, type: "email" | "phone"): Promise<{ id: string; code?: string }> {
-  const res = await fetch("/api/register/send-otp", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contact, type }),
-    credentials: "include",
-  });
-  if (!res.ok) throw new Error("Failed to send OTP");
-  return res.json();
-}
-
-async function verifyOtp(id: string, code: string): Promise<boolean> {
-  const res = await fetch("/api/register/verify-otp", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ id, code }),
-    credentials: "include",
-  });
-  if (!res.ok) return false;
-  const data = await res.json();
-  return data.verified === true;
 }
 
 // ─── Registration closed screen ───────────────────────────────────────────────
@@ -112,8 +91,9 @@ interface RegistrationFormProps {
 function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_, maxTeams, kickoffTime }: RegistrationFormProps) {
   const { toast } = useToast();
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const { isLoaded, isSignedIn, user } = useUser();
 
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
 
   const [teamName, setTeamName] = useState("");
   const [shortName, setShortName] = useState("");
@@ -126,18 +106,23 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
   const [managerPhone, setManagerPhone] = useState("");
   const [managerEmail, setManagerEmail] = useState("");
 
-  const [otpId, setOtpId] = useState<string | null>(null);
-  const [otpCode, setOtpCode] = useState("");
-  const [otpSending, setOtpSending] = useState(false);
-  const [otpVerifying, setOtpVerifying] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-
-  const [createdTeamId, setCreatedTeamId] = useState<number | null>(null);
-  const [createdTeamName, setCreatedTeamName] = useState("");
   const [rows, setRows] = useState<PlayerRow[]>(Array.from({ length: MIN_PLAYERS }, newRow));
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [createdTeamId, setCreatedTeamId] = useState<number | null>(null);
+  const [createdTeamName, setCreatedTeamName] = useState("");
 
+  // Pre-fill manager email from Clerk
+  useEffect(() => {
+    if (user && !managerEmail) {
+      const email = user.primaryEmailAddress?.emailAddress ?? "";
+      if (email) setManagerEmail(email);
+    }
+    if (user && !managerName) {
+      const name = user.fullName ?? "";
+      if (name) setManagerName(name);
+    }
+  }, [user]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -159,57 +144,13 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
 
   const handleStep1Next = () => {
     if (!teamName.trim()) { toast({ variant: "destructive", title: "Team name is required" }); return; }
-    if (!managerEmail.trim()) { toast({ variant: "destructive", title: "Manager email is required" }); return; }
     setStep(2);
-  };
-
-  const handleSendOtp = async () => {
-    const contact = managerEmail.trim();
-    if (!contact) return;
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contact)) {
-      toast({ variant: "destructive", title: "Please enter a valid email address" });
-      return;
-    }
-    setOtpSending(true);
-    try {
-      const result = await sendOtp(contact, "email");
-      setOtpId(result.id);
-      setOtpSent(true);
-      setOtpCode("");
-      toast({ title: "Code sent!", description: `Check your inbox at ${contact}` });
-    } catch {
-      toast({ variant: "destructive", title: "Failed to send code" });
-    } finally {
-      setOtpSending(false);
-    }
-  };
-
-  const handleVerifyOtp = async () => {
-    if (!otpId || otpCode.length !== 6) { toast({ variant: "destructive", title: "Enter the 6-digit code" }); return; }
-    setOtpVerifying(true);
-    try {
-      const ok = await verifyOtp(otpId, otpCode);
-      if (ok) {
-        setStep(3);
-        toast({ title: "Identity verified!", description: "Now register your players." });
-      } else {
-        toast({ variant: "destructive", title: "Incorrect or expired code" });
-      }
-    } catch {
-      toast({ variant: "destructive", title: "Verification failed" });
-    } finally {
-      setOtpVerifying(false);
-    }
   };
 
   const handleSubmit = async () => {
     const validRows = rows.filter((r) => r.name.trim());
     if (validRows.length < MIN_PLAYERS) {
       toast({ variant: "destructive", title: `At least ${MIN_PLAYERS} players required`, description: `You have ${validRows.length}. Please fill in at least ${MIN_PLAYERS} names.` });
-      return;
-    }
-    if (!otpId) {
-      toast({ variant: "destructive", title: "Please verify your identity first" });
       return;
     }
     setSubmitting(true);
@@ -220,7 +161,6 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({
-          otpId,
           name: teamName.trim(),
           shortName: sn,
           primaryColor,
@@ -254,6 +194,31 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
     }
   };
 
+  // Sign-in guard
+  if (isLoaded && !isSignedIn) {
+    return (
+      <div className="flex flex-col items-center text-center gap-6 py-20 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-md mx-auto">
+        <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
+          <LogIn className="h-9 w-9 text-primary" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-black">Sign In Required</h2>
+          <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+            Sign in with Google or Facebook to verify your identity before registering your team.
+          </p>
+        </div>
+        <Link href={`${basePath}/sign-in?redirect_url=${basePath}/register-team`}>
+          <Button size="lg" className="font-bold">
+            <LogIn className="h-4 w-4 mr-2" /> Sign In to Continue
+          </Button>
+        </Link>
+        <Link href="/" className="text-xs text-muted-foreground hover:text-foreground">
+          ← Back to home
+        </Link>
+      </div>
+    );
+  }
+
   if (submitted) {
     return (
       <div className="flex flex-col items-center text-center gap-6 py-20 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -275,11 +240,11 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
     );
   }
 
-  const steps = ["Team Details", "Verify Identity", "Add Players"];
+  const steps = ["Team Details", "Add Players"];
   const StepIndicator = () => (
     <div className="flex items-center gap-1 justify-center text-sm mb-6 flex-wrap">
       {steps.map((label, i) => {
-        const num = (i + 1) as 1 | 2 | 3;
+        const num = (i + 1) as 1 | 2;
         const active = step === num;
         const done = step > num;
         return (
@@ -306,12 +271,10 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* ── Event Hero Banner ── */}
       <div className="relative rounded-2xl overflow-hidden border border-primary/30 bg-gradient-to-br from-primary/20 via-primary/5 to-transparent">
-        {/* decorative ring */}
         <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full border-[40px] border-primary/10 pointer-events-none" />
         <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full border-[30px] border-primary/10 pointer-events-none" />
 
         <div className="relative px-6 py-8 flex flex-col items-center text-center gap-4">
-          {/* Registration Open pill */}
           <div className="inline-flex items-center gap-2 bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-primary/30">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary-foreground opacity-75" />
@@ -320,7 +283,6 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
             Registration Open
           </div>
 
-          {/* Logo + name */}
           <div className="flex items-center gap-4">
             <img src="/onsl-official-logo.png" alt={tournamentName} className="h-16 w-16 rounded-full object-contain ring-2 ring-primary/40 shadow-xl" />
             <div className="text-left">
@@ -329,7 +291,6 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
             </div>
           </div>
 
-          {/* Event detail chips */}
           <div className="flex flex-wrap justify-center gap-2 mt-1">
             <div className="flex items-center gap-1.5 bg-background/60 border rounded-full px-3 py-1.5 text-xs font-semibold">
               <CalendarDays className="h-3.5 w-3.5 text-primary flex-shrink-0" />
@@ -354,7 +315,6 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
             )}
           </div>
 
-          {/* Countdown */}
           {daysLeft > 0 && (
             <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-xl px-5 py-2.5 mt-1">
               <span className="text-3xl font-black text-primary tabular-nums">{daysLeft}</span>
@@ -368,15 +328,24 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
         </div>
       </div>
 
+      {/* Signed-in identity badge */}
+      {isSignedIn && user && (
+        <div className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-primary/30 bg-primary/5 text-sm">
+          <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+          <span className="text-muted-foreground">Registering as</span>
+          <span className="font-semibold text-foreground">{user.primaryEmailAddress?.emailAddress}</span>
+        </div>
+      )}
+
       <div className="max-w-2xl mx-auto">
         <StepIndicator />
 
-        {/* STEP 1 */}
+        {/* STEP 1 — Team Details */}
         {step === 1 && (
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2"><Shield className="h-5 w-5 text-primary" /> Team Details</CardTitle>
-              <CardDescription>Fill in your team information. You'll verify your identity next.</CardDescription>
+              <CardDescription>Fill in your team information and add your players next.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-5">
               <div className="space-y-2">
@@ -433,7 +402,6 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
 
               <div className="space-y-3 pt-1 border-t">
                 <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground pt-2">Manager / Contact</p>
-                <p className="text-xs text-muted-foreground -mt-1">Manager email is required — a verification code will be sent to it.</p>
                 <div className="space-y-1">
                   <Label>Manager Name</Label>
                   <Input placeholder="e.g. Raj Kumar" value={managerName} onChange={(e) => setManagerName(e.target.value)} />
@@ -444,73 +412,22 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
                     <Input type="tel" placeholder="+358 …" value={managerPhone} onChange={(e) => setManagerPhone(e.target.value)} />
                   </div>
                   <div className="space-y-1">
-                    <Label>Manager Email *</Label>
+                    <Label>Manager Email</Label>
                     <Input type="email" placeholder="manager@email.com" value={managerEmail} onChange={(e) => setManagerEmail(e.target.value)} />
+                    <p className="text-xs text-muted-foreground">Auto-filled from your sign-in</p>
                   </div>
                 </div>
               </div>
 
               <Button size="lg" className="w-full font-bold uppercase tracking-wider" onClick={handleStep1Next} disabled={!teamName.trim()}>
-                Continue — Verify Identity <ChevronRight className="h-4 w-4 ml-2" />
+                Continue — Add Players <ChevronRight className="h-4 w-4 ml-2" />
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {/* STEP 2 */}
+        {/* STEP 2 — Add Players */}
         {step === 2 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><KeyRound className="h-5 w-5 text-primary" /> Verify Your Identity</CardTitle>
-              <CardDescription>We'll send a 6-digit code to confirm you're the team manager.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center gap-2 px-4 py-2.5 rounded-lg border-2 border-primary bg-primary/5 text-primary text-sm font-semibold">
-                <Mail className="h-4 w-4" /> Verification code sent by Email
-              </div>
-              <div className="rounded-lg bg-muted/50 px-4 py-3 flex items-center gap-3">
-                <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                <div>
-                  <p className="text-xs text-muted-foreground">{otpSent ? "A code was sent to" : "Code will be sent to"}</p>
-                  <p className="font-semibold text-sm">{managerEmail.trim()}</p>
-                </div>
-              </div>
-              {!otpSent ? (
-                <Button size="lg" className="w-full font-bold" onClick={handleSendOtp} disabled={otpSending}>
-                  {otpSending ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Sending…</> : "Send Verification Code"}
-                </Button>
-              ) : (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Enter 6-digit code</Label>
-                    <Input
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      placeholder="— — — — — —"
-                      className="text-center text-2xl font-mono tracking-[0.4em] h-14"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-                      onKeyDown={(e) => { if (e.key === "Enter" && otpCode.length === 6) handleVerifyOtp(); }}
-                      autoFocus
-                    />
-                    <p className="text-xs text-muted-foreground text-center">Code expires in 10 minutes</p>
-                  </div>
-                  <Button size="lg" className="w-full font-bold" onClick={handleVerifyOtp} disabled={otpVerifying || otpCode.length !== 6}>
-                    {otpVerifying ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Verifying…</> : "Verify Code"}
-                  </Button>
-                  <Button variant="ghost" size="sm" className="w-full" onClick={() => { setOtpSent(false); setOtpCode(""); }}>
-                    <RefreshCw className="h-3 w-3 mr-2" /> Resend code
-                  </Button>
-                </div>
-              )}
-              <Button variant="outline" className="w-full" onClick={() => setStep(1)}>← Back to team details</Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* STEP 3 */}
-        {step === 3 && (
           <>
             <div className="p-3 rounded-xl border bg-card flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm flex-shrink-0" style={{ backgroundColor: primaryColor }}>
@@ -518,11 +435,9 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
               </div>
               <div>
                 <div className="font-black">{teamName}</div>
-                {city && <div className="text-xs text-muted-foreground">{city}{category ? ` · ${category}` : ""}</div>}
+                {teamCity && <div className="text-xs text-muted-foreground">{teamCity}{category ? ` · ${category}` : ""}</div>}
               </div>
-              <div className="ml-auto flex items-center gap-1.5 text-xs text-primary font-semibold">
-                <CheckCircle2 className="h-4 w-4" /> Verified
-              </div>
+              <button onClick={() => setStep(1)} className="ml-auto text-xs text-muted-foreground hover:text-foreground underline">Edit</button>
             </div>
 
             <Card>
@@ -610,12 +525,10 @@ export default function RegisterTeam() {
     );
   }
 
-  // No active tournament configured
   if (!tournament) {
     return <RegistrationClosed reason="no-tournament" />;
   }
 
-  // Tournament date has already passed — registration closed
   const tournamentDate = parseTournamentDate(tournament.date);
   if (tournamentDate < new Date()) {
     return <RegistrationClosed reason="past" />;
