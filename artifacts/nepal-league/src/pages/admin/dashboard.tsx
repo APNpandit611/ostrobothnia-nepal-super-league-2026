@@ -236,7 +236,7 @@ export default function AdminDashboard() {
               <div className="p-4 border border-destructive/30 bg-destructive/5 rounded-xl flex items-center justify-between">
                 <div>
                   <h4 className="font-bold text-destructive flex items-center gap-2">
-                    <AlertTriangle className="h-4 w-4" /> Danger Zone
+                    <AlertTriangle className="h-4 w-4" /> Reset Fixtures
                   </h4>
                   <p className="text-sm text-muted-foreground">Reset everything (teams kept)</p>
                 </div>
