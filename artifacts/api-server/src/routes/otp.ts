@@ -5,6 +5,10 @@ import { z } from "zod";
 import nodemailer from "nodemailer";
 import { getAuth, clerkClient } from "@clerk/express";
 import { requireAuth } from "../middleware/requireAuth";
+import {
+  sendSquadSubmissionConfirmation,
+  sendAdminSquadApprovalRequest,
+} from "../lib/mailer";
 
 const router: IRouter = Router();
 
@@ -256,6 +260,17 @@ router.post("/register/team", async (req, res): Promise<void> => {
     }))
   );
 
+  // Notify the manager (confirmation) and the admin (approval request).
+  // Fire-and-forget: email delivery must never block or fail the registration.
+  void Promise.allSettled([
+    sendSquadSubmissionConfirmation(team),
+    sendAdminSquadApprovalRequest(team),
+  ]).then((results) => {
+    results.forEach((r) => {
+      if (r.status === "rejected") req.log.error({ err: r.reason }, "Squad registration email rejected");
+    });
+  });
+
   res.status(201).json(team);
 });
 
@@ -329,6 +344,18 @@ router.post("/register/update-squad", async (req, res): Promise<void> => {
 
   // Mark squad as pending approval
   await db.update(teamsTable).set({ squadStatus: "pending" }).where(eq(teamsTable.id, teamId));
+
+  // Notify the manager (confirmation) and the admin (approval request). The manager
+  // email is whatever is on the team, or the Clerk identity claiming it for the first time.
+  const effectiveTeam = { ...team, managerEmail: team.managerEmail ?? clerkEmail };
+  void Promise.allSettled([
+    sendSquadSubmissionConfirmation(effectiveTeam),
+    sendAdminSquadApprovalRequest(effectiveTeam),
+  ]).then((results) => {
+    results.forEach((r) => {
+      if (r.status === "rejected") req.log.error({ err: r.reason }, "Squad update email rejected");
+    });
+  });
 
   const newPlayers = await db.select().from(playersTable).where(eq(playersTable.teamId, teamId));
   res.json(newPlayers);

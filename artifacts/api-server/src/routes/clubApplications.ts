@@ -6,6 +6,7 @@ import {
   sendApplicationConfirmation,
   sendAdminApprovalRequest,
   sendApplicationApproved,
+  sendApplicationRejected,
 } from "../lib/mailer";
 
 const router: IRouter = Router();
@@ -76,6 +77,12 @@ router.patch("/admin/club-applications/:id", async (req, res): Promise<void> => 
   if (status === "accepted" && existing.status !== "accepted") {
     void sendApplicationApproved(row).catch((err) =>
       req.log.error({ err }, "Approval email rejected"),
+    );
+  }
+  // On transition to "rejected", send the applicant a no-reply decline email.
+  if (status === "rejected" && existing.status !== "rejected") {
+    void sendApplicationRejected(row, row.adminNote).catch((err) =>
+      req.log.error({ err }, "Rejection email rejected"),
     );
   }
 

@@ -7,6 +7,7 @@ import {
   UpdateTeamParams,
   GetTeamParams,
 } from "@workspace/api-zod";
+import { sendSquadApproved, sendSquadRejected } from "../lib/mailer";
 
 const router: IRouter = Router();
 
@@ -77,12 +78,29 @@ router.post("/admin/teams/:id/approve-squad", async (req, res): Promise<void> =>
   if (isNaN(id)) { res.status(400).json({ error: "Invalid team id" }); return; }
   const action = (req.body as { action?: string }).action ?? "approve";
   const newStatus = action === "unapprove" ? null : "approved";
+
+  const [existing] = await db.select().from(teamsTable).where(eq(teamsTable.id, id));
+  if (!existing) { res.status(404).json({ error: "Team not found" }); return; }
+
   const [team] = await db
     .update(teamsTable)
     .set({ squadStatus: newStatus })
     .where(eq(teamsTable.id, id))
     .returning();
   if (!team) { res.status(404).json({ error: "Team not found" }); return; }
+
+  // Notify the manager on a real status change. Approve → welcome email;
+  // unapprove → "needs changes" email. Fire-and-forget: never block the response.
+  if (newStatus === "approved" && existing.squadStatus !== "approved") {
+    void sendSquadApproved(team).catch((err) =>
+      req.log.error({ err }, "Squad approved email rejected"),
+    );
+  } else if (newStatus === null && existing.squadStatus !== null) {
+    void sendSquadRejected(team).catch((err) =>
+      req.log.error({ err }, "Squad rejected email rejected"),
+    );
+  }
+
   res.json(team);
 });
 

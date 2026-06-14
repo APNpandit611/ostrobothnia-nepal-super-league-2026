@@ -237,7 +237,7 @@ export default function AdminTeams() {
         body: JSON.stringify({ action }),
       });
       if (!res.ok) throw new Error("Failed");
-      toast({ title: action === "approve" ? "Squad approved ✓" : "Approval revoked" });
+      toast({ title: action === "approve" ? "Squad approved — manager notified ✓" : "Squad sent back — manager notified" });
       queryClient.invalidateQueries({ queryKey: getListTeamsQueryKey() });
     } catch {
       toast({ variant: "destructive", title: "Failed to update squad status" });
@@ -501,15 +501,29 @@ export default function AdminTeams() {
                         Revoke Approval
                       </Button>
                     ) : (
-                      <Button
-                        size="sm"
-                        className="gap-1.5 bg-green-600 hover:bg-green-700 text-white"
-                        onClick={() => handleApproveSquad(selectedTeam.id, "approve")}
-                        disabled={approvingId === selectedTeam.id}
-                      >
-                        {approvingId === selectedTeam.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
-                        Approve Squad
-                      </Button>
+                      <>
+                        <Button
+                          size="sm"
+                          className="gap-1.5 bg-green-600 hover:bg-green-700 text-white"
+                          onClick={() => handleApproveSquad(selectedTeam.id, "approve")}
+                          disabled={approvingId === selectedTeam.id}
+                        >
+                          {approvingId === selectedTeam.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+                          Approve Squad
+                        </Button>
+                        {selectedTeam.squadStatus === "pending" && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="gap-1.5 text-red-600 border-red-500/40 hover:bg-red-500/10"
+                            onClick={() => handleApproveSquad(selectedTeam.id, "unapprove")}
+                            disabled={approvingId === selectedTeam.id}
+                          >
+                            {approvingId === selectedTeam.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <X className="h-3.5 w-3.5" />}
+                            Reject
+                          </Button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
