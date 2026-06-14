@@ -2,6 +2,11 @@ import { Router, type IRouter } from "express";
 import { db, clubApplicationsTable } from "@workspace/db";
 import { eq, desc } from "drizzle-orm";
 import { requireAuth } from "../middleware/requireAuth";
+import {
+  sendApplicationConfirmation,
+  sendAdminApprovalRequest,
+  sendApplicationApproved,
+} from "../lib/mailer";
 
 const router: IRouter = Router();
 
@@ -20,6 +25,18 @@ router.post("/club-applications", async (req, res): Promise<void> => {
     position: position?.trim() || null,
     message: message?.trim() || null,
   }).returning();
+
+  // Notify the applicant (from the KSB email) and send an approval request to the admin.
+  // Fire-and-forget: email delivery should never block or fail the submission.
+  void Promise.allSettled([
+    sendApplicationConfirmation(row),
+    sendAdminApprovalRequest(row),
+  ]).then((results) => {
+    results.forEach((r) => {
+      if (r.status === "rejected") req.log.error({ err: r.reason }, "Application email rejected");
+    });
+  });
+
   res.status(201).json(row);
 });
 
@@ -38,6 +55,13 @@ router.get("/admin/club-applications", async (req, res): Promise<void> => {
 router.patch("/admin/club-applications/:id", async (req, res): Promise<void> => {
   const id = parseInt(req.params.id);
   const { status, adminNote } = req.body as { status?: string; adminNote?: string };
+
+  const [existing] = await db
+    .select()
+    .from(clubApplicationsTable)
+    .where(eq(clubApplicationsTable.id, id));
+  if (!existing) { res.status(404).json({ message: "Not found" }); return; }
+
   const update: Record<string, unknown> = { updatedAt: new Date() };
   if (status) update.status = status;
   if (adminNote !== undefined) update.adminNote = adminNote;
@@ -47,6 +71,14 @@ router.patch("/admin/club-applications/:id", async (req, res): Promise<void> => 
     .where(eq(clubApplicationsTable.id, id))
     .returning();
   if (!row) { res.status(404).json({ message: "Not found" }); return; }
+
+  // On transition to "accepted", send the applicant a no-reply welcome email.
+  if (status === "accepted" && existing.status !== "accepted") {
+    void sendApplicationApproved(row).catch((err) =>
+      req.log.error({ err }, "Approval email rejected"),
+    );
+  }
+
   res.json(row);
 });
 
