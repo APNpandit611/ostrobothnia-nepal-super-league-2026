@@ -479,6 +479,7 @@ export default function RegisterTeam() {
           <Link href="/" className="underline hover:text-foreground">Back to home</Link>
           {" · "}
           <Link href="/register" className="underline hover:text-foreground">Join KSB Club</Link>
+
         </p>
       </div>
     </div>

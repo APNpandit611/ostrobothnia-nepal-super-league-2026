@@ -70,7 +70,7 @@ function Router() {
       <Route path="/register">
         <Layout><JoinKsb /></Layout>
       </Route>
-      <Route path="/register/team">
+      <Route path="/register-team">
         <Layout><RegisterTeam /></Layout>
       </Route>
 
