@@ -1,7 +1,10 @@
 import { useListPublishedAnnouncements, useGetActiveTournament } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Megaphone, CalendarDays, Calendar, MapPin, Clock, Users } from "lucide-react";
+import {
+  Megaphone, CalendarDays, Calendar, MapPin, Clock, Users,
+  ListChecks, Award,
+} from "lucide-react";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
 
@@ -38,11 +41,11 @@ export default function Announcements() {
           <Megaphone className="h-6 w-6 text-primary" /> News & Events
         </h1>
         <p className="text-sm text-muted-foreground mt-0.5">
-          Latest news and updates from Kokkola Soccer Boys
+          Latest news, tournament info, and updates from Kokkola Soccer Boys
         </p>
       </div>
 
-      {/* Event info */}
+      {/* Upcoming Event */}
       {tournament && (
         <div className="space-y-3">
           <div className="flex items-center gap-2">
@@ -64,16 +67,61 @@ export default function Announcements() {
             />
             <EventInfoCard icon={Users} label="Format" value={`${tournament.format} · ${tournament.maxTeams ?? 5} teams`} />
           </div>
+          {tournament.description && (
+            <p className="text-sm text-muted-foreground leading-relaxed pl-3 border-l border-border">{tournament.description}</p>
+          )}
         </div>
       )}
 
-      {/* Divider */}
-      {tournament && (
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground">Announcements</h2>
-          <div className="flex-1 h-px bg-border" />
+      {/* Tournament Rules */}
+      {tournament?.rules && tournament.rules.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+              <ListChecks className="h-4 w-4 text-primary" /> Tournament Rules
+            </h2>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <ol className="space-y-2">
+            {tournament.rules.map((rule, i) => (
+              <li key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/15 text-primary text-xs font-black flex items-center justify-center mt-0.5">
+                  {i + 1}
+                </span>
+                <p className="text-sm leading-relaxed">{rule}</p>
+              </li>
+            ))}
+          </ol>
         </div>
       )}
+
+      {/* Prizes */}
+      {tournament?.prizes && tournament.prizes.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+              <Award className="h-4 w-4 text-yellow-500" /> Prizes
+            </h2>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <ol className="space-y-2">
+            {tournament.prizes.map((prize, i) => (
+              <li key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-yellow-500/15 text-yellow-500 text-xs font-black flex items-center justify-center mt-0.5">
+                  {i + 1}
+                </span>
+                <p className="text-sm leading-relaxed">{prize}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* Announcements */}
+      <div className="flex items-center gap-2">
+        <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground">Announcements</h2>
+        <div className="flex-1 h-px bg-border" />
+      </div>
 
       {isLoading ? (
         <div className="flex justify-center py-16">
