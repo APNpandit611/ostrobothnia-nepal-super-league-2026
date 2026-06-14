@@ -66,11 +66,11 @@ function Router() {
       </Route>
 
       <Route path="/register">
-        <Register />
+        <Layout><Register /></Layout>
       </Route>
 
       <Route path="/admin">
-        <AdminLogin />
+        <Layout><AdminLogin /></Layout>
       </Route>
       
       <Route path="/admin/dashboard">

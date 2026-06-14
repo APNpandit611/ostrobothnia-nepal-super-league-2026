@@ -47,7 +47,6 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/register#team", label: "Register Team", icon: Shield },
     ],
   },
-  { href: "/admin/dashboard", label: "Admin", icon: Settings },
 ];
 
 function isParentActive(item: NavItem, location: string): boolean {
@@ -187,14 +186,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <div className="font-black text-sm tracking-tight">KOKKOLA SOCCER BOYS</div>
           </div>
         </Link>
-        <div className="flex items-center gap-4">
-          <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="text-muted-foreground hover:text-foreground">
-            {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </button>
-          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-foreground">
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
+        <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="text-foreground">
+          {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </button>
       </header>
 
       {/* Mobile Navigation */}
@@ -204,6 +198,23 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {NAV_ITEMS.map(item => (
               <MobileItem key={item.href} item={item} location={location} onClose={() => setMobileMenuOpen(false)} />
             ))}
+            <div className="mt-2 pt-2 border-t space-y-0.5">
+              <Link href="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                <div className={cn(
+                  "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
+                  location.startsWith("/admin") ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}>
+                  <Settings className="h-5 w-5" />
+                  Admin
+                </div>
+              </Link>
+              <button
+                onClick={() => { setTheme(theme === "dark" ? "light" : "dark"); }}
+                className="flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              >
+                {theme === "dark" ? <><Sun className="h-5 w-5" /> Light Mode</> : <><Moon className="h-5 w-5" /> Dark Mode</>}
+              </button>
+            </div>
           </nav>
         </div>
       )}
@@ -221,10 +232,19 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <SidebarItem key={item.href} item={item} location={location} />
           ))}
         </nav>
-        <div className="border-t p-4">
+        <div className="border-t p-4 space-y-1">
+          <Link href="/admin/dashboard">
+            <div className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer",
+              location.startsWith("/admin") ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}>
+              <Settings className="h-4 w-4 flex-shrink-0" />
+              Admin
+            </div>
+          </Link>
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted transition-colors text-left"
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium hover:bg-muted transition-colors text-left text-muted-foreground hover:text-foreground"
           >
             {theme === "dark" ? <><Sun className="h-4 w-4" /> Light Mode</> : <><Moon className="h-4 w-4" /> Dark Mode</>}
           </button>
