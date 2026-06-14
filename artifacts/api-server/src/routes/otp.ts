@@ -2,12 +2,12 @@ import { Router, type IRouter } from "express";
 import { eq, and, gt } from "drizzle-orm";
 import { db, otpVerificationsTable, teamsTable, playersTable } from "@workspace/db";
 import { z } from "zod";
-import nodemailer from "nodemailer";
 import { getAuth, clerkClient } from "@clerk/express";
 import { requireAuth } from "../middleware/requireAuth";
 import {
   sendSquadSubmissionConfirmation,
   sendAdminSquadApprovalRequest,
+  senderFrom,
 } from "../lib/mailer";
 
 const router: IRouter = Router();
@@ -17,20 +17,6 @@ const IS_PROD = process.env["NODE_ENV"] === "production";
 
 function generateCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
-}
-
-function getTransporter() {
-  const host = process.env["SMTP_HOST"];
-  if (!host) return null;
-  return nodemailer.createTransport({
-    host,
-    port: Number(process.env["SMTP_PORT"] || "587"),
-    secure: process.env["SMTP_SECURE"] === "true",
-    auth: {
-      user: process.env["SMTP_USER"],
-      pass: process.env["SMTP_PASS"],
-    },
-  });
 }
 
 async function sendViaResend(to: string, code: string, log: (obj: object, msg: string) => void): Promise<boolean> {
@@ -44,7 +30,7 @@ async function sendViaResend(to: string, code: string, log: (obj: object, msg: s
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        from: "ONSL 2026 <noreply@kokkolasoccerboys.cc>",
+        from: senderFrom("ONSL 2026"),
         to,
         subject: "ONSL 2026 — Your verification code",
         html: `
@@ -109,41 +95,14 @@ router.post("/register/send-otp", async (req, res): Promise<void> => {
   let emailDelivered = false;
 
   if (type === "email") {
-    // Try Resend first (works from cloud servers)
     emailDelivered = await sendViaResend(contact, code, (obj, msg) => req.log.info(obj, msg));
     if (emailDelivered) {
       req.log.info({ contact }, "OTP email sent via Resend");
     } else {
-      // Fall back to SMTP
-      const transporter = getTransporter();
-      if (transporter) {
-        try {
-          const from = process.env["SMTP_FROM"] || process.env["SMTP_USER"] || "noreply@onsl2026.fi";
-          await transporter.sendMail({
-            from,
-            to: contact,
-            subject: "ONSL 2026 — Your verification code",
-            html: `
-              <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
-                <h2 style="color:#16a34a">Ostrobothnia Nepal Super League 2026</h2>
-                <p>Your team registration verification code is:</p>
-                <div style="font-size:40px;font-weight:900;letter-spacing:8px;text-align:center;padding:24px 0;color:#111">${code}</div>
-                <p style="color:#666;font-size:14px">This code expires in 10 minutes. Do not share it with anyone.</p>
-              </div>
-            `,
-          });
-          req.log.info({ contact, type }, "OTP email sent via SMTP");
-          emailDelivered = true;
-        } catch (err) {
-          req.log.error({ err }, "Failed to send OTP email via SMTP");
-        }
-      }
-      if (!emailDelivered) {
-        req.log.info({ contact, code }, "OTP CODE (all delivery methods failed)");
-      }
+      req.log.info({ contact, ...(IS_PROD ? {} : { code }) }, "OTP CODE (email delivery failed)");
     }
   } else {
-    req.log.info({ contact, code }, "OTP CODE (SMS — no SMS provider configured)");
+    req.log.info({ contact, ...(IS_PROD ? {} : { code }) }, "OTP CODE (SMS — no SMS provider configured)");
   }
 
   res.status(200).json({ id: record.id });

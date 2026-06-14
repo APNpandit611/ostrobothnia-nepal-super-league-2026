@@ -1,35 +1,15 @@
-import nodemailer, { type Transporter } from "nodemailer";
 import { logger } from "./logger";
 
 const KSB_NAME = "Kokkola Soccer Boys";
-const DEFAULT_FROM = "ksoccerboys@gmail.com";
 
-let cachedTransporter: Transporter | null | undefined;
-
-function getTransporter(): Transporter | null {
-  if (cachedTransporter !== undefined) return cachedTransporter;
-  const host = process.env["SMTP_HOST"];
-  if (!host) {
-    logger.warn("SMTP_HOST not set — outgoing emails disabled");
-    cachedTransporter = null;
-    return null;
-  }
-  cachedTransporter = nodemailer.createTransport({
-    host,
-    port: Number(process.env["SMTP_PORT"] || "587"),
-    secure: process.env["SMTP_SECURE"] === "true",
-    auth: {
-      user: process.env["SMTP_USER"],
-      pass: process.env["SMTP_PASS"],
-    },
-  });
-  return cachedTransporter;
-}
+// Resend requires the "from" address to be on a domain you've verified at
+// https://resend.com/domains. Override with the MAIL_FROM env var if you verify
+// a different domain.
+const FROM_ADDRESS = process.env["MAIL_FROM"] || "noreply@kokkolasoccerboys.cc";
 
 function bareAddress(): string {
-  const addr = process.env["SMTP_FROM"] || process.env["SMTP_USER"] || DEFAULT_FROM;
-  const match = addr.match(/<(.+)>/);
-  return match ? match[1] : addr;
+  const match = FROM_ADDRESS.match(/<(.+)>/);
+  return match ? match[1] : FROM_ADDRESS;
 }
 
 function ksbFrom(): string {
@@ -38,6 +18,12 @@ function ksbFrom(): string {
 
 function noReplyFrom(): string {
   return `${KSB_NAME} (No Reply) <${bareAddress()}>`;
+}
+
+// Shared sender builder so other routes (e.g. OTP) resolve the same
+// verified-domain address as the rest of the mailer.
+export function senderFrom(name: string): string {
+  return `${name} <${bareAddress()}>`;
 }
 
 function adminEmail(): string | null {
@@ -105,20 +91,35 @@ async function send(opts: {
   replyTo?: string;
   context: string;
 }): Promise<boolean> {
-  const transporter = getTransporter();
-  if (!transporter) return false;
+  const apiKey = process.env["RESEND_API_KEY"];
+  if (!apiKey) {
+    logger.warn({ context: opts.context }, "RESEND_API_KEY not set — outgoing emails disabled");
+    return false;
+  }
   try {
-    await transporter.sendMail({
-      from: opts.from,
-      to: opts.to,
-      subject: opts.subject,
-      html: opts.html,
-      ...(opts.replyTo ? { replyTo: opts.replyTo } : {}),
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        from: opts.from,
+        to: opts.to,
+        subject: opts.subject,
+        html: opts.html,
+        ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
+      }),
     });
-    logger.info({ to: opts.to, context: opts.context }, "Email sent");
+    if (!res.ok) {
+      const body = await res.text().catch(() => "(unreadable)");
+      logger.error({ status: res.status, body, to: opts.to, context: opts.context }, "Resend API error");
+      return false;
+    }
+    logger.info({ to: opts.to, context: opts.context }, "Email sent via Resend");
     return true;
   } catch (err) {
-    logger.error({ err, to: opts.to, context: opts.context }, "Failed to send email");
+    logger.error({ err, to: opts.to, context: opts.context }, "Failed to send email via Resend");
     return false;
   }
 }

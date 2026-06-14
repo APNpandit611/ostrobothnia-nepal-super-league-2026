@@ -59,6 +59,7 @@ _Populate as needed._
 - After adding new schema files, run `pnpm run typecheck:libs` before typechecking leaf packages — stale declarations cause TS2305 errors
 - The `goals` route recalculates match score on every delete (counts all remaining goals)
 - Admin credentials come from the environment: `ADMIN_USERNAME` (defaults to `admin`) and `ADMIN_PASSWORD` (required secret). Login returns 503 if `ADMIN_PASSWORD` is unset
+- Email is sent via the **Resend HTTP API** (`RESEND_API_KEY`); nodemailer/SMTP was removed (Gmail SMTP fails from cloud servers). Resend only delivers from a **verified domain** — verify a domain at resend.com/domains, then point `MAIL_FROM` at it. Until then, sends to anyone but the Resend account owner return 403 and notifications won't arrive
 
 ## Pointers
 
