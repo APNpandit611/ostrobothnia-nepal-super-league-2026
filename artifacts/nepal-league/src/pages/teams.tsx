@@ -1,6 +1,6 @@
 import { useListTeams, useGetStandings, useListPlayers } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Crosshair, Shield, Users, FileText, UserPlus } from "lucide-react";
+import { Loader2, Crosshair, Shield, Users, FileText, UserPlus, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
 import type { Team } from "@workspace/api-client-react";
 
@@ -117,12 +117,38 @@ export default function Teams() {
     );
   }
 
-  const registeredCount = standings?.length ?? 0;
-  const noTeamsRegistered = !teamsLoading && !standingsLoading && registeredCount === 0;
+  const noTeamsRegistered = !teamsLoading && !standingsLoading && (standings?.length ?? 0) === 0;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <h1 className="text-3xl font-black tracking-tight uppercase italic">Teams</h1>
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <h1 className="text-3xl font-black tracking-tight uppercase italic">Teams</h1>
+        <Link href="/register-team">
+          <div className="flex items-center gap-2 bg-primary text-primary-foreground font-bold px-4 py-2.5 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer text-sm">
+            <UserPlus className="h-4 w-4" /> Register a Team
+          </div>
+        </Link>
+      </div>
+
+      {/* Registration banner */}
+      <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 bg-primary/15 rounded-lg flex-shrink-0">
+            <Shield className="h-5 w-5 text-primary" />
+          </div>
+          <div>
+            <p className="font-bold text-sm">Ostrobothnia Nepal Super League 2026</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Registration is open — 28 June 2026 · Santahaka, Kokkola
+            </p>
+          </div>
+        </div>
+        <Link href="/register-team">
+          <div className="flex items-center gap-2 text-primary font-bold text-sm hover:underline cursor-pointer whitespace-nowrap">
+            Register your team <ChevronRight className="h-4 w-4" />
+          </div>
+        </Link>
+      </div>
 
       {noTeamsRegistered ? (
         <Card className="border-dashed">
@@ -134,11 +160,6 @@ export default function Teams() {
                 Teams will appear here once they register their squad.
               </p>
             </div>
-            <Link href="/register">
-              <div className="flex items-center gap-2 bg-primary text-primary-foreground font-bold px-5 py-2.5 rounded-lg hover:bg-primary/90 transition-colors cursor-pointer text-sm">
-                <UserPlus className="h-4 w-4" /> Register a Team
-              </div>
-            </Link>
           </CardContent>
         </Card>
       ) : (
