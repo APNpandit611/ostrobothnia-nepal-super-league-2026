@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useCreateTeam, useAddPlayer } from "@workspace/api-client-react";
+import { useCreateTeam, useAddPlayer, useGetActiveTournament } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,8 +9,10 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, UserPlus, Trash2, CheckCircle2, ClipboardList,
   Shield, ChevronRight, Upload, X, Mail, KeyRound, RefreshCw,
+  CalendarX, Lock,
 } from "lucide-react";
 import { Link } from "wouter";
+import { format } from "date-fns";
 
 const POSITIONS = ["GK", "C", "V.C", "Player", "Manager"];
 const MIN_PLAYERS = 7;
@@ -37,6 +39,11 @@ function autoShortName(name: string): string {
   return words.map((w) => w[0]).join("").slice(0, 4).toUpperCase();
 }
 
+function parseTournamentDate(date: string): Date {
+  const [year, month, day] = date.split("-").map(Number);
+  return new Date(year, month - 1, day, 23, 59, 59);
+}
+
 async function sendOtp(contact: string, type: "email" | "phone"): Promise<{ id: string; devCode?: string }> {
   const res = await fetch("/api/register/send-otp", {
     method: "POST",
@@ -60,7 +67,39 @@ async function verifyOtp(id: string, code: string): Promise<boolean> {
   return data.verified === true;
 }
 
-export default function RegisterTeam() {
+// ─── Registration closed screen ───────────────────────────────────────────────
+function RegistrationClosed({ reason }: { reason: "no-tournament" | "past" }) {
+  return (
+    <div className="flex flex-col items-center text-center gap-6 py-20 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-md mx-auto">
+      <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center">
+        {reason === "no-tournament"
+          ? <CalendarX className="h-9 w-9 text-muted-foreground" />
+          : <Lock className="h-9 w-9 text-muted-foreground" />}
+      </div>
+      <div>
+        <h1 className="text-2xl font-black">
+          {reason === "no-tournament" ? "No Upcoming Tournament" : "Registration Closed"}
+        </h1>
+        <p className="text-muted-foreground mt-2 text-sm leading-relaxed">
+          {reason === "no-tournament"
+            ? "There is no upcoming tournament open for team registration at the moment. Check back later or follow us for announcements."
+            : "The registration window for this tournament has closed. The event has already taken place."}
+        </p>
+      </div>
+      <div className="flex gap-3">
+        <Link href="/announcements">
+          <Button variant="outline">News & Updates</Button>
+        </Link>
+        <Link href="/">
+          <Button>Back to Home</Button>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main registration form ───────────────────────────────────────────────────
+function RegistrationForm({ tournamentName, tournamentDate }: { tournamentName: string; tournamentDate: string }) {
   const { toast } = useToast();
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -206,7 +245,8 @@ export default function RegisterTeam() {
         <div>
           <h2 className="text-2xl font-black">Registration Complete!</h2>
           <p className="text-muted-foreground mt-2">
-            <span className="font-bold text-foreground">{createdTeamName}</span> has been registered for ONSL 2026. Only the admin can make changes from here.
+            <span className="font-bold text-foreground">{createdTeamName}</span> has been registered for{" "}
+            <span className="font-bold text-foreground">{tournamentName}</span>. Only the admin can make changes from here.
           </p>
         </div>
         <div className="flex gap-3">
@@ -241,10 +281,20 @@ export default function RegisterTeam() {
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Header */}
       <div className="text-center space-y-2">
-        <img src="/onsl-official-logo.png" alt="ONSL 2026" className="h-14 w-14 rounded-full object-contain mx-auto" />
-        <h1 className="text-2xl font-black uppercase italic tracking-tight">Register Your Team</h1>
-        <p className="text-muted-foreground text-sm">Register your team for ONSL 2026. Once submitted, only admin can make changes.</p>
+        <img src="/onsl-official-logo.png" alt={tournamentName} className="h-14 w-14 rounded-full object-contain mx-auto" />
+        <div className="inline-flex items-center gap-2 bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+          <Shield className="h-3.5 w-3.5" /> Team Registration
+        </div>
+        <h1 className="text-2xl font-black uppercase italic tracking-tight">{tournamentName}</h1>
+        <p className="text-muted-foreground text-sm">
+          Register your team to compete · Tournament date:{" "}
+          <span className="font-semibold text-foreground">
+            {format(parseTournamentDate(tournamentDate), "d MMMM yyyy")}
+          </span>
+        </p>
+        <p className="text-xs text-muted-foreground">Once submitted, only admin can make changes.</p>
       </div>
 
       <div className="max-w-2xl mx-auto">
@@ -468,7 +518,7 @@ export default function RegisterTeam() {
             </Card>
 
             <Button size="lg" className="w-full font-bold uppercase tracking-wider mt-4" onClick={handleSubmit} disabled={submitting}>
-              {submitting ? <><Loader2 className="h-5 w-5 animate-spin mr-2" /> Registering…</> : "Submit Team Registration"}
+              {submitting ? <><Loader2 className="h-5 w-5 animate-spin mr-2" /> Registering…</> : `Submit Registration for ${tournamentName}`}
             </Button>
           </>
         )}
@@ -477,11 +527,39 @@ export default function RegisterTeam() {
           <Link href="/teams" className="underline hover:text-foreground">View squads</Link>
           {" · "}
           <Link href="/" className="underline hover:text-foreground">Back to home</Link>
-          {" · "}
-          <Link href="/register" className="underline hover:text-foreground">Join KSB Club</Link>
-
         </p>
       </div>
     </div>
+  );
+}
+
+// ─── Page entry point ─────────────────────────────────────────────────────────
+export default function RegisterTeam() {
+  const { data: tournament, isLoading } = useGetActiveTournament();
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center py-24">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // No active tournament configured
+  if (!tournament) {
+    return <RegistrationClosed reason="no-tournament" />;
+  }
+
+  // Tournament date has already passed — registration closed
+  const tournamentDate = parseTournamentDate(tournament.date);
+  if (tournamentDate < new Date()) {
+    return <RegistrationClosed reason="past" />;
+  }
+
+  return (
+    <RegistrationForm
+      tournamentName={tournament.name}
+      tournamentDate={tournament.date}
+    />
   );
 }
