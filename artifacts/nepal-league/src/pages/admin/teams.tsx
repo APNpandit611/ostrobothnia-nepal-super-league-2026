@@ -276,6 +276,15 @@ export default function AdminTeams() {
   const selectedTeam = teams?.find((t) => t.id === selectedId);
   const edit = selectedId ? edits[selectedId] : null;
 
+  const isDirty = !!(
+    selectedTeam && edit && (
+      edit.name !== selectedTeam.name ||
+      edit.shortName !== selectedTeam.shortName ||
+      edit.primaryColor.toLowerCase() !== (selectedTeam.primaryColor || "#16a34a").toLowerCase() ||
+      edit.logoUrl !== (selectedTeam.logoUrl ?? "")
+    )
+  );
+
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
@@ -458,7 +467,7 @@ export default function AdminTeams() {
                 </div>
                 <Button
                   onClick={() => handleSave(selectedTeam.id)}
-                  disabled={updateMutation.isPending && (updateMutation.variables as { id: number })?.id === selectedTeam.id}
+                  disabled={!isDirty || (updateMutation.isPending && (updateMutation.variables as { id: number })?.id === selectedTeam.id)}
                   className="gap-1.5"
                 >
                   {updateMutation.isPending && (updateMutation.variables as { id: number })?.id === selectedTeam.id
