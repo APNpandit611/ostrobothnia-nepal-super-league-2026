@@ -285,18 +285,46 @@ export default function AdminTeams() {
         <p className="text-sm text-muted-foreground mt-0.5">Select a team to edit details and manage the squad</p>
       </div>
 
+      {/* Pending approval banner */}
+      {(() => {
+        const pending = teams?.filter(t => t.squadStatus === "pending") ?? [];
+        if (pending.length === 0) return null;
+        return (
+          <div className="flex items-start gap-3 rounded-xl border border-yellow-500/40 bg-yellow-500/10 px-4 py-3">
+            <Clock className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-yellow-600">
+                {pending.length} squad{pending.length > 1 ? "s" : ""} awaiting approval
+              </p>
+              <div className="flex flex-wrap gap-1.5 mt-1.5">
+                {pending.map(t => (
+                  <button
+                    key={t.id}
+                    onClick={() => setSelectedId(t.id)}
+                    className="text-xs font-semibold px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-700 hover:bg-yellow-500/30 transition-colors border border-yellow-500/30"
+                  >
+                    {t.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Team selector */}
       <div className="flex gap-2 flex-wrap">
         {teams?.map((team) => {
           const isSelected = team.id === selectedId;
           const isConfirming = confirmDeleteId === team.id;
+          const isPendingSquad = team.squadStatus === "pending";
           return (
             <div key={team.id} className="relative group">
               <button
                 onClick={() => { setSelectedId(team.id); setConfirmDeleteId(null); }}
                 className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border-2 transition-all font-semibold text-sm pr-9"
                 style={{
-                  borderColor: isSelected ? (edits[team.id]?.primaryColor || team.primaryColor) : "transparent",
+                  borderColor: isSelected ? (edits[team.id]?.primaryColor || team.primaryColor) : isPendingSquad ? "#eab308" : "transparent",
                   backgroundColor: isSelected ? `${edits[team.id]?.primaryColor || team.primaryColor}18` : "hsl(var(--muted)/0.5)",
                   color: isSelected ? (edits[team.id]?.primaryColor || team.primaryColor) : undefined,
                 }}
@@ -314,6 +342,9 @@ export default function AdminTeams() {
                   />
                 )}
                 <span>{edits[team.id]?.shortName || team.shortName}</span>
+                {isPendingSquad && (
+                  <span className="ml-0.5 h-2 w-2 rounded-full bg-yellow-500 flex-shrink-0" title="Squad pending approval" />
+                )}
               </button>
               {/* Delete button */}
               {isConfirming ? (
@@ -372,7 +403,12 @@ export default function AdminTeams() {
                     value="squad"
                     className="pb-3 px-0 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none text-sm font-semibold"
                   >
-                    Squad
+                    <span className="flex items-center gap-1.5">
+                      Squad
+                      {selectedTeam.squadStatus === "pending" && (
+                        <span className="h-2 w-2 rounded-full bg-yellow-500 flex-shrink-0" />
+                      )}
+                    </span>
                   </TabsTrigger>
                 </TabsList>
               </div>
