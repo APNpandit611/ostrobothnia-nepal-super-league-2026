@@ -39,7 +39,7 @@ async function sendViaResend(to: string, code: string, log: (obj: object, msg: s
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        from: "ONSL 2026 <onboarding@resend.dev>",
+        from: "ONSL 2026 <noreply@kokkolasoccerboys.cc>",
         to,
         subject: "ONSL 2026 — Your verification code",
         html: `
