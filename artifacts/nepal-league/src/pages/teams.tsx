@@ -143,6 +143,17 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
                     )}
                   </div>
                 ))}
+                {team.managerName && (
+                  <div className="flex items-center gap-2.5 py-1.5 px-2 mt-1 border-t border-dashed border-border/60">
+                    <span className="text-[11px] font-black w-6 h-6 rounded-full flex items-center justify-center bg-muted text-muted-foreground flex-shrink-0">
+                      M
+                    </span>
+                    <span className="text-sm font-medium flex-1">{team.managerName}</span>
+                    <span className="text-[10px] font-bold border rounded px-1.5 py-0.5 bg-purple-500/20 text-purple-400 border-purple-500/30">
+                      Manager
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </>
