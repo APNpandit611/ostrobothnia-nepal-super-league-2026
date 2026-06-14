@@ -165,6 +165,28 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Register CTA */}
+      <Card className="border-primary/30 bg-gradient-to-br from-primary/10 to-transparent overflow-hidden relative">
+        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 pointer-events-none" />
+        <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center gap-6">
+          <div className="flex-1 space-y-2">
+            <div className="flex items-center gap-2 text-primary font-black uppercase tracking-wider text-sm">
+              <UserPlus className="h-5 w-5" />
+              Register Your Team
+            </div>
+            <h3 className="text-xl md:text-2xl font-black">Is your club joining {displayShortName}?</h3>
+            <p className="text-muted-foreground text-sm">
+              Register your team and squad before the tournament. You'll need a team manager email for OTP verification and at least 7 players.
+            </p>
+          </div>
+          <Link href="/register#team">
+            <div className="flex items-center gap-2 bg-primary text-primary-foreground font-bold px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors cursor-pointer whitespace-nowrap">
+              Register Now <ArrowRight className="h-4 w-4" />
+            </div>
+          </Link>
+        </CardContent>
+      </Card>
+
       {/* About the tournament */}
       <div className="grid md:grid-cols-2 gap-6">
         <Card>
@@ -304,28 +326,6 @@ export default function Home() {
           ))}
         </div>
       </div>
-
-      {/* Register CTA */}
-      <Card className="border-primary/30 bg-gradient-to-br from-primary/10 to-transparent overflow-hidden relative">
-        <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 pointer-events-none" />
-        <CardContent className="p-6 md:p-8 flex flex-col md:flex-row items-center gap-6">
-          <div className="flex-1 space-y-2">
-            <div className="flex items-center gap-2 text-primary font-black uppercase tracking-wider text-sm">
-              <UserPlus className="h-5 w-5" />
-              Register Your Team
-            </div>
-            <h3 className="text-xl md:text-2xl font-black">Is your club joining {displayShortName}?</h3>
-            <p className="text-muted-foreground text-sm">
-              Register your team and squad before the tournament. You'll need a team manager email for OTP verification and at least 7 players.
-            </p>
-          </div>
-          <Link href="/register">
-            <div className="flex items-center gap-2 bg-primary text-primary-foreground font-bold px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors cursor-pointer whitespace-nowrap">
-              Register Now <ArrowRight className="h-4 w-4" />
-            </div>
-          </Link>
-        </CardContent>
-      </Card>
 
       {/* Share / QR */}
       <Card className="border-dashed">
