@@ -153,19 +153,6 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           </Link>
-          <Link href="/standings">
-            <Card className="hover:border-primary cursor-pointer transition-all hover:shadow-md">
-              <CardContent className="p-5 flex items-center gap-4">
-                <div className="p-3 bg-primary/10 text-primary rounded-xl">
-                  <Trophy className="h-6 w-6" />
-                </div>
-                <div>
-                  <h3 className="font-bold">Standings</h3>
-                  <p className="text-sm text-muted-foreground">Current leaderboard</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
         </div>
 
         {/* Tournament actions + live matches */}
