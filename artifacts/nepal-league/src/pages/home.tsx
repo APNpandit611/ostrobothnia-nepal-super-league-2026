@@ -115,8 +115,8 @@ export default function Home() {
 
           {/* Logo */}
           <img
-            src="/ksb-logo.png"
-            alt="Kokkola Soccer Boys"
+            src="/onsl-logo.jpeg"
+            alt="ONSL 2026"
             className="h-32 w-32 md:h-44 md:w-44 object-contain rounded-full shadow-xl ring-4 ring-primary/25"
           />
 
@@ -337,7 +337,7 @@ export default function Home() {
               fgColor="#111827"
               level="M"
               imageSettings={{
-                src: "/ksb-logo.png",
+                src: "/onsl-logo.jpeg",
                 x: undefined,
                 y: undefined,
                 height: 28,

@@ -12,7 +12,6 @@ import {
   UserPlus, Trash2, Mail, KeyRound, RefreshCw, Pencil, Lock,
 } from "lucide-react";
 
-const POSITIONS = ["GK", "C", "V.C", "Player", "Manager"];
 const MIN_PLAYERS = 7;
 const MAX_PLAYERS = 15;
 
@@ -20,11 +19,10 @@ interface PlayerRow {
   localId: string;
   name: string;
   number: string;
-  position: string;
 }
 
 function newRow(): PlayerRow {
-  return { localId: crypto.randomUUID(), name: "", number: "", position: "" };
+  return { localId: crypto.randomUUID(), name: "", number: "" };
 }
 
 async function sendOtp(contact: string, teamId: number): Promise<{ id: string; code?: string }> {
@@ -60,7 +58,7 @@ async function submitSquadUpdate(teamId: number, otpId: string, players: PlayerR
       players: players.map(p => ({
         name: p.name.trim(),
         number: p.number ? parseInt(p.number) : null,
-        position: p.position || null,
+        position: null,
       })),
     }),
     credentials: "include",
@@ -129,7 +127,6 @@ export default function UpdateSquad() {
           localId: crypto.randomUUID(),
           name: p.name,
           number: p.number?.toString() ?? "",
-          position: p.position ?? "",
         })));
       } else {
         setRows(Array.from({ length: MIN_PLAYERS }, newRow));
@@ -397,15 +394,14 @@ export default function UpdateSquad() {
           ) : (
             <Card>
               <CardContent className="p-4 space-y-3">
-                <div className="grid grid-cols-[2fr_1fr_1.5fr_auto] gap-2 px-1">
-                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Name</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">#</span>
-                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Position</span>
+                <div className="grid grid-cols-[1fr_auto_auto] gap-2 px-1">
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Player Name</span>
+                  <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground w-16 text-center">Jersey #</span>
                   <span />
                 </div>
 
                 {rows.map((row, i) => (
-                  <div key={row.localId} className="grid grid-cols-[2fr_1fr_1.5fr_auto] gap-2 items-center">
+                  <div key={row.localId} className="grid grid-cols-[1fr_auto_auto] gap-2 items-center">
                     <Input
                       placeholder={`Player ${i + 1}`}
                       value={row.name}
@@ -416,18 +412,9 @@ export default function UpdateSquad() {
                       placeholder="—"
                       value={row.number}
                       onChange={e => updateRow(row.localId, "number", e.target.value.replace(/\D/g, ""))}
-                      className="h-9 text-sm text-center"
+                      className="h-9 text-sm text-center w-16"
                       maxLength={2}
                     />
-                    <Select value={row.position} onValueChange={val => updateRow(row.localId, "position", val)}>
-                      <SelectTrigger className="h-9 text-sm">
-                        <SelectValue placeholder="Role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value=" ">—</SelectItem>
-                        {POSITIONS.map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
                     <button
                       onClick={() => removeRow(row.localId)}
                       disabled={rows.length <= 1}
