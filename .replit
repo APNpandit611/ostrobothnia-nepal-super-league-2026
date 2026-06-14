@@ -43,6 +43,6 @@ channel = "stable-25_05"
 [userenv.shared]
 SMTP_HOST = "smtp.gmail.com"
 SMTP_PORT = "587"
-SMTP_USER = "ksoccerboys@gmail.com"
-SMTP_FROM = "Kokkola Soccer Boys <ksoccerboys@gmail.com>"
+SMTP_USER = "Ksoccerboys@gmail.com"
+SMTP_FROM = "ONSL 2026 <Ksoccerboys@gmail.com>"
 SMTP_SECURE = "false"
