@@ -65,8 +65,8 @@ async function sendViaResend(to: string, code: string, log: (obj: object, msg: s
 }
 
 const SendOtpBody = z.object({
-  contact: z.string().min(1).max(320),
-  type: z.enum(["email", "phone"]),
+  contact: z.string().email().max(320),
+  type: z.enum(["email"]),
   teamId: z.number().int().positive().optional(),
 });
 
@@ -141,12 +141,7 @@ router.post("/register/send-otp", async (req, res): Promise<void> => {
     req.log.info({ contact, code }, "OTP CODE (SMS — no SMS provider configured)");
   }
 
-  res.status(200).json({
-    id: record.id,
-    // Always return the code so managers can see it on screen
-    // (Resend free tier only delivers to verified domains; on-screen is the primary delivery)
-    code,
-  });
+  res.status(200).json({ id: record.id });
 });
 
 router.post("/register/verify-otp", async (req, res): Promise<void> => {
