@@ -12,7 +12,7 @@ import {
   Loader2, UserPlus, Trash2, CheckCircle2, ClipboardList,
   Shield, ChevronRight, Upload, X, Mail, Phone, KeyRound, RefreshCw, Heart,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 const POSITIONS = ["GK", "C", "V.C", "Player", "Manager"];
@@ -607,8 +607,9 @@ function RegisterTeamTab() {
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 export default function Register() {
-  const hash = typeof window !== "undefined" ? window.location.hash : "";
-  const defaultTab = hash === "#team" ? "team" : "join";
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const defaultTab = params.get("tab") === "team" ? "team" : "join";
 
   return (
     <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
