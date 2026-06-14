@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import { useState } from "react";
 import { 
   useAdminLogout, 
   useGetTournamentStats, 
@@ -10,6 +11,8 @@ import {
 } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
@@ -21,25 +24,27 @@ import {
   RefreshCcw,
   Users,
   AlertTriangle,
-  Home
+  Home,
+  Lock
 } from "lucide-react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetPassword, setResetPassword] = useState("");
+  const [resetPasswordError, setResetPasswordError] = useState(false);
 
   const { data: stats } = useGetTournamentStats();
   const { data: liveMatches } = useListMatches({ status: 'live' });
@@ -69,12 +74,22 @@ export default function AdminDashboard() {
       onSuccess: () => {
         toast({ title: "Success", description: "Tournament reset completely" });
         queryClient.invalidateQueries();
+        setResetDialogOpen(false);
+        setResetPassword("");
+        setResetPasswordError(false);
       },
       onError: () => {
-        toast({ variant: "destructive", title: "Error", description: "Failed to reset tournament" });
+        setResetPasswordError(true);
+        toast({ variant: "destructive", title: "Incorrect password", description: "The password you entered is wrong." });
       }
     }
   });
+
+  const handleResetConfirm = () => {
+    if (!resetPassword.trim()) { setResetPasswordError(true); return; }
+    setResetPasswordError(false);
+    resetTournamentMutation.mutate({ data: { password: resetPassword } });
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -195,29 +210,53 @@ export default function AdminDashboard() {
                 </h4>
                 <p className="text-sm text-muted-foreground">Reset everything (teams kept)</p>
               </div>
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button variant="destructive">Reset Tournament</Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete all matches, goals, cards, and events. Only team names and colors will remain.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction 
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      onClick={() => resetTournamentMutation.mutate()}
-                    >
-                      Yes, reset everything
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <Button variant="destructive" onClick={() => { setResetPassword(""); setResetPasswordError(false); setResetDialogOpen(true); }}>
+                Reset Tournament
+              </Button>
             </div>
+
+            <Dialog open={resetDialogOpen} onOpenChange={(open) => { if (!resetTournamentMutation.isPending) setResetDialogOpen(open); }}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2 text-destructive">
+                    <AlertTriangle className="h-5 w-5" /> Reset Tournament
+                  </DialogTitle>
+                  <DialogDescription>
+                    This will permanently delete all matches, goals, cards, and events. Team records will remain. This cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3 py-2">
+                  <Label htmlFor="reset-password" className="flex items-center gap-2">
+                    <Lock className="h-4 w-4" /> Enter admin password to confirm
+                  </Label>
+                  <Input
+                    id="reset-password"
+                    type="password"
+                    placeholder="Admin password"
+                    value={resetPassword}
+                    onChange={(e) => { setResetPassword(e.target.value); setResetPasswordError(false); }}
+                    onKeyDown={(e) => { if (e.key === "Enter") handleResetConfirm(); }}
+                    className={resetPasswordError ? "border-destructive focus-visible:ring-destructive" : ""}
+                    autoFocus
+                  />
+                  {resetPasswordError && (
+                    <p className="text-sm text-destructive">Incorrect password. Please try again.</p>
+                  )}
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setResetDialogOpen(false)} disabled={resetTournamentMutation.isPending}>
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleResetConfirm}
+                    disabled={resetTournamentMutation.isPending || !resetPassword.trim()}
+                  >
+                    {resetTournamentMutation.isPending ? "Resetting..." : "Yes, reset everything"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
 

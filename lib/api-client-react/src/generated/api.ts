@@ -43,6 +43,7 @@ import type {
   PlayerInput,
   PlayerUpdate,
   PublishToggleInput,
+  ResetTournamentBody,
   StandingRow,
   Team,
   TeamInput,
@@ -3183,23 +3184,24 @@ export const getResetTournamentUrl = () => {
 /**
  * @summary Reset the entire tournament (admin only)
  */
-export const resetTournament = async ( options?: RequestInit): Promise<MessageResponse> => {
+export const resetTournament = async (resetTournamentBody: ResetTournamentBody, options?: RequestInit): Promise<MessageResponse> => {
 
   return customFetch<MessageResponse>(getResetTournamentUrl(),
   {
     ...options,
-    method: 'POST'
-
-
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      resetTournamentBody,)
   }
 );}
 
 
 
 
-export const getResetTournamentMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetTournament>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof resetTournament>>, TError,void, TContext> => {
+export const getResetTournamentMutationOptions = <TError = ErrorType<MessageResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetTournament>>, TError,{data: BodyType<ResetTournamentBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof resetTournament>>, TError,{data: BodyType<ResetTournamentBody>}, TContext> => {
 
 const mutationKey = ['resetTournament'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -3211,10 +3213,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetTournament>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resetTournament>>, {data: BodyType<ResetTournamentBody>}> = (props) => {
+          const {data} = props ?? {};
 
-
-          return  resetTournament(requestOptions)
+          return  resetTournament(data,requestOptions)
         }
 
 
@@ -3225,18 +3227,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type ResetTournamentMutationResult = NonNullable<Awaited<ReturnType<typeof resetTournament>>>
-
-    export type ResetTournamentMutationError = ErrorType<unknown>
+    export type ResetTournamentMutationBody = BodyType<ResetTournamentBody>
+    export type ResetTournamentMutationError = ErrorType<MessageResponse>
 
     /**
  * @summary Reset the entire tournament (admin only)
  */
-export const useResetTournament = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetTournament>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useResetTournament = <TError = ErrorType<MessageResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetTournament>>, TError,{data: BodyType<ResetTournamentBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof resetTournament>>,
         TError,
-        void,
+        {data: BodyType<ResetTournamentBody>},
         TContext
       > => {
       return useMutation(getResetTournamentMutationOptions(options));

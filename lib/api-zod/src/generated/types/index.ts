@@ -42,6 +42,7 @@ export * from './player';
 export * from './playerInput';
 export * from './playerUpdate';
 export * from './publishToggleInput';
+export * from './resetTournamentBody';
 export * from './standingRow';
 export * from './team';
 export * from './teamInput';

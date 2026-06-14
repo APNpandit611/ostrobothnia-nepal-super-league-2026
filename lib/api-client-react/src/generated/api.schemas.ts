@@ -620,3 +620,7 @@ export const ListAllAnnouncementsStatus = {
   published: 'published',
 } as const;
 
+export type ResetTournamentBody = {
+  password: string;
+};
+

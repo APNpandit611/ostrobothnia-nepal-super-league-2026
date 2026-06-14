@@ -849,6 +849,10 @@ export const ToggleAnnouncementPublishResponse = zod.object({
 /**
  * @summary Reset the entire tournament (admin only)
  */
+export const ResetTournamentBody = zod.object({
+  "password": zod.string()
+})
+
 export const ResetTournamentResponse = zod.object({
   "message": zod.string()
 })

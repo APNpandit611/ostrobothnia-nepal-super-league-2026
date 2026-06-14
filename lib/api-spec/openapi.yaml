@@ -865,9 +865,25 @@ paths:
       operationId: resetTournament
       tags: [matches]
       summary: Reset the entire tournament (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
       responses:
         "200":
           description: Tournament reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+        "403":
+          description: Incorrect password
           content:
             application/json:
               schema:
