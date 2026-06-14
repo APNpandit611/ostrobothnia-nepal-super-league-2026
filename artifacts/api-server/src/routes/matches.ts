@@ -67,12 +67,16 @@ router.post("/matches", async (req, res): Promise<void> => {
   res.status(201).json(enrichMatch(match, teamsMap.get(match.homeTeamId), teamsMap.get(match.awayTeamId)));
 });
 
-const ADMIN_PASSWORD = "Ksoccerboys@1995!";
-
 // Auto-generate round-robin fixtures for all teams
 router.post("/matches/generate", async (req, res): Promise<void> => {
   const { password } = req.body as { password?: string };
-  if (!password || password !== ADMIN_PASSWORD) {
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    req.log.error("ADMIN_PASSWORD is not configured");
+    res.status(503).json({ error: "Admin password is not configured" });
+    return;
+  }
+  if (!password || password !== adminPassword) {
     res.status(403).json({ error: "Incorrect password" });
     return;
   }
