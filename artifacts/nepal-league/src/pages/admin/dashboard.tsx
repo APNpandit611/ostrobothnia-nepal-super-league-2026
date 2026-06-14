@@ -8,7 +8,8 @@ import {
   useGenerateFixtures,
   useResetTournament,
   getListMatchesQueryKey,
-  getGetTournamentStatsQueryKey
+  getGetTournamentStatsQueryKey,
+  getGetAdminMeQueryKey
 } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -61,7 +62,12 @@ export default function AdminDashboard() {
   const { data: teams } = useListTeams();
 
   const logoutMutation = useAdminLogout({
-    mutation: { onSuccess: () => setLocation("/admin") }
+    mutation: {
+      onSuccess: () => {
+        queryClient.removeQueries({ queryKey: getGetAdminMeQueryKey() });
+        setLocation("/admin");
+      }
+    }
   });
 
   const generateFixturesMutation = useGenerateFixtures({

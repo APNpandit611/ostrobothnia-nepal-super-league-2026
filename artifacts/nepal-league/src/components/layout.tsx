@@ -4,8 +4,11 @@ import {
   CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3,
   Settings, Menu, X, Sun, Moon, Home, UserPlus, Mail, Phone, MapPin,
   Facebook, Info, Megaphone, ChevronDown, Heart, Shield,
+  ClipboardEdit, BookOpen, LogOut,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useGetAdminMe, useAdminLogout, getGetAdminMeQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "./theme-provider";
 
 interface NavChild {
@@ -39,6 +42,16 @@ const NAV_ITEMS: NavItem[] = [
   },
   { href: "/announcements", label: "News", icon: Megaphone },
   { href: "/register", label: "Join KSB Club", icon: Heart },
+];
+
+const ADMIN_NAV_ITEMS: NavItem[] = [
+  { href: "/admin/dashboard", label: "Dashboard", icon: Settings },
+  { href: "/admin/matches", label: "Match Control", icon: Activity },
+  { href: "/admin/tournament", label: "Tournament Info", icon: ClipboardEdit },
+  { href: "/admin/teams", label: "Teams", icon: Users },
+  { href: "/admin/club-applications", label: "Applications", icon: Heart },
+  { href: "/admin/announcements", label: "Announcements", icon: Megaphone },
+  { href: "/admin/club-settings", label: "About Us", icon: BookOpen },
 ];
 
 function isParentActive(item: NavItem, location: string): boolean {
@@ -166,10 +179,24 @@ function MobileItem({ item, location, onClose }: { item: NavItem; location: stri
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 export function Layout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const mainRef = useRef<HTMLElement>(null);
+
+  const queryClient = useQueryClient();
+  const { data: adminMe, isError: adminMeError } = useGetAdminMe({
+    query: { retry: false, staleTime: 30_000 } as never,
+  });
+  const isAdmin = !adminMeError && !!adminMe?.isAdmin;
+  const logoutMutation = useAdminLogout({
+    mutation: {
+      onSuccess: () => {
+        queryClient.removeQueries({ queryKey: getGetAdminMeQueryKey() });
+        setLocation("/admin");
+      },
+    },
+  });
 
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0, behavior: "instant" });
@@ -203,17 +230,33 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {NAV_ITEMS.map(item => (
               <MobileItem key={item.href} item={item} location={location} onClose={() => setMobileMenuOpen(false)} />
             ))}
-            <div className="mt-2 pt-2 border-t">
-              <Link href="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
-                <div className={cn(
-                  "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
-                  location.startsWith("/admin") ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                )}>
-                  <Settings className="h-5 w-5" />
-                  Admin
-                </div>
-              </Link>
-            </div>
+            {isAdmin ? (
+              <div className="mt-2 pt-2 border-t">
+                <div className="px-4 pb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Admin Panel</div>
+                {ADMIN_NAV_ITEMS.map(item => (
+                  <MobileItem key={item.href} item={item} location={location} onClose={() => setMobileMenuOpen(false)} />
+                ))}
+                <button
+                  onClick={() => { setMobileMenuOpen(false); logoutMutation.mutate(); }}
+                  className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                >
+                  <LogOut className="h-5 w-5" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="mt-2 pt-2 border-t">
+                <Link href="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
+                  <div className={cn(
+                    "flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-colors",
+                    location.startsWith("/admin") ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}>
+                    <Settings className="h-5 w-5" />
+                    Admin
+                  </div>
+                </Link>
+              </div>
+            )}
           </nav>
         </div>
       )}
@@ -232,15 +275,32 @@ export function Layout({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
         <div className="border-t p-4">
-          <Link href="/admin/dashboard">
-            <div className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer",
-              location.startsWith("/admin") ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}>
-              <Settings className="h-4 w-4 flex-shrink-0" />
-              Admin
+          {isAdmin ? (
+            <div className="space-y-0.5">
+              <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Admin Panel</div>
+              {ADMIN_NAV_ITEMS.map(item => (
+                <SidebarItem key={item.href} item={item} location={location} />
+              ))}
+              <button
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+                className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+              >
+                <LogOut className="h-4 w-4 flex-shrink-0" />
+                Logout
+              </button>
             </div>
-          </Link>
+          ) : (
+            <Link href="/admin/dashboard">
+              <div className={cn(
+                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors cursor-pointer",
+                location.startsWith("/admin") ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}>
+                <Settings className="h-4 w-4 flex-shrink-0" />
+                Admin
+              </div>
+            </Link>
+          )}
         </div>
       </aside>
 

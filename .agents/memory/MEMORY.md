@@ -1,2 +1,3 @@
 - [Custom fetch credentials](custom-fetch-credentials.md) — all API calls must use `credentials: "include"` or session cookies are never sent and auth always returns 401.
 - [Clerk OAuth integration](clerk-oauth.md) — Clerk replaces OTP for team registration/squad update; key setup quirks documented.
+- [Admin auth state in Layout](admin-auth-nav-cache.md) — admin-gated nav uses useGetAdminMe; seed cache on login, removeQueries on logout, read !isError or the panel goes stale.

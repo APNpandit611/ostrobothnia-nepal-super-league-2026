@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useAdminLogin } from "@workspace/api-client-react";
+import { useAdminLogin, getGetAdminMeQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,12 +13,14 @@ import { Link } from "wouter";
 export default function AdminLogin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const loginMutation = useAdminLogin({
     mutation: {
-      onSuccess: () => {
+      onSuccess: (data) => {
+        queryClient.setQueryData(getGetAdminMeQueryKey(), data);
         toast({
           title: "Success",
           description: "Logged in successfully",
