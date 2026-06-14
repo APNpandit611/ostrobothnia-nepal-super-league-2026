@@ -1,17 +1,13 @@
 ---
 name: Admin auth state in shared Layout
-description: How the React frontend gates admin nav UI on the admin-me query, and the cache rules that keep it in sync across login/logout.
+description: Cache rules that keep admin-gated UI consistent across login/logout in the React frontend.
 ---
 
-The admin session is cookie-based (separate from Clerk). `useGetAdminMe` (GET `/api/auth/me`, returns `AuthResponse` with `isAdmin`, 401 when not an admin) is the single source of truth for whether to show admin-only UI.
+The admin session is cookie-based (separate from Clerk) and exposed by a single admin-me query that returns `isAdmin` (401 when not an admin). The shared Layout shows admin-only navigation on every page based on it, and the same query also guards admin routes — so two observers must always agree.
 
-The shared `Layout` renders a persistent "Admin Panel" nav section on every page when `isAdmin`, so admins keep access to admin tools while browsing public pages.
+**Durable rules for any admin-gated UI (break one and the nav goes stale):**
+- Treat the query as admin ONLY when it is not errored — a previously-successful query can still expose old data during a 401 refetch, which would keep admin UI visible after logout.
+- On login, seed the cache from the login response rather than invalidate-then-navigate; the latter races the route guard and can bounce the user back to the login page before the refetch lands.
+- On logout, remove the query from the cache before navigating; invalidate alone leaves stale success data.
 
-**Rules any admin-gated UI must follow (or the nav goes stale):**
-- Derive admin state as `!isError && !!data?.isAdmin` — NOT just `!!data?.isAdmin`. A previously-successful query can still expose old `data` during/after a 401 refetch, which would keep the admin UI visible after logout.
-- On **login** success, seed the cache: `queryClient.setQueryData(getGetAdminMeQueryKey(), data)` (login returns the same `AuthResponse`). Plain `invalidateQueries` + immediate navigate races the AuthGuard, which can redirect back to the login page before the refetch lands.
-- On **logout** success, `queryClient.removeQueries({ queryKey: getGetAdminMeQueryKey() })` before navigating. `invalidateQueries` leaves stale success data around.
-
-**Why:** the same admin-me query is observed by both `AuthGuard` and `Layout`; without seed-on-login / clear-on-logout the sidebar and the guard disagree, producing wrong redirects or a stale admin panel.
-
-**How to apply:** when adding any component that shows/hides UI based on admin status, reuse `useGetAdminMe` with a small `staleTime` (dedupes the shared `/api/auth/me` calls) and follow the three rules above.
+**Why:** the admin-me query is observed by both the route guard and the persistent nav. Without seed-on-login / clear-on-logout they disagree, producing wrong redirects or a stale admin panel.
