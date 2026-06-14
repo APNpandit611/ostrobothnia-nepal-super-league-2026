@@ -3,8 +3,12 @@ import { eq, and, gt } from "drizzle-orm";
 import { db, otpVerificationsTable, teamsTable, playersTable } from "@workspace/db";
 import { z } from "zod";
 import nodemailer from "nodemailer";
+import { requireAuth } from "../middleware/requireAuth";
 
 const router: IRouter = Router();
+
+const MAX_PLAYERS = 15;
+const IS_PROD = process.env["NODE_ENV"] === "production";
 
 function generateCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
@@ -25,8 +29,9 @@ function getTransporter() {
 }
 
 const SendOtpBody = z.object({
-  contact: z.string().min(1),
+  contact: z.string().min(1).max(320),
   type: z.enum(["email", "phone"]),
+  teamId: z.number().int().positive().optional(),
 });
 
 const VerifyOtpBody = z.object({
@@ -41,13 +46,23 @@ router.post("/register/send-otp", async (req, res): Promise<void> => {
     return;
   }
 
-  const { contact, type } = parsed.data;
+  const { contact, type, teamId } = parsed.data;
+
+  // If teamId is provided, verify the team exists
+  if (teamId !== undefined) {
+    const [team] = await db.select({ id: teamsTable.id }).from(teamsTable).where(eq(teamsTable.id, teamId));
+    if (!team) {
+      res.status(404).json({ error: "Team not found" });
+      return;
+    }
+  }
+
   const code = generateCode();
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
   const [record] = await db
     .insert(otpVerificationsTable)
-    .values({ contact, type, code, expiresAt })
+    .values({ contact, type, code, expiresAt, teamId: teamId ?? null })
     .returning();
 
   let emailDelivered = false;
@@ -74,19 +89,19 @@ router.post("/register/send-otp", async (req, res): Promise<void> => {
         emailDelivered = true;
       } catch (err) {
         req.log.error({ err }, "Failed to send OTP email — falling back to log");
-        req.log.info({ contact, code }, "OTP CODE (email send failed — showing in response)");
+        req.log.info({ contact, code }, "OTP CODE (email send failed)");
       }
     } else {
       req.log.info({ contact, code }, "OTP CODE (no SMTP configured — dev mode)");
     }
   } else {
-    req.log.info({ contact, code }, "OTP CODE (SMS — dev mode, no SMS provider configured)");
+    req.log.info({ contact, code }, "OTP CODE (SMS — no SMS provider configured)");
   }
 
   res.status(200).json({
     id: record.id,
-    // Only expose the code in the response when delivery failed (no SMTP or send error)
-    ...(emailDelivered ? {} : { devCode: code }),
+    // Only expose code in non-production when delivery failed (dev convenience)
+    ...(!emailDelivered && !IS_PROD ? { devCode: code } : {}),
   });
 });
 
@@ -125,25 +140,39 @@ router.post("/register/verify-otp", async (req, res): Promise<void> => {
   res.json({ verified: true });
 });
 
-const UpdateSquadBody = z.object({
-  teamId: z.number().int().positive(),
-  otpId: z.string().min(1),
-  players: z.array(z.object({
-    name: z.string().min(1),
-    number: z.union([z.number().int(), z.null()]).optional(),
-    position: z.string().optional().nullable(),
-  })).min(1),
+// Public: register a new team + players in one atomic call (requires a verified OTP)
+const RegisterPlayerInput = z.object({
+  name: z.string().min(1).max(100),
+  number: z.union([z.number().int().min(1).max(99), z.null()]).optional(),
+  position: z.string().max(30).optional().nullable(),
+  email: z.string().max(320).optional().nullable(),
+  phone: z.string().max(30).optional().nullable(),
 });
 
-router.post("/register/update-squad", async (req, res): Promise<void> => {
-  const parsed = UpdateSquadBody.safeParse(req.body);
+const RegisterTeamBody = z.object({
+  otpId: z.string().min(1),
+  name: z.string().min(1).max(100),
+  shortName: z.string().min(1).max(10),
+  primaryColor: z.string().max(20).optional().nullable(),
+  logoUrl: z.string().max(2_000_000).optional().nullable(),
+  city: z.string().max(100).optional().nullable(),
+  category: z.string().max(50).optional().nullable(),
+  managerName: z.string().max(100).optional().nullable(),
+  managerPhone: z.string().max(30).optional().nullable(),
+  managerEmail: z.string().max(320).optional().nullable(),
+  players: z.array(RegisterPlayerInput).min(1).max(MAX_PLAYERS),
+});
+
+router.post("/register/team", async (req, res): Promise<void> => {
+  const parsed = RegisterTeamBody.safeParse(req.body);
   if (!parsed.success) {
-    res.status(400).json({ error: "Invalid request body" });
+    res.status(400).json({ error: "Invalid request body", details: parsed.error.issues });
     return;
   }
 
-  const { teamId, otpId, players } = parsed.data;
+  const { otpId, players, ...teamData } = parsed.data;
 
+  // Verify OTP
   const [otp] = await db
     .select()
     .from(otpVerificationsTable)
@@ -157,6 +186,76 @@ router.post("/register/update-squad", async (req, res): Promise<void> => {
     return;
   }
 
+  // Create team
+  const [team] = await db
+    .insert(teamsTable)
+    .values({
+      name: teamData.name.trim(),
+      shortName: teamData.shortName.trim(),
+      primaryColor: teamData.primaryColor ?? "#16a34a",
+      logoUrl: teamData.logoUrl ?? null,
+      city: teamData.city ?? null,
+      category: teamData.category ?? null,
+      managerName: teamData.managerName ?? null,
+      managerPhone: teamData.managerPhone ?? null,
+      managerEmail: teamData.managerEmail ?? null,
+    })
+    .returning();
+
+  // Add players
+  await db.insert(playersTable).values(
+    players.map(p => ({
+      teamId: team.id,
+      name: p.name.trim(),
+      number: p.number ?? null,
+      position: p.position ?? null,
+      email: p.email ?? null,
+      phone: p.phone ?? null,
+    }))
+  );
+
+  res.status(201).json(team);
+});
+
+const UpdateSquadBody = z.object({
+  teamId: z.number().int().positive(),
+  otpId: z.string().min(1),
+  players: z.array(z.object({
+    name: z.string().min(1).max(100),
+    number: z.union([z.number().int().min(1).max(99), z.null()]).optional(),
+    position: z.string().max(30).optional().nullable(),
+  })).min(1).max(MAX_PLAYERS),
+});
+
+router.post("/register/update-squad", async (req, res): Promise<void> => {
+  const parsed = UpdateSquadBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body", details: parsed.error.issues });
+    return;
+  }
+
+  const { teamId, otpId, players } = parsed.data;
+
+  // Verify OTP and that it was issued for this specific team
+  const [otp] = await db
+    .select()
+    .from(otpVerificationsTable)
+    .where(and(
+      eq(otpVerificationsTable.id, otpId),
+      eq(otpVerificationsTable.verified, true),
+    ));
+
+  if (!otp) {
+    res.status(403).json({ error: "OTP not verified — please verify your identity first" });
+    return;
+  }
+
+  // Ensure the OTP was issued for this exact team
+  if (otp.teamId !== null && otp.teamId !== teamId) {
+    res.status(403).json({ error: "OTP was not issued for this team" });
+    return;
+  }
+
   const [team] = await db.select().from(teamsTable).where(eq(teamsTable.id, teamId));
   if (!team) {
     res.status(404).json({ error: "Team not found" });
@@ -165,19 +264,26 @@ router.post("/register/update-squad", async (req, res): Promise<void> => {
 
   await db.delete(playersTable).where(eq(playersTable.teamId, teamId));
 
-  if (players.length > 0) {
-    await db.insert(playersTable).values(
-      players.map(p => ({
-        teamId,
-        name: p.name.trim(),
-        number: p.number ?? null,
-        position: p.position ?? null,
-      }))
-    );
-  }
+  await db.insert(playersTable).values(
+    players.map(p => ({
+      teamId,
+      name: p.name.trim(),
+      number: p.number ?? null,
+      position: p.position ?? null,
+    }))
+  );
 
   const newPlayers = await db.select().from(playersTable).where(eq(playersTable.teamId, teamId));
   res.json(newPlayers);
+});
+
+// Admin: list OTP records (for debugging purposes — requires auth)
+router.get("/admin/otp-records", requireAuth, async (req, res): Promise<void> => {
+  const records = await db
+    .select({ id: otpVerificationsTable.id, contact: otpVerificationsTable.contact, verified: otpVerificationsTable.verified, createdAt: otpVerificationsTable.createdAt })
+    .from(otpVerificationsTable)
+    .orderBy(otpVerificationsTable.createdAt);
+  res.json(records);
 });
 
 export default router;
