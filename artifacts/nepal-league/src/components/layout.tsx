@@ -43,9 +43,9 @@ const NAV_ITEMS: NavItem[] = [
 
 function isParentActive(item: NavItem, location: string): boolean {
   if (item.href === "/") return location === "/";
+  if (!item.children) return location === item.href;
   if (location === item.href || location.startsWith(item.href + "/")) return true;
-  if (item.children) return item.children.some(c => location === c.href || location.startsWith(c.href + "/"));
-  return false;
+  return item.children.some(c => location === c.href || location.startsWith(c.href + "/"));
 }
 
 // ─── Desktop sidebar nav item ─────────────────────────────────────────────────
