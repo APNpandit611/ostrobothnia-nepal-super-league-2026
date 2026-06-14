@@ -67,12 +67,20 @@ router.post("/matches", async (req, res): Promise<void> => {
   res.status(201).json(enrichMatch(match, teamsMap.get(match.homeTeamId), teamsMap.get(match.awayTeamId)));
 });
 
+const ADMIN_PASSWORD = "Ksoccerboys@1995!";
+
 // Auto-generate round-robin fixtures for all teams
-router.post("/matches/generate", async (_req, res): Promise<void> => {
+router.post("/matches/generate", async (req, res): Promise<void> => {
+  const { password } = req.body as { password?: string };
+  if (!password || password !== ADMIN_PASSWORD) {
+    res.status(403).json({ error: "Incorrect password" });
+    return;
+  }
+
   const teams = await db.select().from(teamsTable).orderBy(teamsTable.id);
 
   if (teams.length < 2) {
-    res.status(400).json({ error: "Need at least 2 teams" });
+    res.status(400).json({ error: `Not enough teams — ${teams.length} registered, need at least 2` });
     return;
   }
 

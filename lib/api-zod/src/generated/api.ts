@@ -244,6 +244,14 @@ export const CreateMatchBody = zod.object({
 
 
 /**
+ * @summary Auto-generate round-robin fixtures for all teams
+ */
+export const GenerateFixturesBody = zod.object({
+  "password": zod.string()
+})
+
+
+/**
  * @summary Get match by ID with full details
  */
 export const GetMatchParams = zod.object({

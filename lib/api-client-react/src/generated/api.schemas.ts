@@ -693,6 +693,18 @@ export const ListMatchesStatus = {
   finished: 'finished',
 } as const;
 
+export type GenerateFixturesBody = {
+  password: string;
+};
+
+export type GenerateFixtures400 = {
+  error?: string;
+};
+
+export type GenerateFixtures403 = {
+  error?: string;
+};
+
 export type ListAllAnnouncementsParams = {
 status?: ListAllAnnouncementsStatus;
 category?: string;

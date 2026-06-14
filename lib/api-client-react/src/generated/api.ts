@@ -31,6 +31,9 @@ import type {
   ClubApplicationUpdate,
   ClubSettings,
   ClubSettingsUpdate,
+  GenerateFixtures400,
+  GenerateFixtures403,
+  GenerateFixturesBody,
   Goal,
   GoalInput,
   HealthStatus,
@@ -1126,23 +1129,24 @@ export const getGenerateFixturesUrl = () => {
 /**
  * @summary Auto-generate round-robin fixtures for all teams
  */
-export const generateFixtures = async ( options?: RequestInit): Promise<Match[]> => {
+export const generateFixtures = async (generateFixturesBody: GenerateFixturesBody, options?: RequestInit): Promise<Match[]> => {
 
   return customFetch<Match[]>(getGenerateFixturesUrl(),
   {
     ...options,
-    method: 'POST'
-
-
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      generateFixturesBody,)
   }
 );}
 
 
 
 
-export const getGenerateFixturesMutationOptions = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateFixtures>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof generateFixtures>>, TError,void, TContext> => {
+export const getGenerateFixturesMutationOptions = <TError = ErrorType<GenerateFixtures400 | GenerateFixtures403>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateFixtures>>, TError,{data: BodyType<GenerateFixturesBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof generateFixtures>>, TError,{data: BodyType<GenerateFixturesBody>}, TContext> => {
 
 const mutationKey = ['generateFixtures'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -1154,10 +1158,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateFixtures>>, void> = () => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof generateFixtures>>, {data: BodyType<GenerateFixturesBody>}> = (props) => {
+          const {data} = props ?? {};
 
-
-          return  generateFixtures(requestOptions)
+          return  generateFixtures(data,requestOptions)
         }
 
 
@@ -1168,18 +1172,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type GenerateFixturesMutationResult = NonNullable<Awaited<ReturnType<typeof generateFixtures>>>
-
-    export type GenerateFixturesMutationError = ErrorType<unknown>
+    export type GenerateFixturesMutationBody = BodyType<GenerateFixturesBody>
+    export type GenerateFixturesMutationError = ErrorType<GenerateFixtures400 | GenerateFixtures403>
 
     /**
  * @summary Auto-generate round-robin fixtures for all teams
  */
-export const useGenerateFixtures = <TError = ErrorType<unknown>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateFixtures>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+export const useGenerateFixtures = <TError = ErrorType<GenerateFixtures400 | GenerateFixtures403>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof generateFixtures>>, TError,{data: BodyType<GenerateFixturesBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof generateFixtures>>,
         TError,
-        void,
+        {data: BodyType<GenerateFixturesBody>},
         TContext
       > => {
       return useMutation(getGenerateFixturesMutationOptions(options));

@@ -310,6 +310,16 @@ paths:
       operationId: generateFixtures
       tags: [matches]
       summary: Auto-generate round-robin fixtures for all teams
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
       responses:
         "201":
           description: Fixtures generated
@@ -319,6 +329,24 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Match"
+        "400":
+          description: Not enough teams registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "403":
+          description: Incorrect password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 
   /matches/{id}:
     get:

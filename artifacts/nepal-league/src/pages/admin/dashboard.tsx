@@ -4,6 +4,7 @@ import {
   useAdminLogout, 
   useGetTournamentStats, 
   useListMatches,
+  useListTeams,
   useGenerateFixtures,
   useResetTournament,
   getListMatchesQueryKey,
@@ -51,8 +52,13 @@ export default function AdminDashboard() {
   const [resetPassword, setResetPassword] = useState("");
   const [resetPasswordError, setResetPasswordError] = useState(false);
 
+  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
+  const [generatePassword, setGeneratePassword] = useState("");
+  const [generatePasswordError, setGeneratePasswordError] = useState(false);
+
   const { data: stats } = useGetTournamentStats();
   const { data: liveMatches } = useListMatches({ status: 'live' });
+  const { data: teams } = useListTeams();
 
   const logoutMutation = useAdminLogout({
     mutation: { onSuccess: () => setLocation("/admin") }
@@ -61,12 +67,30 @@ export default function AdminDashboard() {
   const generateFixturesMutation = useGenerateFixtures({
     mutation: {
       onSuccess: () => {
-        toast({ title: "Success", description: "Fixtures generated successfully" });
+        toast({ title: "Fixtures generated!", description: "The match schedule is ready." });
         queryClient.invalidateQueries({ queryKey: getListMatchesQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetTournamentStatsQueryKey() });
+        setGenerateDialogOpen(false);
+        setGeneratePassword("");
+        setGeneratePasswordError(false);
       },
-      onError: () => toast({ variant: "destructive", title: "Error", description: "Failed to generate fixtures" }),
+      onError: (err: unknown) => {
+        const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "";
+        if (msg.toLowerCase().includes("password") || (err as { response?: { status?: number } })?.response?.status === 403) {
+          setGeneratePasswordError(true);
+          toast({ variant: "destructive", title: "Incorrect password" });
+        } else {
+          toast({ variant: "destructive", title: "Failed to generate fixtures", description: msg || "Unknown error" });
+        }
+      },
     }
   });
+
+  const handleGenerateConfirm = () => {
+    if (!generatePassword.trim()) { setGeneratePasswordError(true); return; }
+    setGeneratePasswordError(false);
+    generateFixturesMutation.mutate({ data: { password: generatePassword } });
+  };
 
   const resetTournamentMutation = useResetTournament({
     mutation: {
@@ -177,16 +201,29 @@ export default function AdminDashboard() {
               <CardDescription>System-level controls for the tournament</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-4 border rounded-xl flex items-center justify-between">
-                <div>
+              <div className="p-4 border rounded-xl flex items-start justify-between gap-4">
+                <div className="min-w-0">
                   <h4 className="font-bold">Generate Fixtures</h4>
                   <p className="text-sm text-muted-foreground">Creates the 10-match schedule</p>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                      (teams?.length ?? 0) >= 2
+                        ? "bg-primary/10 text-primary"
+                        : "bg-destructive/10 text-destructive"
+                    }`}>
+                      {teams?.length ?? 0} team{(teams?.length ?? 0) !== 1 ? "s" : ""} registered
+                    </span>
+                    {(teams?.length ?? 0) < 2 && (
+                      <span className="text-xs text-destructive">— need at least 2</span>
+                    )}
+                  </div>
                 </div>
                 <Button
-                  onClick={() => generateFixturesMutation.mutate()}
-                  disabled={generateFixturesMutation.isPending || (stats?.totalMatches || 0) > 0}
+                  onClick={() => { setGeneratePassword(""); setGeneratePasswordError(false); setGenerateDialogOpen(true); }}
+                  disabled={(stats?.totalMatches || 0) > 0}
+                  className="flex-shrink-0"
                 >
-                  {generateFixturesMutation.isPending ? "Generating..." : "Generate"}
+                  Generate
                 </Button>
               </div>
 
@@ -321,6 +358,73 @@ export default function AdminDashboard() {
           </Link>
         </div>
       </section>
+
+      {/* Generate Fixtures Dialog */}
+      <Dialog open={generateDialogOpen} onOpenChange={(open) => { if (!generateFixturesMutation.isPending) setGenerateDialogOpen(open); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5 text-primary" /> Generate Fixtures
+            </DialogTitle>
+            <DialogDescription>
+              This will create the 10-match round-robin schedule. Any existing fixtures and match data will be cleared first.
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Team count status */}
+          <div className={`rounded-xl border p-4 space-y-1 ${(teams?.length ?? 0) < 2 ? "border-destructive/40 bg-destructive/5" : "border-primary/30 bg-primary/5"}`}>
+            <div className="flex items-center gap-2">
+              <Users className={`h-4 w-4 ${(teams?.length ?? 0) < 2 ? "text-destructive" : "text-primary"}`} />
+              <span className="font-semibold text-sm">
+                {teams?.length ?? 0} team{(teams?.length ?? 0) !== 1 ? "s" : ""} currently registered
+              </span>
+            </div>
+            {(teams?.length ?? 0) < 2 ? (
+              <p className="text-xs text-destructive pl-6">You need at least 2 teams registered before generating fixtures. Go to <strong>Teams</strong> and add teams first.</p>
+            ) : (
+              <div className="pl-6 flex flex-col gap-0.5">
+                {teams?.map(t => (
+                  <span key={t.id} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ backgroundColor: t.primaryColor ?? "#888" }} />
+                    {t.name}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-3 py-1">
+            <Label htmlFor="generate-password" className="flex items-center gap-2">
+              <Lock className="h-4 w-4" /> Enter admin password to confirm
+            </Label>
+            <Input
+              id="generate-password"
+              type="password"
+              placeholder="Admin password"
+              value={generatePassword}
+              onChange={(e) => { setGeneratePassword(e.target.value); setGeneratePasswordError(false); }}
+              onKeyDown={(e) => { if (e.key === "Enter" && (teams?.length ?? 0) >= 2) handleGenerateConfirm(); }}
+              className={generatePasswordError ? "border-destructive focus-visible:ring-destructive" : ""}
+              autoFocus
+            />
+            {generatePasswordError && (
+              <p className="text-sm text-destructive">Incorrect password. Please try again.</p>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setGenerateDialogOpen(false)} disabled={generateFixturesMutation.isPending}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleGenerateConfirm}
+              disabled={generateFixturesMutation.isPending || !generatePassword.trim() || (teams?.length ?? 0) < 2}
+            >
+              {generateFixturesMutation.isPending ? "Generating..." : "Generate Fixtures"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Reset Dialog */}
       <Dialog open={resetDialogOpen} onOpenChange={(open) => { if (!resetTournamentMutation.isPending) setResetDialogOpen(open); }}>
