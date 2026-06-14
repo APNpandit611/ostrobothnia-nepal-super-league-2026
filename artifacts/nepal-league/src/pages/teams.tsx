@@ -1,6 +1,6 @@
 import { useListTeams, useGetStandings, useListPlayers } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Crosshair, Shield, Users, FileText, UserPlus, ChevronRight } from "lucide-react";
+import { Loader2, Crosshair, Shield, Users, FileText, UserPlus, ChevronRight, Clock, CheckCircle2 } from "lucide-react";
 import { Link } from "wouter";
 import type { Team } from "@workspace/api-client-react";
 
@@ -24,6 +24,9 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
   });
 
   const hasPlayers = !isLoading && (players?.length ?? 0) > 0;
+  const isApproved = team.squadStatus === "approved";
+  const isPending = team.squadStatus === "pending";
+  const isLocked = isApproved; // squad locked for manager edits once approved
 
   return (
     <Card className="overflow-hidden hover:border-primary/50 transition-colors">
@@ -34,15 +37,25 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
             <CardTitle className="text-xl font-bold">{team.name}</CardTitle>
             <p className="text-muted-foreground font-mono text-sm">{team.shortName}</p>
           </div>
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <Link href={`/update-squad?team=${team.id}`}>
-              <button
-                className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors hover:bg-muted"
-              >
-                <UserPlus className="h-3 w-3" /> Update Squad
-              </button>
-            </Link>
-            {hasPlayers && (
+          <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
+            {isApproved && (
+              <span className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full bg-green-500/15 text-green-600 border border-green-500/30">
+                <CheckCircle2 className="h-3 w-3" /> Approved
+              </span>
+            )}
+            {isPending && (
+              <span className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full bg-yellow-500/15 text-yellow-600 border border-yellow-500/30">
+                <Clock className="h-3 w-3" /> Pending
+              </span>
+            )}
+            {!isLocked && (
+              <Link href={`/update-squad?team=${team.id}`}>
+                <button className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors hover:bg-muted">
+                  <UserPlus className="h-3 w-3" /> Update Squad
+                </button>
+              </Link>
+            )}
+            {isApproved && hasPlayers && (
               <Link href={`/teams/${team.id}`}>
                 <button
                   className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors hover:text-white"
@@ -69,6 +82,15 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
                 <UserPlus className="h-3.5 w-3.5" /> Submit squad now
               </div>
             </Link>
+          </div>
+        ) : isPending ? (
+          /* Submitted but awaiting admin approval */
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
+            <Clock className="h-8 w-8 text-yellow-500/60" />
+            <div>
+              <p className="text-sm font-semibold">Squad submitted — pending approval</p>
+              <p className="text-xs text-muted-foreground mt-0.5">The squad will appear here once the admin approves it.</p>
+            </div>
           </div>
         ) : (
           <>

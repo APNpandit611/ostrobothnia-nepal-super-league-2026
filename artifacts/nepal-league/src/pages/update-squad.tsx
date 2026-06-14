@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, CheckCircle2, ChevronRight, Shield, Users,
-  UserPlus, Trash2, Mail, KeyRound, RefreshCw, Pencil,
+  UserPlus, Trash2, Mail, KeyRound, RefreshCw, Pencil, Lock,
 } from "lucide-react";
 
 const POSITIONS = ["GK", "C", "V.C", "Player", "Manager"];
@@ -203,6 +203,28 @@ export default function UpdateSquad() {
     if (rows.length >= MAX_PLAYERS) return;
     setRows(rs => [...rs, newRow()]);
   };
+
+  // Squad locked once admin has approved — show locked message instead of form
+  if (selectedTeam?.squadStatus === "approved") {
+    return (
+      <div className="flex flex-col items-center text-center gap-6 py-20 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-md mx-auto">
+        <div className="w-20 h-20 rounded-full bg-yellow-500/10 flex items-center justify-center">
+          <Lock className="h-10 w-10 text-yellow-600" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-black">Squad Locked</h2>
+          <p className="text-muted-foreground mt-2">
+            <span className="font-bold text-foreground">{selectedTeam.name}</span>'s squad has been approved by the admin and can no longer be edited by team managers.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">Contact the tournament admin to request changes.</p>
+        </div>
+        <div className="flex gap-3 flex-wrap justify-center">
+          <Link href="/teams"><Button variant="outline"><Users className="h-4 w-4 mr-2" /> View All Squads</Button></Link>
+          <Link href="/"><Button>Back to Home</Button></Link>
+        </div>
+      </div>
+    );
+  }
 
   if (submitted && selectedTeam) {
     return (

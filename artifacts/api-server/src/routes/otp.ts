@@ -306,6 +306,12 @@ router.post("/register/update-squad", async (req, res): Promise<void> => {
     return;
   }
 
+  // Lock squad once admin has approved — only admin can edit after that
+  if (team.squadStatus === "approved") {
+    res.status(403).json({ error: "Squad is locked after admin approval. Contact the admin to make changes." });
+    return;
+  }
+
   await db.delete(playersTable).where(eq(playersTable.teamId, teamId));
 
   await db.insert(playersTable).values(
@@ -316,6 +322,9 @@ router.post("/register/update-squad", async (req, res): Promise<void> => {
       position: p.position ?? null,
     }))
   );
+
+  // Mark squad as pending approval
+  await db.update(teamsTable).set({ squadStatus: "pending" }).where(eq(teamsTable.id, teamId));
 
   const newPlayers = await db.select().from(playersTable).where(eq(playersTable.teamId, teamId));
   res.json(newPlayers);

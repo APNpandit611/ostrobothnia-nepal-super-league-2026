@@ -40,6 +40,11 @@ export interface Team {
   managerPhone?: string | null;
   /** @nullable */
   managerEmail?: string | null;
+  /**
+     * null = not submitted, pending = awaiting admin approval, approved = publicly visible
+     * @nullable
+     */
+  squadStatus?: string | null;
   createdAt?: string;
 }
 

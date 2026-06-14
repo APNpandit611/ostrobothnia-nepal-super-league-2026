@@ -1099,6 +1099,9 @@ components:
           type: ["string", "null"]
         managerEmail:
           type: ["string", "null"]
+        squadStatus:
+          type: ["string", "null"]
+          description: "null = not submitted, pending = awaiting admin approval, approved = publicly visible"
         createdAt:
           type: string
 

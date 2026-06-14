@@ -70,4 +70,18 @@ router.delete("/teams/:id", async (req, res): Promise<void> => {
   res.status(204).send();
 });
 
+router.post("/admin/teams/:id/approve-squad", async (req, res): Promise<void> => {
+  const id = parseInt(req.params.id);
+  if (isNaN(id)) { res.status(400).json({ error: "Invalid team id" }); return; }
+  const action = (req.body as { action?: string }).action ?? "approve";
+  const newStatus = action === "unapprove" ? null : "approved";
+  const [team] = await db
+    .update(teamsTable)
+    .set({ squadStatus: newStatus })
+    .where(eq(teamsTable.id, id))
+    .returning();
+  if (!team) { res.status(404).json({ error: "Team not found" }); return; }
+  res.json(team);
+});
+
 export default router;

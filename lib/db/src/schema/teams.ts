@@ -13,6 +13,8 @@ export const teamsTable = pgTable("teams", {
   managerName: text("manager_name"),
   managerPhone: text("manager_phone"),
   managerEmail: text("manager_email"),
+  // null = no squad submitted, 'pending' = submitted awaiting admin approval, 'approved' = visible publicly
+  squadStatus: text("squad_status"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

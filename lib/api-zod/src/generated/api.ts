@@ -53,6 +53,7 @@ export const ListTeamsResponseItem = zod.object({
   "managerName": zod.string().nullish(),
   "managerPhone": zod.string().nullish(),
   "managerEmail": zod.string().nullish(),
+  "squadStatus": zod.string().nullish().describe('null = not submitted, pending = awaiting admin approval, approved = publicly visible'),
   "createdAt": zod.string().optional()
 })
 export const ListTeamsResponse = zod.array(ListTeamsResponseItem)
@@ -92,6 +93,7 @@ export const GetTeamResponse = zod.object({
   "managerName": zod.string().nullish(),
   "managerPhone": zod.string().nullish(),
   "managerEmail": zod.string().nullish(),
+  "squadStatus": zod.string().nullish().describe('null = not submitted, pending = awaiting admin approval, approved = publicly visible'),
   "createdAt": zod.string().optional()
 })
 
@@ -126,6 +128,7 @@ export const UpdateTeamResponse = zod.object({
   "managerName": zod.string().nullish(),
   "managerPhone": zod.string().nullish(),
   "managerEmail": zod.string().nullish(),
+  "squadStatus": zod.string().nullish().describe('null = not submitted, pending = awaiting admin approval, approved = publicly visible'),
   "createdAt": zod.string().optional()
 })
 

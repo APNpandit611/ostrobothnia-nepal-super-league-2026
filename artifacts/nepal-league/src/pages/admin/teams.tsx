@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Loader2, Save, Users, UserPlus, Trash2, Pencil, X, Check, ShieldCheck, AlertTriangle,
+  CheckCircle2, Clock, LockOpen,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -224,6 +225,27 @@ export default function AdminTeams() {
     },
   });
 
+  const [approvingId, setApprovingId] = useState<number | null>(null);
+
+  const handleApproveSquad = async (id: number, action: "approve" | "unapprove") => {
+    setApprovingId(id);
+    try {
+      const res = await fetch(`/api/admin/teams/${id}/approve-squad`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      toast({ title: action === "approve" ? "Squad approved ✓" : "Approval revoked" });
+      queryClient.invalidateQueries({ queryKey: getListTeamsQueryKey() });
+    } catch {
+      toast({ variant: "destructive", title: "Failed to update squad status" });
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
   const handleDeleteTeam = async (id: number) => {
     setDeleting(true);
     try {
@@ -415,9 +437,44 @@ export default function AdminTeams() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-                      Roster
-                    </span>
+                    <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Roster</span>
+                    {selectedTeam.squadStatus === "approved" && (
+                      <span className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-green-500/15 text-green-600 border border-green-500/30">
+                        <CheckCircle2 className="h-3 w-3" /> Approved
+                      </span>
+                    )}
+                    {selectedTeam.squadStatus === "pending" && (
+                      <span className="flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-500/15 text-yellow-600 border border-yellow-500/30">
+                        <Clock className="h-3 w-3" /> Pending Approval
+                      </span>
+                    )}
+                    {!selectedTeam.squadStatus && (
+                      <span className="text-xs text-muted-foreground">(not submitted)</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {selectedTeam.squadStatus === "approved" ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-1.5 text-yellow-600 border-yellow-500/40 hover:bg-yellow-500/10"
+                        onClick={() => handleApproveSquad(selectedTeam.id, "unapprove")}
+                        disabled={approvingId === selectedTeam.id}
+                      >
+                        {approvingId === selectedTeam.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LockOpen className="h-3.5 w-3.5" />}
+                        Revoke Approval
+                      </Button>
+                    ) : selectedTeam.squadStatus === "pending" ? (
+                      <Button
+                        size="sm"
+                        className="gap-1.5 bg-green-600 hover:bg-green-700 text-white"
+                        onClick={() => handleApproveSquad(selectedTeam.id, "approve")}
+                        disabled={approvingId === selectedTeam.id}
+                      >
+                        {approvingId === selectedTeam.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+                        Approve Squad
+                      </Button>
+                    ) : null}
                   </div>
                 </div>
                 <PlayerSection teamId={selectedTeam.id} teamColor={edit.primaryColor} />
