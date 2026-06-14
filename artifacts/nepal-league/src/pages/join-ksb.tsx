@@ -150,7 +150,7 @@ export default function JoinKsb() {
 
         <p className="text-center text-xs text-muted-foreground mt-4">
           We aim to respond within a few days. For urgent enquiries email{" "}
-          <a href="mailto:ksoccerboys@gmail.com" className="underline hover:text-foreground">ksoccerboys@gmail.com</a>
+          <a href="mailto:info@kokkolasoccerboys.cc" className="underline hover:text-foreground">info@kokkolasoccerboys.cc</a>
         </p>
 
       </div>

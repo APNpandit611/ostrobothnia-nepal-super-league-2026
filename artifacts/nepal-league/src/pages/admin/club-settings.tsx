@@ -142,7 +142,7 @@ export default function AdminClubSettings() {
                 <Label className="flex items-center gap-1.5"><Mail className="h-3.5 w-3.5 text-muted-foreground" /> Email</Label>
                 <Input
                   type="email"
-                  placeholder="e.g. ksoccerboys@gmail.com"
+                  placeholder="e.g. info@kokkolasoccerboys.cc"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); mark(); }}
                 />

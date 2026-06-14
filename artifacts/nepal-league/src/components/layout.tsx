@@ -379,8 +379,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <div><div className="font-black text-sm tracking-tight">KOKKOLA SOCCER BOYS</div></div>
               </div>
               <div className="flex flex-col gap-2 text-xs text-muted-foreground">
-                <a href="mailto:ksoccerboys@gmail.com" className="flex items-center gap-2 hover:text-foreground transition-colors">
-                  <Mail className="h-3.5 w-3.5" /> ksoccerboys@gmail.com
+                <a href="mailto:info@kokkolasoccerboys.cc" className="flex items-center gap-2 hover:text-foreground transition-colors">
+                  <Mail className="h-3.5 w-3.5" /> info@kokkolasoccerboys.cc
                 </a>
                 <a href="tel:+358413174494" className="flex items-center gap-2 hover:text-foreground transition-colors">
                   <Phone className="h-3.5 w-3.5" /> +358 413 174 494

@@ -29,7 +29,7 @@ export default function About() {
       : DEFAULT_STORY;
 
   const tagline = settings?.tagline || DEFAULT_TAGLINE;
-  const email = settings?.email || "ksoccerboys@gmail.com";
+  const email = settings?.email || "info@kokkolasoccerboys.cc";
   const phone = settings?.phone || "+358 413 174 494";
   const homeGround = settings?.homeGround || "Kokkola, Finland";
   const values =

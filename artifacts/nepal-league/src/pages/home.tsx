@@ -363,9 +363,9 @@ export default function Home() {
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
                 <Facebook className="h-3.5 w-3.5" /> Follow us on Facebook
               </a>
-              <a href="mailto:ksoccerboys@gmail.com"
+              <a href="mailto:info@kokkolasoccerboys.cc"
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                <Mail className="h-3.5 w-3.5" /> ksoccerboys@gmail.com
+                <Mail className="h-3.5 w-3.5" /> info@kokkolasoccerboys.cc
               </a>
               <a href="tel:+358413174494"
                 className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
