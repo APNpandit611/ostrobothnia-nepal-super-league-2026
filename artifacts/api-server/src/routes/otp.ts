@@ -28,9 +28,12 @@ function getTransporter() {
   });
 }
 
-async function sendViaResend(to: string, code: string): Promise<boolean> {
+async function sendViaResend(to: string, code: string, log: (obj: object, msg: string) => void): Promise<boolean> {
   const apiKey = process.env["RESEND_API_KEY"];
-  if (!apiKey) return false;
+  if (!apiKey) {
+    log({ reason: "RESEND_API_KEY not set" }, "Resend skipped");
+    return false;
+  }
   try {
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -49,8 +52,14 @@ async function sendViaResend(to: string, code: string): Promise<boolean> {
         `,
       }),
     });
-    return res.ok;
-  } catch {
+    if (!res.ok) {
+      const body = await res.text().catch(() => "(unreadable)");
+      log({ status: res.status, body }, "Resend API error");
+      return false;
+    }
+    return true;
+  } catch (err) {
+    log({ err }, "Resend fetch failed");
     return false;
   }
 }
@@ -96,7 +105,7 @@ router.post("/register/send-otp", async (req, res): Promise<void> => {
 
   if (type === "email") {
     // Try Resend first (works from cloud servers)
-    emailDelivered = await sendViaResend(contact, code);
+    emailDelivered = await sendViaResend(contact, code, (obj, msg) => req.log.info(obj, msg));
     if (emailDelivered) {
       req.log.info({ contact }, "OTP email sent via Resend");
     } else {
