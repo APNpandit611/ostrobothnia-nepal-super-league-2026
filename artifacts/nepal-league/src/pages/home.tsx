@@ -310,14 +310,14 @@ export default function Home() {
             { href: "/live", icon: Activity, label: "Live Scores" },
             { href: "/teams", icon: Users, label: "Teams" },
             { href: "/results", icon: ArrowRight, label: "Results" },
-          ].map(({ href, icon: Icon, label, highlight }) => (
+          ].map(({ href, icon: Icon, label }) => (
             <Link key={href} href={href}>
-              <Card className={`hover:border-primary cursor-pointer transition-colors group ${highlight ? "border-primary/40 bg-primary/5" : ""}`}>
+              <Card className="hover:border-primary cursor-pointer transition-colors group">
                 <CardContent className="p-4 flex items-center gap-3">
-                  <div className={`p-2 rounded-lg transition-colors ${highlight ? "bg-primary/10 text-primary" : "bg-muted group-hover:bg-primary/10 group-hover:text-primary"}`}>
+                  <div className="p-2 rounded-lg transition-colors bg-muted group-hover:bg-primary/10 group-hover:text-primary">
                     <Icon className="h-5 w-5" />
                   </div>
-                  <span className={`font-bold text-sm ${highlight ? "text-primary" : ""}`}>{label}</span>
+                  <span className="font-bold text-sm">{label}</span>
                   <ArrowRight className="h-4 w-4 text-muted-foreground ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
                 </CardContent>
               </Card>

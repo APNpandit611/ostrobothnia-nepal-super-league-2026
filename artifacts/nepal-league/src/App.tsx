@@ -26,7 +26,6 @@ import Announcements from "./pages/announcements";
 import AdminAnnouncements from "./pages/admin/announcements";
 import AdminClubApplications from "./pages/admin/club-applications";
 import AdminClubSettings from "./pages/admin/club-settings";
-import Register from "./pages/register";
 import JoinKsb from "./pages/join-ksb";
 import RegisterTeam from "./pages/register-team";
 import SquadPoster from "./pages/squad-poster";
