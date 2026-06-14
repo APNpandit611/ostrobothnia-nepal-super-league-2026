@@ -641,6 +641,41 @@ paths:
                 items:
                   $ref: "#/components/schemas/TopScorer"
 
+  # ── Club Settings ─────────────────────────────────────────────────────
+  /api/club-settings:
+    get:
+      operationId: getClubSettings
+      tags: [club-settings]
+      summary: Get club settings (story paragraphs)
+      responses:
+        "200":
+          description: Club settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClubSettings"
+
+  /api/admin/club-settings:
+    put:
+      operationId: updateClubSettings
+      tags: [club-settings]
+      summary: Update club settings (admin)
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ClubSettingsUpdate"
+      responses:
+        "200":
+          description: Updated club settings
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ClubSettings"
+
   # ── Tournament Info CRUD ──────────────────────────────────────────────
   /tournaments:
     get:
@@ -1710,3 +1745,25 @@ components:
       properties:
         isPublished:
           type: boolean
+
+    # ── Club Settings ──────────────────────────────────────────────────
+    ClubSettings:
+      type: object
+      required: [id, storyParagraphs, updatedAt]
+      properties:
+        id:
+          type: integer
+        storyParagraphs:
+          type: array
+          items:
+            type: string
+        updatedAt:
+          type: string
+
+    ClubSettingsUpdate:
+      type: object
+      properties:
+        storyParagraphs:
+          type: array
+          items:
+            type: string

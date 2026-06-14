@@ -7,6 +7,8 @@ export * from "./generated/types/clubApplicationUpdate";
 export * from "./generated/types/clubApplicationUpdateStatus";
 export * from "./generated/types/listClubApplicationsParams";
 export * from "./generated/types/listClubApplicationsStatus";
+export * from "./generated/types/clubSettings";
+export * from "./generated/types/clubSettingsUpdate";
 export * from "./generated/types/announcementCategory";
 export * from "./generated/types/announcementInputCategory";
 export * from "./generated/types/announcementInput";

@@ -14,6 +14,7 @@ import playersRouter from "./players";
 import otpRouter from "./otp";
 import announcementsRouter from "./announcements";
 import clubApplicationsRouter from "./clubApplications";
+import clubSettingsRouter from "./clubSettings";
 
 const router: IRouter = Router();
 
@@ -32,5 +33,6 @@ router.use(playersRouter);
 router.use(otpRouter);
 router.use(announcementsRouter);
 router.use(clubApplicationsRouter);
+router.use(clubSettingsRouter);
 
 export default router;

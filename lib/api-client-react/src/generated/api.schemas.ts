@@ -645,6 +645,16 @@ export interface PublishToggleInput {
   isPublished: boolean;
 }
 
+export interface ClubSettings {
+  id: number;
+  storyParagraphs: string[];
+  updatedAt: string;
+}
+
+export interface ClubSettingsUpdate {
+  storyParagraphs?: string[];
+}
+
 export type ListMatchesParams = {
 status?: ListMatchesStatus;
 };

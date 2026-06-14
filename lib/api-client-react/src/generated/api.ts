@@ -29,6 +29,8 @@ import type {
   ClubApplication,
   ClubApplicationInput,
   ClubApplicationUpdate,
+  ClubSettings,
+  ClubSettingsUpdate,
   Goal,
   GoalInput,
   HealthStatus,
@@ -2363,6 +2365,154 @@ export function useGetTopScorers<TData = Awaited<ReturnType<typeof getTopScorers
 
 
 
+
+export const getGetClubSettingsUrl = () => {
+
+
+
+
+  return `/api/api/club-settings`
+}
+
+/**
+ * @summary Get club settings (story paragraphs)
+ */
+export const getClubSettings = async ( options?: RequestInit): Promise<ClubSettings> => {
+
+  return customFetch<ClubSettings>(getGetClubSettingsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetClubSettingsQueryKey = () => {
+    return [
+    `/api/api/club-settings`
+    ] as const;
+    }
+
+
+export const getGetClubSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getClubSettings>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getClubSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetClubSettingsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getClubSettings>>> = ({ signal }) => getClubSettings({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getClubSettings>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetClubSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getClubSettings>>>
+export type GetClubSettingsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get club settings (story paragraphs)
+ */
+
+export function useGetClubSettings<TData = Awaited<ReturnType<typeof getClubSettings>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getClubSettings>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetClubSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateClubSettingsUrl = () => {
+
+
+
+
+  return `/api/api/admin/club-settings`
+}
+
+/**
+ * @summary Update club settings (admin)
+ */
+export const updateClubSettings = async (clubSettingsUpdate: ClubSettingsUpdate, options?: RequestInit): Promise<ClubSettings> => {
+
+  return customFetch<ClubSettings>(getUpdateClubSettingsUrl(),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      clubSettingsUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateClubSettingsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateClubSettings>>, TError,{data: BodyType<ClubSettingsUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateClubSettings>>, TError,{data: BodyType<ClubSettingsUpdate>}, TContext> => {
+
+const mutationKey = ['updateClubSettings'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateClubSettings>>, {data: BodyType<ClubSettingsUpdate>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateClubSettings(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateClubSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof updateClubSettings>>>
+    export type UpdateClubSettingsMutationBody = BodyType<ClubSettingsUpdate>
+    export type UpdateClubSettingsMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Update club settings (admin)
+ */
+export const useUpdateClubSettings = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateClubSettings>>, TError,{data: BodyType<ClubSettingsUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateClubSettings>>,
+        TError,
+        {data: BodyType<ClubSettingsUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateClubSettingsMutationOptions(options));
+    }
 
 export const getListTournamentsUrl = () => {
 

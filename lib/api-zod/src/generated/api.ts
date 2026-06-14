@@ -614,6 +614,30 @@ export const GetTopScorersResponse = zod.array(GetTopScorersResponseItem)
 
 
 /**
+ * @summary Get club settings (story paragraphs)
+ */
+export const GetClubSettingsResponse = zod.object({
+  "id": zod.number(),
+  "storyParagraphs": zod.array(zod.string()),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Update club settings (admin)
+ */
+export const UpdateClubSettingsBody = zod.object({
+  "storyParagraphs": zod.array(zod.string()).optional()
+})
+
+export const UpdateClubSettingsResponse = zod.object({
+  "id": zod.number(),
+  "storyParagraphs": zod.array(zod.string()),
+  "updatedAt": zod.string()
+})
+
+
+/**
  * @summary List all tournaments
  */
 export const ListTournamentsResponseItem = zod.object({

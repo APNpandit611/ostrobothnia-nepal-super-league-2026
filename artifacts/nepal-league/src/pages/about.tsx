@@ -1,5 +1,12 @@
 import { Shield, Users, MapPin, Star, Heart, Trophy, Mail, Phone } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useGetClubSettings } from "@workspace/api-client-react";
+
+const DEFAULT_STORY = [
+  "Kokkola Soccer Boys was born out of a simple idea: bring the Nepalese community in Kokkola together through football. What started as informal matches between friends quickly grew into an organised club with a shared identity and a green jersey to call our own.",
+  "Over the years, KSB has become a cornerstone of the Nepalese community in Central Ostrobothnia — organising matches, tournaments, and social events that connect people across generations and backgrounds.",
+  "In 2026, KSB proudly hosts the Ostrobothnia Nepal Super League — bringing together five clubs from across Finland for a day of top-level Nepalese football at Santahaka Tekonurmikenttä.",
+];
 
 const VALUES = [
   {
@@ -29,6 +36,12 @@ const VALUES = [
 ];
 
 export default function About() {
+  const { data: settings } = useGetClubSettings();
+  const story =
+    settings?.storyParagraphs && settings.storyParagraphs.length > 0
+      ? settings.storyParagraphs
+      : DEFAULT_STORY;
+
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-3xl">
 
@@ -57,15 +70,9 @@ export default function About() {
           <h2 className="text-xl font-black uppercase tracking-wide">Our Story</h2>
         </div>
         <div className="space-y-4 text-muted-foreground leading-relaxed pl-4 border-l border-border">
-          <p>
-            Kokkola Soccer Boys was born out of a simple idea: bring the Nepalese community in Kokkola together through football. What started as informal matches between friends quickly grew into an organised club with a shared identity and a green jersey to call our own.
-          </p>
-          <p>
-            Over the years, KSB has become a cornerstone of the Nepalese community in Central Ostrobothnia — organising matches, tournaments, and social events that connect people across generations and backgrounds.
-          </p>
-          <p>
-            In 2026, KSB proudly hosts the <span className="text-foreground font-semibold">Ostrobothnia Nepal Super League</span> — bringing together five clubs from across Finland for a day of top-level Nepalese football at Santahaka Tekonurmikenttä.
-          </p>
+          {story.map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
         </div>
       </div>
 

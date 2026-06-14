@@ -23,6 +23,8 @@ export * from './clubApplicationInput';
 export * from './clubApplicationStatus';
 export * from './clubApplicationUpdate';
 export * from './clubApplicationUpdateStatus';
+export * from './clubSettings';
+export * from './clubSettingsUpdate';
 export * from './goal';
 export * from './goalInput';
 export * from './healthStatus';

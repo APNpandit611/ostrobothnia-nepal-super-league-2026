@@ -26,7 +26,8 @@ import {
   AlertTriangle,
   Home,
   Lock,
-  Heart
+  Heart,
+  BookOpen
 } from "lucide-react";
 import {
   Dialog,
@@ -178,6 +179,19 @@ export default function AdminDashboard() {
               <div>
                 <h3 className="font-bold">Club Applications</h3>
                 <p className="text-sm text-muted-foreground">Review membership requests</p>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/admin/club-settings">
+          <Card className="hover:border-primary cursor-pointer transition-all hover:shadow-md">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="p-3 bg-primary/10 text-primary rounded-xl">
+                <BookOpen className="h-6 w-6" />
+              </div>
+              <div>
+                <h3 className="font-bold">About Page</h3>
+                <p className="text-sm text-muted-foreground">Edit club story & content</p>
               </div>
             </CardContent>
           </Card>
