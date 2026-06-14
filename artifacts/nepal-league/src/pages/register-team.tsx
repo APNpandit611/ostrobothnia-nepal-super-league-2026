@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useGetActiveTournament } from "@workspace/api-client-react";
-import { useUser } from "@clerk/react";
+import { useUser, useClerk } from "@clerk/react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,6 +92,7 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
   const { toast } = useToast();
   const logoInputRef = useRef<HTMLInputElement>(null);
   const { isLoaded, isSignedIn, user } = useUser();
+  const { signOut } = useClerk();
 
   const [step, setStep] = useState<1 | 2>(1);
 
@@ -187,6 +188,12 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
       setCreatedTeamId(team.id);
       setCreatedTeamName(team.name);
       setSubmitted(true);
+      // Log the user out immediately after a successful registration.
+      // Pass a no-op callback so Clerk skips its default post-sign-out
+      // redirect and the success screen stays visible.
+      void signOut(() => {}).catch(() => {
+        toast({ title: "Registration submitted", description: "Couldn't sign you out automatically — please sign out manually." });
+      });
     } catch (err) {
       toast({ variant: "destructive", title: "Failed to register team", description: err instanceof Error ? err.message : "Unknown error" });
     } finally {
@@ -194,8 +201,8 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
     }
   };
 
-  // Sign-in guard
-  if (isLoaded && !isSignedIn) {
+  // Sign-in guard — skipped once submitted, since we sign the user out on success.
+  if (isLoaded && !isSignedIn && !submitted) {
     return (
       <div className="flex flex-col items-center text-center gap-6 py-20 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-md mx-auto">
         <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
