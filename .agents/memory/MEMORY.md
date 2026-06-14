@@ -4,4 +4,5 @@
 - [Team approval visibility gate](team-approval-visibility.md) — public surfaces show only squadStatus="approved"; registration sets "pending"; /api/teams list stays unfiltered for admin.
 - [Admin auth state in Layout](admin-auth-nav-cache.md) — admin-gated nav uses useGetAdminMe; seed cache on login, removeQueries on logout, read !isError or the panel goes stale.
 - [Admin auth gate & session cookie](admin-auth-gate.md) — all `/admin/*` (incl GET) require a session via central gate; session cookie must be HMAC-signed with SESSION_SECRET, never a literal.
+- [Goal scorer must belong to scoring team](goal-scorer-team.md) — goal.teamId = scorer's own team (even own goals); scorer validated against that squad; squad-less teams fall back to free text.
 - [Fixture generation](fixture-generation.md) — generator must derive a round-robin from actual DB teams (circle method); never hardcode team short names or the roster, or inserts get undefined FK IDs → 500.

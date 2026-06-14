@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, and } from "drizzle-orm";
-import { db, goalsTable, matchesTable, teamsTable } from "@workspace/db";
+import { db, goalsTable, matchesTable, teamsTable, playersTable } from "@workspace/db";
 import {
   AddGoalParams,
   AddGoalBody,
@@ -40,6 +40,22 @@ router.post("/matches/:matchId/goals", async (req, res): Promise<void> => {
   if (!match) {
     res.status(404).json({ error: "Match not found" });
     return;
+  }
+
+  // The scoring team must be one of the two teams in this match
+  if (parsed.data.teamId !== match.homeTeamId && parsed.data.teamId !== match.awayTeamId) {
+    res.status(400).json({ error: "Team is not part of this match" });
+    return;
+  }
+
+  // The goal scorer must be a registered player of the scoring team
+  // (enforced only when that team has a squad; teams without players fall back to free text)
+  if (parsed.data.scorerName) {
+    const squad = await db.select().from(playersTable).where(eq(playersTable.teamId, parsed.data.teamId));
+    if (squad.length > 0 && !squad.some(p => p.name === parsed.data.scorerName)) {
+      res.status(400).json({ error: "Goal scorer must be a player from the same team" });
+      return;
+    }
   }
 
   const [goal] = await db.insert(goalsTable).values({

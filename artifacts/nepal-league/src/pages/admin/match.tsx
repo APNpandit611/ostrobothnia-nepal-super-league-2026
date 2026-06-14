@@ -11,13 +11,17 @@ import {
   useUpdateMatch,
   getGetMatchQueryKey,
   useListMatchEvents,
-  getListMatchEventsQueryKey
+  getListMatchEventsQueryKey,
+  useListPlayers
 } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Play, Square, RotateCcw, Target, AlertTriangle, Clock } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -37,6 +41,14 @@ export default function AdminMatchDetail() {
     query: { refetchInterval: 5000 } as never
   });
 
+  // Squads of each team — goal scorers must be chosen from the scoring team's players
+  const { data: homePlayers, isLoading: homePlayersLoading } = useListPlayers(match?.homeTeamId ?? 0, {
+    query: { enabled: !!match?.homeTeamId } as never,
+  });
+  const { data: awayPlayers, isLoading: awayPlayersLoading } = useListPlayers(match?.awayTeamId ?? 0, {
+    query: { enabled: !!match?.awayTeamId } as never,
+  });
+
   // Kickoff time editor state
   const [kickoffTime, setKickoffTime] = useState("");
   const [showTimeEditor, setShowTimeEditor] = useState(false);
@@ -49,7 +61,8 @@ export default function AdminMatchDetail() {
   }, [match?.scheduledTime]);
 
   // Goal Form State
-  const [scorerName, setScorerName] = useState("");
+  const [homeScorer, setHomeScorer] = useState("");
+  const [awayScorer, setAwayScorer] = useState("");
   const [goalMinute, setGoalMinute] = useState("");
   const [isOwnGoal, setIsOwnGoal] = useState(false);
 
@@ -93,10 +106,19 @@ export default function AdminMatchDetail() {
     mutation: {
       onSuccess: () => {
         toast({ title: "Goal Added!" });
-        setScorerName("");
+        setHomeScorer("");
+        setAwayScorer("");
         setGoalMinute("");
         setIsOwnGoal(false);
         invalidateQueries();
+      },
+      onError: (error) => {
+        const data = (error as { data?: unknown })?.data;
+        const description =
+          data && typeof data === "object" && "error" in data
+            ? String((data as { error: unknown }).error)
+            : "The scorer must be a player from the same team.";
+        toast({ variant: "destructive", title: "Could not add goal", description });
       }
     }
   });
@@ -133,14 +155,14 @@ export default function AdminMatchDetail() {
     updateMatchMutation.mutate({ id: matchId, data: { scheduledTime: newScheduledTime } });
   };
 
-  const handleAddGoal = (teamId: number) => {
-    if (!scorerName || !goalMinute) {
-      toast({ variant: "destructive", title: "Error", description: "Scorer name and minute required" });
+  const handleAddGoal = (teamId: number, scorer: string) => {
+    if (!scorer || !goalMinute) {
+      toast({ variant: "destructive", title: "Error", description: "Scorer and minute required" });
       return;
     }
     addGoalMutation.mutate({
       matchId,
-      data: { teamId, scorerName, minute: parseInt(goalMinute), isOwnGoal }
+      data: { teamId, scorerName: scorer, minute: parseInt(goalMinute), isOwnGoal }
     });
   };
 
@@ -252,14 +274,14 @@ export default function AdminMatchDetail() {
               </h3>
               <div className="grid gap-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <Input placeholder="Scorer Name" value={scorerName} onChange={(e) => setScorerName(e.target.value)} />
+                  <ScorerField players={homePlayers} isLoading={homePlayersLoading} value={homeScorer} onChange={setHomeScorer} />
                   <Input type="number" placeholder="Minute" value={goalMinute} onChange={(e) => setGoalMinute(e.target.value)} />
                 </div>
                 <div className="flex items-center space-x-2">
                   <Switch id="own-goal-home" checked={isOwnGoal} onCheckedChange={setIsOwnGoal} />
                   <Label htmlFor="own-goal-home">Own Goal</Label>
                 </div>
-                <Button className="w-full font-bold" onClick={() => handleAddGoal(match.homeTeamId)} disabled={addGoalMutation.isPending}>
+                <Button className="w-full font-bold" onClick={() => handleAddGoal(match.homeTeamId, homeScorer)} disabled={addGoalMutation.isPending}>
                   +1 Goal Home
                 </Button>
               </div>
@@ -300,13 +322,13 @@ export default function AdminMatchDetail() {
               <div className="grid gap-3">
                 <div className="grid grid-cols-2 gap-3">
                   <Input type="number" placeholder="Minute" value={goalMinute} onChange={(e) => setGoalMinute(e.target.value)} />
-                  <Input placeholder="Scorer Name" value={scorerName} onChange={(e) => setScorerName(e.target.value)} className="text-right" />
+                  <ScorerField players={awayPlayers} isLoading={awayPlayersLoading} value={awayScorer} onChange={setAwayScorer} align />
                 </div>
                 <div className="flex items-center justify-end space-x-2">
                   <Label htmlFor="own-goal-away">Own Goal</Label>
                   <Switch id="own-goal-away" checked={isOwnGoal} onCheckedChange={setIsOwnGoal} />
                 </div>
-                <Button className="w-full font-bold" onClick={() => handleAddGoal(match.awayTeamId)} disabled={addGoalMutation.isPending}>
+                <Button className="w-full font-bold" onClick={() => handleAddGoal(match.awayTeamId, awayScorer)} disabled={addGoalMutation.isPending}>
                   +1 Goal Away
                 </Button>
               </div>
@@ -362,5 +384,57 @@ export default function AdminMatchDetail() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+type ScorerPlayer = { id: number; name: string; number?: number | null };
+
+function ScorerField({
+  players,
+  isLoading,
+  value,
+  onChange,
+  align,
+}: {
+  players: ScorerPlayer[] | undefined;
+  isLoading?: boolean;
+  value: string;
+  onChange: (v: string) => void;
+  align?: boolean;
+}) {
+  // While the squad is still loading, avoid showing free text (which the backend would reject)
+  if (isLoading) {
+    return (
+      <Input
+        placeholder="Loading squad…"
+        disabled
+        className={align ? "text-right" : undefined}
+      />
+    );
+  }
+  // Teams without a registered squad fall back to free text so goals can still be recorded
+  if (!players || players.length === 0) {
+    return (
+      <Input
+        placeholder="Scorer Name"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={align ? "text-right" : undefined}
+      />
+    );
+  }
+  return (
+    <Select value={value || undefined} onValueChange={onChange}>
+      <SelectTrigger>
+        <SelectValue placeholder="Scorer" />
+      </SelectTrigger>
+      <SelectContent>
+        {players.map((p) => (
+          <SelectItem key={p.id} value={p.name}>
+            {p.number ? `#${p.number} ` : ""}{p.name}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   );
 }
