@@ -25,22 +25,42 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
 
   const hasPlayers = !isLoading && (players?.length ?? 0) > 0;
 
+  const logoUrl = team.logoUrl;
+
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow border-0 shadow-sm">
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow border-0 shadow-sm relative">
       {/* Brand colour top bar */}
       <div className="h-3 w-full" style={{ backgroundColor: color }} />
 
-      <CardContent className="p-0">
+      {/* Background logo watermark */}
+      {logoUrl && (
+        <div
+          className="absolute inset-0 opacity-[0.06] pointer-events-none bg-no-repeat bg-right-top bg-contain"
+          style={{ backgroundImage: `url(${logoUrl})` }}
+        />
+      )}
+
+      <CardContent className="p-0 relative z-10">
         {/* Header block */}
         <div className="p-5 pb-4">
           <div className="flex items-start gap-4">
-            {/* Team initials circle */}
-            <div
-              className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-black text-xl flex-shrink-0 shadow-sm"
-              style={{ backgroundColor: color }}
-            >
-              {team.shortName.slice(0, 2).toUpperCase()}
-            </div>
+            {/* Logo or initials circle */}
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt={team.name}
+                className="w-14 h-14 rounded-xl object-cover bg-white shadow-sm flex-shrink-0 border"
+                style={{ borderColor: `${color}30` }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
+            ) : (
+              <div
+                className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-black text-xl flex-shrink-0 shadow-sm"
+                style={{ backgroundColor: color }}
+              >
+                {team.shortName.slice(0, 2).toUpperCase()}
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <h3 className="font-black text-lg leading-tight truncate">{team.name}</h3>
               <p className="text-muted-foreground font-mono text-xs mt-0.5">{team.shortName}</p>
