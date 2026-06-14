@@ -69,53 +69,57 @@ export default function AdminMatches() {
       </div>
 
       {/* Live Standings */}
-      {standings && standings.length > 0 && (
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Trophy className="h-4 w-4 text-primary" />
-              Current Standings
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/40 text-muted-foreground text-xs uppercase tracking-wider">
-                    <th className="text-left px-4 py-2 w-8">#</th>
-                    <th className="text-left px-4 py-2">Team</th>
-                    <th className="text-center px-3 py-2">P</th>
-                    <th className="text-center px-3 py-2">W</th>
-                    <th className="text-center px-3 py-2">D</th>
-                    <th className="text-center px-3 py-2">L</th>
-                    <th className="text-center px-3 py-2">GD</th>
-                    <th className="text-center px-3 py-2 font-black text-foreground">Pts</th>
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-base">
+            <Trophy className="h-4 w-4 text-primary" />
+            Current Standings
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b bg-muted/40 text-muted-foreground text-xs uppercase tracking-wider">
+                  <th className="text-left px-4 py-2 w-8">#</th>
+                  <th className="text-left px-4 py-2">Team</th>
+                  <th className="text-center px-3 py-2">P</th>
+                  <th className="text-center px-3 py-2">W</th>
+                  <th className="text-center px-3 py-2">D</th>
+                  <th className="text-center px-3 py-2">L</th>
+                  <th className="text-center px-3 py-2">GD</th>
+                  <th className="text-center px-3 py-2 font-black text-foreground">Pts</th>
+                </tr>
+              </thead>
+              <tbody>
+                {standings && standings.length > 0 ? standings.map((row, idx) => (
+                  <tr key={row.teamId} className={`border-b last:border-0 ${idx === 0 ? "bg-primary/5" : ""}`}>
+                    <td className="px-4 py-2.5 text-muted-foreground font-bold">{idx + 1}</td>
+                    <td className="px-4 py-2.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: row.primaryColor ?? "#888" }} />
+                        <span className="font-semibold">{row.teamName}</span>
+                      </div>
+                    </td>
+                    <td className="px-3 py-2.5 text-center">{row.played}</td>
+                    <td className="px-3 py-2.5 text-center">{row.won}</td>
+                    <td className="px-3 py-2.5 text-center">{row.drawn}</td>
+                    <td className="px-3 py-2.5 text-center">{row.lost}</td>
+                    <td className="px-3 py-2.5 text-center">{(row.goalsFor ?? 0) - (row.goalsAgainst ?? 0) >= 0 ? "+" : ""}{(row.goalsFor ?? 0) - (row.goalsAgainst ?? 0)}</td>
+                    <td className="px-3 py-2.5 text-center font-black text-primary">{row.points}</td>
                   </tr>
-                </thead>
-                <tbody>
-                  {standings.map((row, idx) => (
-                    <tr key={row.teamId} className={`border-b last:border-0 ${idx === 0 ? "bg-primary/5" : ""}`}>
-                      <td className="px-4 py-2.5 text-muted-foreground font-bold">{idx + 1}</td>
-                      <td className="px-4 py-2.5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: row.primaryColor ?? "#888" }} />
-                          <span className="font-semibold">{row.teamName}</span>
-                        </div>
-                      </td>
-                      <td className="px-3 py-2.5 text-center">{row.played}</td>
-                      <td className="px-3 py-2.5 text-center">{row.won}</td>
-                      <td className="px-3 py-2.5 text-center">{row.drawn}</td>
-                      <td className="px-3 py-2.5 text-center">{row.lost}</td>
-                      <td className="px-3 py-2.5 text-center">{(row.goalsFor ?? 0) - (row.goalsAgainst ?? 0) >= 0 ? "+" : ""}{(row.goalsFor ?? 0) - (row.goalsAgainst ?? 0)}</td>
-                      <td className="px-3 py-2.5 text-center font-black text-primary">{row.points}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+                )) : (
+                  <tr>
+                    <td colSpan={8} className="px-4 py-6 text-center text-muted-foreground text-sm">
+                      No matches played yet — standings will update automatically.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
