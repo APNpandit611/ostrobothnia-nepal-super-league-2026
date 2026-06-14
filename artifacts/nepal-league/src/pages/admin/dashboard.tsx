@@ -31,6 +31,7 @@ import {
   Megaphone,
   Swords,
   Building2,
+  ClipboardEdit,
 } from "lucide-react";
 import {
   Dialog,
@@ -149,6 +150,19 @@ export default function AdminDashboard() {
                 <div>
                   <h3 className="font-bold">View Fixtures</h3>
                   <p className="text-sm text-muted-foreground">See all scheduled games</p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+          <Link href="/admin/tournament">
+            <Card className="hover:border-primary cursor-pointer transition-all hover:shadow-md">
+              <CardContent className="p-5 flex items-center gap-4">
+                <div className="p-3 bg-primary/10 text-primary rounded-xl">
+                  <ClipboardEdit className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold">Tournament Info</h3>
+                  <p className="text-sm text-muted-foreground">Edit upcoming event details</p>
                 </div>
               </CardContent>
             </Card>
