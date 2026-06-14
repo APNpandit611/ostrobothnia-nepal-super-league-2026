@@ -7,7 +7,7 @@ import {
   ClipboardEdit, BookOpen, LogOut,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { useGetAdminMe, useAdminLogout, getGetAdminMeQueryKey } from "@workspace/api-client-react";
+import { useGetAdminMe, useAdminLogout, getGetAdminMeQueryKey, useListTeams } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "./theme-provider";
 
@@ -22,6 +22,7 @@ interface NavItem {
   label: string;
   icon: React.ElementType;
   children?: NavChild[];
+  badge?: number;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -61,6 +62,19 @@ function isParentActive(item: NavItem, location: string): boolean {
   return item.children.some(c => location === c.href || location.startsWith(c.href + "/"));
 }
 
+// ─── Notification badge (red count pill) ──────────────────────────────────────
+function NavBadge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span
+      className="flex h-5 min-w-[1.25rem] flex-shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-bold leading-none text-white shadow-sm"
+      title={`${count} squad${count === 1 ? "" : "s"} awaiting approval`}
+    >
+      {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
 // ─── Desktop sidebar nav item ─────────────────────────────────────────────────
 function SidebarItem({ item, location }: { item: NavItem; location: string }) {
   const Icon = item.icon;
@@ -79,7 +93,8 @@ function SidebarItem({ item, location }: { item: NavItem; location: string }) {
           active ? "bg-primary text-primary-foreground" : "hover:bg-muted",
         )}>
           <Icon className="h-4 w-4 flex-shrink-0" />
-          {item.label}
+          <span className="flex-1 truncate">{item.label}</span>
+          {item.badge ? <NavBadge count={item.badge} /> : null}
         </div>
       </Link>
     );
@@ -139,7 +154,8 @@ function MobileItem({ item, location, onClose }: { item: NavItem; location: stri
           active ? "bg-primary text-primary-foreground" : "hover:bg-muted",
         )}>
           <Icon className="h-5 w-5" />
-          {item.label}
+          <span className="flex-1 truncate">{item.label}</span>
+          {item.badge ? <NavBadge count={item.badge} /> : null}
         </div>
       </Link>
     );
@@ -198,6 +214,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
     },
   });
 
+  // Pending squad approvals — drives the red count badge on the admin "Teams" nav
+  // item. Only fetched (and polled) while an admin is logged in.
+  const { data: teamsList } = useListTeams({
+    query: {
+      enabled: isAdmin,
+      refetchInterval: isAdmin ? 30_000 : false,
+      staleTime: 15_000,
+    } as never,
+  });
+  const pendingCount = isAdmin
+    ? teamsList?.filter(t => t.squadStatus === "pending").length ?? 0
+    : 0;
+  const adminItems: NavItem[] = ADMIN_NAV_ITEMS.map(item =>
+    item.href === "/admin/teams" ? { ...item, badge: pendingCount } : item,
+  );
+
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0, behavior: "instant" });
     setMobileMenuOpen(false);
@@ -226,24 +258,28 @@ export function Layout({ children }: { children: React.ReactNode }) {
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 top-16 z-40 bg-background md:hidden overflow-y-auto">
-          <nav className="flex flex-col p-4 gap-0.5">
+          <nav className="flex min-h-full flex-col p-4 gap-0.5">
             {NAV_ITEMS.map(item => (
               <MobileItem key={item.href} item={item} location={location} onClose={() => setMobileMenuOpen(false)} />
             ))}
             {isAdmin ? (
-              <div className="mt-2 pt-2 border-t">
-                <div className="px-4 pb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Admin Panel</div>
-                {ADMIN_NAV_ITEMS.map(item => (
-                  <MobileItem key={item.href} item={item} location={location} onClose={() => setMobileMenuOpen(false)} />
-                ))}
-                <button
-                  onClick={() => { setMobileMenuOpen(false); logoutMutation.mutate(); }}
-                  className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                >
-                  <LogOut className="h-5 w-5" />
-                  Logout
-                </button>
-              </div>
+              <>
+                <div className="mt-2 pt-2 border-t">
+                  <div className="px-4 pb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Admin Panel</div>
+                  {adminItems.map(item => (
+                    <MobileItem key={item.href} item={item} location={location} onClose={() => setMobileMenuOpen(false)} />
+                  ))}
+                </div>
+                <div className="mt-auto pt-2 border-t">
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); logoutMutation.mutate(); }}
+                    className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  >
+                    <LogOut className="h-5 w-5" />
+                    Logout
+                  </button>
+                </div>
+              </>
             ) : (
               <div className="mt-2 pt-2 border-t">
                 <Link href="/admin/dashboard" onClick={() => setMobileMenuOpen(false)}>
@@ -273,23 +309,25 @@ export function Layout({ children }: { children: React.ReactNode }) {
           {NAV_ITEMS.map(item => (
             <SidebarItem key={item.href} item={item} location={location} />
           ))}
+          {isAdmin && (
+            <div className="mt-2 space-y-0.5 border-t pt-2">
+              <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Admin Panel</div>
+              {adminItems.map(item => (
+                <SidebarItem key={item.href} item={item} location={location} />
+              ))}
+            </div>
+          )}
         </nav>
         <div className="border-t p-4">
           {isAdmin ? (
-            <div className="space-y-0.5">
-              <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Admin Panel</div>
-              {ADMIN_NAV_ITEMS.map(item => (
-                <SidebarItem key={item.href} item={item} location={location} />
-              ))}
-              <button
-                onClick={() => logoutMutation.mutate()}
-                disabled={logoutMutation.isPending}
-                className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
-              >
-                <LogOut className="h-4 w-4 flex-shrink-0" />
-                Logout
-              </button>
-            </div>
+            <button
+              onClick={() => logoutMutation.mutate()}
+              disabled={logoutMutation.isPending}
+              className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors cursor-pointer"
+            >
+              <LogOut className="h-4 w-4 flex-shrink-0" />
+              Logout
+            </button>
           ) : (
             <Link href="/admin/dashboard">
               <div className={cn(
