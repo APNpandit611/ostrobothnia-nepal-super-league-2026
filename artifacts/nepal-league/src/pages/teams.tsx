@@ -43,12 +43,7 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
                 <CheckCircle2 className="h-3 w-3" /> Approved
               </span>
             )}
-            {isPending && (
-              <span className="flex items-center gap-1 text-xs font-bold px-2 py-1 rounded-full bg-yellow-500/15 text-yellow-600 border border-yellow-500/30">
-                <Clock className="h-3 w-3" /> Pending
-              </span>
-            )}
-            {!isLocked && (
+            {!isApproved && !isPending && (
               <Link href={`/update-squad?team=${team.id}`}>
                 <button className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors hover:bg-muted">
                   <UserPlus className="h-3 w-3" /> Update Squad
@@ -84,12 +79,12 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
             </Link>
           </div>
         ) : !isApproved ? (
-          /* Players exist but squad not yet approved (pending or revoked) */
+          /* Players exist but squad not yet approved — show nothing revealing */
           <div className="flex flex-col items-center gap-3 py-6 text-center">
-            <Clock className="h-8 w-8 text-yellow-500/60" />
+            <Users className="h-8 w-8 text-muted-foreground/40" />
             <div>
-              <p className="text-sm font-semibold">Squad submitted — pending approval</p>
-              <p className="text-xs text-muted-foreground mt-0.5">The squad will appear here once the admin approves it.</p>
+              <p className="text-sm font-semibold">Squad coming soon</p>
+              <p className="text-xs text-muted-foreground mt-0.5">The squad list will be published before the tournament.</p>
             </div>
           </div>
         ) : (
