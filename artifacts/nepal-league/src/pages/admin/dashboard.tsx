@@ -313,8 +313,8 @@ export default function AdminDashboard() {
                   <BookOpen className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="font-bold">About Page</h3>
-                  <p className="text-sm text-muted-foreground">Edit club story</p>
+                  <h3 className="font-bold">About Us</h3>
+                  <p className="text-sm text-muted-foreground">Edit club story, contact & values</p>
                 </div>
               </CardContent>
             </Card>

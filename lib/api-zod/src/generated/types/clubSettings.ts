@@ -5,9 +5,20 @@
  * Nepal Summer League Finland 2026 Tournament API
  * OpenAPI spec version: 0.1.0
  */
+import type { ClubValueItem } from './clubValueItem';
 
 export interface ClubSettings {
   id: number;
   storyParagraphs: string[];
+  /** @nullable */
+  tagline?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  homeGround?: string | null;
+  /** @nullable */
+  values?: ClubValueItem[] | null;
   updatedAt: string;
 }

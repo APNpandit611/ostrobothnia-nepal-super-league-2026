@@ -1747,6 +1747,15 @@ components:
           type: boolean
 
     # ── Club Settings ──────────────────────────────────────────────────
+    ClubValueItem:
+      type: object
+      required: [title, description]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+
     ClubSettings:
       type: object
       required: [id, storyParagraphs, updatedAt]
@@ -1757,6 +1766,18 @@ components:
           type: array
           items:
             type: string
+        tagline:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        homeGround:
+          type: ["string", "null"]
+        values:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/ClubValueItem"
         updatedAt:
           type: string
 
@@ -1767,3 +1788,15 @@ components:
           type: array
           items:
             type: string
+        tagline:
+          type: ["string", "null"]
+        email:
+          type: ["string", "null"]
+        phone:
+          type: ["string", "null"]
+        homeGround:
+          type: ["string", "null"]
+        values:
+          type: ["array", "null"]
+          items:
+            $ref: "#/components/schemas/ClubValueItem"

@@ -619,6 +619,14 @@ export const GetTopScorersResponse = zod.array(GetTopScorersResponseItem)
 export const GetClubSettingsResponse = zod.object({
   "id": zod.number(),
   "storyParagraphs": zod.array(zod.string()),
+  "tagline": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "homeGround": zod.string().nullish(),
+  "values": zod.array(zod.object({
+  "title": zod.string(),
+  "description": zod.string()
+})).nullish(),
   "updatedAt": zod.string()
 })
 
@@ -627,12 +635,28 @@ export const GetClubSettingsResponse = zod.object({
  * @summary Update club settings (admin)
  */
 export const UpdateClubSettingsBody = zod.object({
-  "storyParagraphs": zod.array(zod.string()).optional()
+  "storyParagraphs": zod.array(zod.string()).optional(),
+  "tagline": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "homeGround": zod.string().nullish(),
+  "values": zod.array(zod.object({
+  "title": zod.string(),
+  "description": zod.string()
+})).nullish()
 })
 
 export const UpdateClubSettingsResponse = zod.object({
   "id": zod.number(),
   "storyParagraphs": zod.array(zod.string()),
+  "tagline": zod.string().nullish(),
+  "email": zod.string().nullish(),
+  "phone": zod.string().nullish(),
+  "homeGround": zod.string().nullish(),
+  "values": zod.array(zod.object({
+  "title": zod.string(),
+  "description": zod.string()
+})).nullish(),
   "updatedAt": zod.string()
 })
 

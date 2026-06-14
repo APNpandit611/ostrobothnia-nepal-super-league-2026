@@ -1,8 +1,13 @@
-import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, serial, text, timestamp, jsonb } from "drizzle-orm/pg-core";
 
 export const clubSettingsTable = pgTable("club_settings", {
   id: serial("id").primaryKey(),
   storyParagraphs: text("story_paragraphs").array().notNull().default([]),
+  tagline: text("tagline"),
+  email: text("email"),
+  phone: text("phone"),
+  homeGround: text("home_ground"),
+  values: jsonb("values").$type<{ title: string; description: string }[]>(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

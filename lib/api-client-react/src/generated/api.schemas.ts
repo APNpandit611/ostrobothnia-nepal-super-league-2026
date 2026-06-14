@@ -645,14 +645,39 @@ export interface PublishToggleInput {
   isPublished: boolean;
 }
 
+export interface ClubValueItem {
+  title: string;
+  description: string;
+}
+
 export interface ClubSettings {
   id: number;
   storyParagraphs: string[];
+  /** @nullable */
+  tagline?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  homeGround?: string | null;
+  /** @nullable */
+  values?: ClubValueItem[] | null;
   updatedAt: string;
 }
 
 export interface ClubSettingsUpdate {
   storyParagraphs?: string[];
+  /** @nullable */
+  tagline?: string | null;
+  /** @nullable */
+  email?: string | null;
+  /** @nullable */
+  phone?: string | null;
+  /** @nullable */
+  homeGround?: string | null;
+  /** @nullable */
+  values?: ClubValueItem[] | null;
 }
 
 export type ListMatchesParams = {

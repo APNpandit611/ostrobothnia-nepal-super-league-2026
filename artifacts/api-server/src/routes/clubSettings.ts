@@ -23,13 +23,25 @@ router.get("/api/club-settings", async (req, res): Promise<void> => {
 });
 
 router.put("/api/admin/club-settings", async (req, res): Promise<void> => {
-  const { storyParagraphs } = req.body as { storyParagraphs?: string[] };
+  const { storyParagraphs, tagline, email, phone, homeGround, values } = req.body as {
+    storyParagraphs?: string[];
+    tagline?: string | null;
+    email?: string | null;
+    phone?: string | null;
+    homeGround?: string | null;
+    values?: { title: string; description: string }[] | null;
+  };
   try {
     const existing = await getOrCreate();
     const [updated] = await db
       .update(clubSettingsTable)
       .set({
         ...(Array.isArray(storyParagraphs) && { storyParagraphs }),
+        ...(tagline !== undefined && { tagline: tagline ?? null }),
+        ...(email !== undefined && { email: email ?? null }),
+        ...(phone !== undefined && { phone: phone ?? null }),
+        ...(homeGround !== undefined && { homeGround: homeGround ?? null }),
+        ...(values !== undefined && { values: values ?? null }),
         updatedAt: new Date(),
       })
       .where(eq(clubSettingsTable.id, existing.id))

@@ -2,45 +2,38 @@ import { Shield, Users, MapPin, Star, Heart, Trophy, Mail, Phone } from "lucide-
 import { Card, CardContent } from "@/components/ui/card";
 import { useGetClubSettings } from "@workspace/api-client-react";
 
+const DEFAULT_TAGLINE =
+  "A Nepalese football club rooted in community, culture, and the love of the game — representing the Nepalese diaspora in Ostrobothnia.";
+
 const DEFAULT_STORY = [
   "Kokkola Soccer Boys was born out of a simple idea: bring the Nepalese community in Kokkola together through football. What started as informal matches between friends quickly grew into an organised club with a shared identity and a green jersey to call our own.",
   "Over the years, KSB has become a cornerstone of the Nepalese community in Central Ostrobothnia — organising matches, tournaments, and social events that connect people across generations and backgrounds.",
   "In 2026, KSB proudly hosts the Ostrobothnia Nepal Super League — bringing together five clubs from across Finland for a day of top-level Nepalese football at Santahaka Tekonurmikenttä.",
 ];
 
-const VALUES = [
-  {
-    icon: Heart,
-    title: "Community",
-    description:
-      "Founded by Nepalese living in Kokkola, KSB is more than a football club — it is a gathering place for culture, friendship, and belonging.",
-  },
-  {
-    icon: Shield,
-    title: "Sportsmanship",
-    description:
-      "We play with passion and respect. On and off the pitch, our players represent the values of fair play and team spirit.",
-  },
-  {
-    icon: Star,
-    title: "Excellence",
-    description:
-      "From grassroots training to competitive tournaments, we push each other to grow as players and as people.",
-  },
-  {
-    icon: Users,
-    title: "Inclusion",
-    description:
-      "Everyone is welcome. KSB opens its doors to all who share a love for the beautiful game and the Nepalese community in Finland.",
-  },
+const VALUE_ICONS = [Heart, Shield, Star, Users];
+
+const DEFAULT_VALUES = [
+  { title: "Community", description: "Founded by Nepalese living in Kokkola, KSB is more than a football club — it is a gathering place for culture, friendship, and belonging." },
+  { title: "Sportsmanship", description: "We play with passion and respect. On and off the pitch, our players represent the values of fair play and team spirit." },
+  { title: "Excellence", description: "From grassroots training to competitive tournaments, we push each other to grow as players and as people." },
+  { title: "Inclusion", description: "Everyone is welcome. KSB opens its doors to all who share a love for the beautiful game and the Nepalese community in Finland." },
 ];
 
 export default function About() {
   const { data: settings } = useGetClubSettings();
+
   const story =
     settings?.storyParagraphs && settings.storyParagraphs.length > 0
       ? settings.storyParagraphs
       : DEFAULT_STORY;
+
+  const tagline = settings?.tagline || DEFAULT_TAGLINE;
+  const email = settings?.email || "ksoccerboys@gmail.com";
+  const phone = settings?.phone || "+358 413 174 494";
+  const homeGround = settings?.homeGround || "Kokkola, Finland";
+  const values =
+    settings?.values && settings.values.length > 0 ? settings.values : DEFAULT_VALUES;
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-3xl">
@@ -57,9 +50,7 @@ export default function About() {
           <h1 className="text-3xl font-black tracking-tight leading-tight">
             Kokkola Soccer Boys
           </h1>
-          <p className="text-muted-foreground leading-relaxed">
-            A Nepalese football club rooted in community, culture, and the love of the game — representing the Nepalese diaspora in Ostrobothnia.
-          </p>
+          <p className="text-muted-foreground leading-relaxed">{tagline}</p>
         </div>
       </div>
 
@@ -83,19 +74,22 @@ export default function About() {
           <h2 className="text-xl font-black uppercase tracking-wide">What We Stand For</h2>
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
-          {VALUES.map(({ icon: Icon, title, description }) => (
-            <Card key={title} className="border-border/60">
-              <CardContent className="p-5 flex gap-4">
-                <div className="p-2 rounded-xl bg-primary/10 h-fit">
-                  <Icon className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h3 className="font-bold mb-1">{title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {values.map(({ title, description }, i) => {
+            const Icon = VALUE_ICONS[i % VALUE_ICONS.length];
+            return (
+              <Card key={title} className="border-border/60">
+                <CardContent className="p-5 flex gap-4">
+                  <div className="p-2 rounded-xl bg-primary/10 h-fit">
+                    <Icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold mb-1">{title}</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       </div>
 
@@ -114,7 +108,7 @@ export default function About() {
             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Home Ground</p>
             <div className="flex items-center justify-center gap-1.5 mt-2">
               <MapPin className="h-4 w-4 text-primary" />
-              <span className="text-sm font-semibold">Kokkola, Finland</span>
+              <span className="text-sm font-semibold">{homeGround}</span>
             </div>
           </div>
           <div>
@@ -135,7 +129,7 @@ export default function About() {
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
           <a
-            href="mailto:ksoccerboys@gmail.com"
+            href={`mailto:${email}`}
             className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 border hover:border-primary transition-colors flex-1"
           >
             <div className="p-2 rounded-lg bg-primary/10">
@@ -143,11 +137,11 @@ export default function About() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Email</p>
-              <p className="font-semibold text-sm">ksoccerboys@gmail.com</p>
+              <p className="font-semibold text-sm">{email}</p>
             </div>
           </a>
           <a
-            href="tel:+358413174494"
+            href={`tel:${phone.replace(/\s/g, "")}`}
             className="flex items-center gap-3 p-4 rounded-xl bg-muted/50 border hover:border-primary transition-colors flex-1"
           >
             <div className="p-2 rounded-lg bg-primary/10">
@@ -155,7 +149,7 @@ export default function About() {
             </div>
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Phone</p>
-              <p className="font-semibold text-sm">+358 413 174 494</p>
+              <p className="font-semibold text-sm">{phone}</p>
             </div>
           </a>
         </div>
