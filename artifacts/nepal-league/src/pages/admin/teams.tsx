@@ -344,7 +344,7 @@ export default function AdminTeams() {
                       <Input
                         value={edit.logoUrl}
                         onChange={(e) => set(selectedTeam.id, "logoUrl", e.target.value)}
-                        placeholder="/ksb-logo.jpg or https://…"
+                        placeholder="/ksb-logo.png or https://…"
                         className="flex-1"
                       />
                       {edit.logoUrl && (
