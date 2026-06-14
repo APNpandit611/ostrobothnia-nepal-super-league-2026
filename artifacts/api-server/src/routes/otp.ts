@@ -28,6 +28,33 @@ function getTransporter() {
   });
 }
 
+async function sendViaResend(to: string, code: string): Promise<boolean> {
+  const apiKey = process.env["RESEND_API_KEY"];
+  if (!apiKey) return false;
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        from: "ONSL 2026 <onboarding@resend.dev>",
+        to,
+        subject: "ONSL 2026 — Your verification code",
+        html: `
+          <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+            <h2 style="color:#16a34a">Ostrobothnia Nepal Super League 2026</h2>
+            <p>Your team registration verification code is:</p>
+            <div style="font-size:40px;font-weight:900;letter-spacing:8px;text-align:center;padding:24px 0;color:#111">${code}</div>
+            <p style="color:#666;font-size:14px">This code expires in 10 minutes. Do not share it with anyone.</p>
+          </div>
+        `,
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 const SendOtpBody = z.object({
   contact: z.string().min(1).max(320),
   type: z.enum(["email", "phone"]),
@@ -68,31 +95,38 @@ router.post("/register/send-otp", async (req, res): Promise<void> => {
   let emailDelivered = false;
 
   if (type === "email") {
-    const transporter = getTransporter();
-    if (transporter) {
-      try {
-        const from = process.env["SMTP_FROM"] || process.env["SMTP_USER"] || "noreply@onsl2026.fi";
-        await transporter.sendMail({
-          from,
-          to: contact,
-          subject: "ONSL 2026 — Your verification code",
-          html: `
-            <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
-              <h2 style="color:#16a34a">Ostrobothnia Nepal Super League 2026</h2>
-              <p>Your team registration verification code is:</p>
-              <div style="font-size:40px;font-weight:900;letter-spacing:8px;text-align:center;padding:24px 0;color:#111">${code}</div>
-              <p style="color:#666;font-size:14px">This code expires in 10 minutes. Do not share it with anyone.</p>
-            </div>
-          `,
-        });
-        req.log.info({ contact, type }, "OTP email sent");
-        emailDelivered = true;
-      } catch (err) {
-        req.log.error({ err }, "Failed to send OTP email — falling back to log");
-        req.log.info({ contact, code }, "OTP CODE (email send failed)");
-      }
+    // Try Resend first (works from cloud servers)
+    emailDelivered = await sendViaResend(contact, code);
+    if (emailDelivered) {
+      req.log.info({ contact }, "OTP email sent via Resend");
     } else {
-      req.log.info({ contact, code }, "OTP CODE (no SMTP configured — dev mode)");
+      // Fall back to SMTP
+      const transporter = getTransporter();
+      if (transporter) {
+        try {
+          const from = process.env["SMTP_FROM"] || process.env["SMTP_USER"] || "noreply@onsl2026.fi";
+          await transporter.sendMail({
+            from,
+            to: contact,
+            subject: "ONSL 2026 — Your verification code",
+            html: `
+              <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+                <h2 style="color:#16a34a">Ostrobothnia Nepal Super League 2026</h2>
+                <p>Your team registration verification code is:</p>
+                <div style="font-size:40px;font-weight:900;letter-spacing:8px;text-align:center;padding:24px 0;color:#111">${code}</div>
+                <p style="color:#666;font-size:14px">This code expires in 10 minutes. Do not share it with anyone.</p>
+              </div>
+            `,
+          });
+          req.log.info({ contact, type }, "OTP email sent via SMTP");
+          emailDelivered = true;
+        } catch (err) {
+          req.log.error({ err }, "Failed to send OTP email via SMTP");
+        }
+      }
+      if (!emailDelivered) {
+        req.log.info({ contact, code }, "OTP CODE (all delivery methods failed)");
+      }
     }
   } else {
     req.log.info({ contact, code }, "OTP CODE (SMS — no SMS provider configured)");
