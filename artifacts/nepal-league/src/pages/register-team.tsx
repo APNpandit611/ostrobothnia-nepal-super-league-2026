@@ -226,10 +226,11 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
           <CheckCircle2 className="h-10 w-10 text-primary" />
         </div>
         <div>
-          <h2 className="text-2xl font-black">Registration Complete!</h2>
+          <h2 className="text-2xl font-black">Registration Submitted!</h2>
           <p className="text-muted-foreground mt-2">
-            <span className="font-bold text-foreground">{createdTeamName}</span> has been registered for{" "}
-            <span className="font-bold text-foreground">{tournamentName}</span>. Only the admin can make changes from here.
+            <span className="font-bold text-foreground">{createdTeamName}</span> has been submitted for{" "}
+            <span className="font-bold text-foreground">{tournamentName}</span> and is now{" "}
+            <span className="font-bold text-foreground">pending admin approval</span>. Your team will appear on the site once an admin approves it.
           </p>
         </div>
         <div className="flex gap-3">

@@ -1,17 +1,16 @@
 import { Router, type IRouter } from "express";
-import { eq, inArray } from "drizzle-orm";
-import { db, teamsTable, matchesTable, goalsTable, playersTable } from "@workspace/db";
+import { eq } from "drizzle-orm";
+import { db, teamsTable, matchesTable, goalsTable } from "@workspace/db";
 
 const router: IRouter = Router();
 
 router.get("/stats/top-scorers", async (_req, res): Promise<void> => {
-  const playerRows = await db.selectDistinct({ teamId: playersTable.teamId }).from(playersTable);
-  const registeredIds = playerRows.map(r => r.teamId);
+  // Only approved teams are part of the tournament
+  const teams = await db.select().from(teamsTable).where(eq(teamsTable.squadStatus, "approved"));
+  const approvedIds = new Set(teams.map(t => t.id));
 
-  const goals = await db.select().from(goalsTable).where(eq(goalsTable.isOwnGoal, false));
-  const teams = registeredIds.length > 0
-    ? await db.select().from(teamsTable).where(inArray(teamsTable.id, registeredIds))
-    : [];
+  const goals = (await db.select().from(goalsTable).where(eq(goalsTable.isOwnGoal, false)))
+    .filter(g => approvedIds.has(g.teamId));
   const teamsMap = new Map(teams.map(t => [t.id, t]));
 
   // Aggregate by scorer name + team
@@ -40,20 +39,16 @@ router.get("/stats/top-scorers", async (_req, res): Promise<void> => {
 });
 
 router.get("/stats", async (_req, res): Promise<void> => {
-  const playerRows = await db.selectDistinct({ teamId: playersTable.teamId }).from(playersTable);
-  const registeredIds = playerRows.map(r => r.teamId);
-
-  const teams = registeredIds.length > 0
-    ? await db.select().from(teamsTable).where(inArray(teamsTable.id, registeredIds))
-    : [];
-  const registeredSet = new Set(registeredIds);
+  // Only approved teams are part of the tournament
+  const teams = await db.select().from(teamsTable).where(eq(teamsTable.squadStatus, "approved"));
+  const registeredSet = new Set(teams.map(t => t.id));
 
   const allMatchesRaw = await db.select().from(matchesTable);
   // Only count matches where both teams are registered
   const allMatches = allMatchesRaw.filter(m => registeredSet.has(m.homeTeamId) && registeredSet.has(m.awayTeamId));
   const finishedMatches = allMatches.filter(m => m.status === "finished");
   const liveMatches = allMatches.filter(m => m.status === "live");
-  const allGoals = await db.select().from(goalsTable);
+  const allGoals = (await db.select().from(goalsTable)).filter(g => registeredSet.has(g.teamId));
 
   const totalGoals = allGoals.length;
   const matchesPlayed = finishedMatches.length;

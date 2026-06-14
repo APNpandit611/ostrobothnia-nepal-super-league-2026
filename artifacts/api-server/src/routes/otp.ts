@@ -238,6 +238,9 @@ router.post("/register/team", async (req, res): Promise<void> => {
       managerName: teamData.managerName ?? null,
       managerPhone: teamData.managerPhone ?? null,
       managerEmail: clerkEmail ?? teamData.managerEmail ?? null,
+      // Squad is submitted at registration → enters the admin approval queue.
+      // Stays hidden from all public pages until an admin approves it.
+      squadStatus: "pending",
     })
     .returning();
 

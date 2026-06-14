@@ -167,6 +167,9 @@ export default function Teams() {
   const { data: teams, isLoading: teamsLoading } = useListTeams();
   const { data: standings, isLoading: standingsLoading } = useGetStandings();
 
+  // Only squads approved by the admin are shown publicly.
+  const approvedTeams = (teams ?? []).filter((t) => t.squadStatus === "approved");
+
   if (teamsLoading || standingsLoading) {
     return (
       <div className="flex justify-center py-12">
@@ -175,7 +178,7 @@ export default function Teams() {
     );
   }
 
-  const noTeamsInDb = !teamsLoading && (teams?.length ?? 0) === 0;
+  const noTeamsInDb = !teamsLoading && approvedTeams.length === 0;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -213,16 +216,16 @@ export default function Teams() {
           <CardContent className="py-16 flex flex-col items-center text-center gap-4">
             <Users className="h-12 w-12 opacity-20" />
             <div>
-              <p className="font-bold text-lg">No teams registered yet</p>
+              <p className="font-bold text-lg">No teams yet</p>
               <p className="text-muted-foreground text-sm mt-1">
-                Teams will appear here once they register.
+                Teams appear here once they register and are approved by the admin.
               </p>
             </div>
           </CardContent>
         </Card>
       ) : (
         <div className="grid md:grid-cols-2 gap-6">
-          {teams?.map((team) => (
+          {approvedTeams.map((team) => (
             <TeamCard
               key={team.id}
               team={team}

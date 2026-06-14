@@ -32,7 +32,9 @@ router.get("/teams/:id", async (req, res): Promise<void> => {
     return;
   }
   const [team] = await db.select().from(teamsTable).where(eq(teamsTable.id, params.data.id));
-  if (!team) {
+  // Public squad page: only approved squads are visible. Pending/unsubmitted
+  // squads behave as "not found" until an admin approves them.
+  if (!team || team.squadStatus !== "approved") {
     res.status(404).json({ error: "Team not found" });
     return;
   }
