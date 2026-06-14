@@ -27,7 +27,7 @@ function newRow(): PlayerRow {
   return { localId: crypto.randomUUID(), name: "", number: "", position: "" };
 }
 
-async function sendOtp(contact: string, teamId: number): Promise<{ id: string; devCode?: string }> {
+async function sendOtp(contact: string, teamId: number): Promise<{ id: string; code?: string }> {
   const res = await fetch("/api/register/send-otp", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -113,7 +113,7 @@ export default function UpdateSquad() {
   const [otpSending, setOtpSending] = useState(false);
   const [otpVerifying, setOtpVerifying] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
-  const [devCode, setDevCode] = useState<string | null>(null);
+  const [shownCode, setShownCode] = useState<string | null>(null);
 
   const [rows, setRows] = useState<PlayerRow[]>(Array.from({ length: MIN_PLAYERS }, newRow));
   const [submitting, setSubmitting] = useState(false);
@@ -146,7 +146,7 @@ export default function UpdateSquad() {
       setOtpId(result.id);
       setOtpSent(true);
       setOtpCode("");
-      if (result.devCode) setDevCode(result.devCode);
+      if (result.code) setShownCode(result.code);
       toast({ title: "Code sent!", description: `Check ${email.trim()}` });
       setStep(2);
     } catch {
@@ -307,10 +307,11 @@ export default function UpdateSquad() {
               </div>
             </div>
 
-            {devCode && (
-              <div className="rounded-lg bg-yellow-500/10 border border-yellow-500/30 px-4 py-3 text-sm">
-                <span className="font-bold text-yellow-600 dark:text-yellow-400">Dev mode — code: </span>
-                <span className="font-mono font-black tracking-widest text-lg">{devCode}</span>
+            {shownCode && (
+              <div className="rounded-xl border-2 border-green-500 bg-green-50 dark:bg-green-950/30 px-4 py-4 text-center">
+                <p className="text-xs font-bold uppercase tracking-widest text-green-700 dark:text-green-400 mb-2">Your verification code</p>
+                <p className="font-mono font-black text-3xl tracking-[0.3em] text-green-800 dark:text-green-300">{shownCode}</p>
+                <p className="text-xs text-muted-foreground mt-2">Enter this code below — also check your email</p>
               </div>
             )}
 
@@ -345,7 +346,7 @@ export default function UpdateSquad() {
               onClick={async () => {
                 setOtpSent(false);
                 setOtpCode("");
-                setDevCode(null);
+                setShownCode(null);
                 await handleSendOtp();
               }}
               className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center justify-center gap-1.5 py-1"

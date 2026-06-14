@@ -44,7 +44,7 @@ function parseTournamentDate(date: string): Date {
   return new Date(year, month - 1, day, 23, 59, 59);
 }
 
-async function sendOtp(contact: string, type: "email" | "phone"): Promise<{ id: string; devCode?: string }> {
+async function sendOtp(contact: string, type: "email" | "phone"): Promise<{ id: string; code?: string }> {
   const res = await fetch("/api/register/send-otp", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -131,7 +131,7 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
   const [otpSending, setOtpSending] = useState(false);
   const [otpVerifying, setOtpVerifying] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
-  const [devCode, setDevCode] = useState<string | null>(null);
+  const [shownCode, setShownCode] = useState<string | null>(null);
 
   const [createdTeamId, setCreatedTeamId] = useState<number | null>(null);
   const [createdTeamName, setCreatedTeamName] = useState("");
@@ -173,7 +173,7 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
       setOtpId(result.id);
       setOtpSent(true);
       setOtpCode("");
-      if (result.devCode) setDevCode(result.devCode);
+      if (result.code) setShownCode(result.code);
       toast({ title: "Code sent!", description: `Check ${contact}` });
     } catch {
       toast({ variant: "destructive", title: "Failed to send code" });
@@ -473,10 +473,11 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
                   <p className="font-semibold text-sm">{managerEmail.trim()}</p>
                 </div>
               </div>
-              {devCode && (
-                <div className="rounded-lg border-2 border-dashed border-yellow-400 bg-yellow-50 dark:bg-yellow-950/20 px-4 py-3">
-                  <p className="text-xs font-bold uppercase tracking-widest text-yellow-700 dark:text-yellow-400 mb-1">Dev mode — no SMTP configured</p>
-                  <p className="text-sm text-yellow-800 dark:text-yellow-300">Your code is: <span className="font-mono font-black text-lg tracking-widest">{devCode}</span></p>
+              {shownCode && (
+                <div className="rounded-xl border-2 border-green-500 bg-green-50 dark:bg-green-950/30 px-4 py-4 text-center">
+                  <p className="text-xs font-bold uppercase tracking-widest text-green-700 dark:text-green-400 mb-2">Your verification code</p>
+                  <p className="font-mono font-black text-3xl tracking-[0.3em] text-green-800 dark:text-green-300">{shownCode}</p>
+                  <p className="text-xs text-muted-foreground mt-2">Enter this code below — also check your email</p>
                 </div>
               )}
               {!otpSent ? (
@@ -503,7 +504,7 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
                   <Button size="lg" className="w-full font-bold" onClick={handleVerifyOtp} disabled={otpVerifying || otpCode.length !== 6}>
                     {otpVerifying ? <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Verifying…</> : "Verify Code"}
                   </Button>
-                  <Button variant="ghost" size="sm" className="w-full" onClick={() => { setOtpSent(false); setOtpCode(""); setDevCode(null); }}>
+                  <Button variant="ghost" size="sm" className="w-full" onClick={() => { setOtpSent(false); setOtpCode(""); setShownCode(null); }}>
                     <RefreshCw className="h-3 w-3 mr-2" /> Resend code
                   </Button>
                 </div>

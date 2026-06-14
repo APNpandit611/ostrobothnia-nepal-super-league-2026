@@ -143,8 +143,9 @@ router.post("/register/send-otp", async (req, res): Promise<void> => {
 
   res.status(200).json({
     id: record.id,
-    // Only expose code in non-production when delivery failed (dev convenience)
-    ...(!emailDelivered && !IS_PROD ? { devCode: code } : {}),
+    // Always return the code so managers can see it on screen
+    // (Resend free tier only delivers to verified domains; on-screen is the primary delivery)
+    code,
   });
 });
 
