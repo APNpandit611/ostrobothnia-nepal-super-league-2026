@@ -1,0 +1,90 @@
+Create a simple and modern web-based Admin Dashboard for a local Nepali football club in Kokkola, Finland.
+
+The club participates mainly in Nepali domestic football leagues held within Finland and hosts one or two tournaments each year. The system should be lightweight, easy to use, and designed for volunteers rather than full-time staff.
+
+The admin panel should include these features:
+
+1. Dashboard
+
+* Total registered players
+* Upcoming matches
+* Upcoming tournaments
+* Recent announcements
+* Pending membership payments
+
+2. Players
+
+* Add, edit, and remove players
+* Player photo
+* Contact information
+* Date of birth
+* Playing position
+* Jersey number
+* Emergency contact
+* Active/inactive status
+
+3. Teams
+
+* Manage the First Team
+* Optionally create additional squads if needed
+* Assign players to teams
+
+4. Matches
+
+* Create fixtures
+* Opponent club name
+* Date and time
+* Venue
+* Home/Away status
+* Record match results
+* Track goalscorers and assists
+
+5. Tournaments
+
+* Create and manage tournaments hosted by the club
+* Tournament name
+* Venue
+* Participating teams
+* Match schedules
+* Results and standings
+
+6. Attendance
+
+* Track player attendance for training sessions and matches
+* Present, Absent, or Excused status
+
+7. Membership & Fees
+
+* Record annual membership fees
+* Mark payments as Paid or Unpaid
+* View outstanding dues
+
+8. Announcements
+
+* Publish notices for players and members
+* Training updates
+* Match reminders
+* Tournament information
+
+9. Photo Gallery & Documents
+
+* Upload tournament photos
+* Store club documents such as registration forms and sponsorship letters
+
+10. User Roles
+
+* Admin: full access
+* Coach: manage players, attendance, and matches
+* Treasurer: manage payments
+* Volunteer: limited access
+
+Design requirements:
+
+* Clean and simple interface.
+* Mobile-friendly because administrators often use phones.
+* Dark and light mode support.
+* Easy enough for non-technical volunteers to use.
+* Use realistic sample data from a Nepali community football club in Finland.
+* Include Nepali names and local tournament examples.
+
+Build the application using Next.js, TypeScript, Tailwind CSS, shadcn/ui, Prisma, PostgreSQL, and NextAuth. Generate database schema, CRUD functionality, seed data, and role-based authentication. Focus on practicality and simplicity rather than enterprise-level complexity.
