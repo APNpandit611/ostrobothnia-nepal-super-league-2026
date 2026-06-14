@@ -179,7 +179,7 @@ export default function Home() {
               Register your team and squad before the tournament. You'll need a team manager email for OTP verification and at least 7 players.
             </p>
           </div>
-          <Link href="/register#team">
+          <Link href="/register/team">
             <div className="flex items-center gap-2 bg-primary text-primary-foreground font-bold px-6 py-3 rounded-xl hover:bg-primary/90 transition-colors cursor-pointer whitespace-nowrap">
               Register Now <ArrowRight className="h-4 w-4" />
             </div>

@@ -153,10 +153,6 @@ export default function JoinKsb() {
           <a href="mailto:ksoccerboys@gmail.com" className="underline hover:text-foreground">ksoccerboys@gmail.com</a>
         </p>
 
-        <p className="text-center text-xs text-muted-foreground mt-2">
-          Want to register a team instead?{" "}
-          <Link href="/register/team" className="underline hover:text-foreground font-semibold">Register Team →</Link>
-        </p>
       </div>
     </div>
   );

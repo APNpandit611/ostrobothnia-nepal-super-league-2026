@@ -38,15 +38,7 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   { href: "/announcements", label: "News", icon: Megaphone },
-  {
-    href: "/register",
-    label: "Register",
-    icon: UserPlus,
-    children: [
-      { href: "/register", label: "Join KSB Club", icon: Heart },
-      { href: "/register/team", label: "Register Team", icon: Shield },
-    ],
-  },
+  { href: "/register", label: "Join KSB Club", icon: Heart },
 ];
 
 function isParentActive(item: NavItem, location: string): boolean {
