@@ -34,9 +34,9 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/fixtures#standings", label: "Standings", icon: ListOrdered },
       { href: "/fixtures#results", label: "Results", icon: ClipboardList },
       { href: "/fixtures#stats", label: "Stats", icon: BarChart3 },
+      { href: "/teams", label: "Teams", icon: Users },
     ],
   },
-  { href: "/teams", label: "Teams", icon: Users },
   { href: "/announcements", label: "News", icon: Megaphone },
   {
     href: "/register",
