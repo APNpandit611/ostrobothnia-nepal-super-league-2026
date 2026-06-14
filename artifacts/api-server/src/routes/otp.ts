@@ -8,6 +8,7 @@ import {
   sendSquadSubmissionConfirmation,
   sendAdminSquadApprovalRequest,
   senderFrom,
+  send,
 } from "../lib/mailer";
 
 const router: IRouter = Router();
@@ -19,40 +20,21 @@ function generateCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
 }
 
-async function sendViaResend(to: string, code: string, log: (obj: object, msg: string) => void): Promise<boolean> {
-  const apiKey = process.env["RESEND_API_KEY"];
-  if (!apiKey) {
-    log({ reason: "RESEND_API_KEY not set" }, "Resend skipped");
-    return false;
-  }
-  try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        from: senderFrom("ONSL 2026"),
-        to,
-        subject: "ONSL 2026 — Your verification code",
-        html: `
-          <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
-            <h2 style="color:#16a34a">Ostrobothnia Nepal Super League 2026</h2>
-            <p>Your team registration verification code is:</p>
-            <div style="font-size:40px;font-weight:900;letter-spacing:8px;text-align:center;padding:24px 0;color:#111">${code}</div>
-            <p style="color:#666;font-size:14px">This code expires in 10 minutes. Do not share it with anyone.</p>
-          </div>
-        `,
-      }),
-    });
-    if (!res.ok) {
-      const body = await res.text().catch(() => "(unreadable)");
-      log({ status: res.status, body }, "Resend API error");
-      return false;
-    }
-    return true;
-  } catch (err) {
-    log({ err }, "Resend fetch failed");
-    return false;
-  }
+async function sendOtpEmail(to: string, code: string): Promise<boolean> {
+  return send({
+    from: senderFrom("ONSL 2026"),
+    to,
+    subject: "ONSL 2026 — Your verification code",
+    html: `
+      <div style="font-family:sans-serif;max-width:480px;margin:0 auto">
+        <h2 style="color:#16a34a">Ostrobothnia Nepal Super League 2026</h2>
+        <p>Your team registration verification code is:</p>
+        <div style="font-size:40px;font-weight:900;letter-spacing:8px;text-align:center;padding:24px 0;color:#111">${code}</div>
+        <p style="color:#666;font-size:14px">This code expires in 10 minutes. Do not share it with anyone.</p>
+      </div>
+    `,
+    context: "otp",
+  });
 }
 
 const SendOtpBody = z.object({
@@ -95,9 +77,9 @@ router.post("/register/send-otp", async (req, res): Promise<void> => {
   let emailDelivered = false;
 
   if (type === "email") {
-    emailDelivered = await sendViaResend(contact, code, (obj, msg) => req.log.info(obj, msg));
+    emailDelivered = await sendOtpEmail(contact, code);
     if (emailDelivered) {
-      req.log.info({ contact }, "OTP email sent via Resend");
+      req.log.info({ contact }, "OTP email sent via SMTP");
     } else {
       req.log.info({ contact, ...(IS_PROD ? {} : { code }) }, "OTP CODE (email delivery failed)");
     }

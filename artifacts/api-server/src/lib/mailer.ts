@@ -1,11 +1,13 @@
+import nodemailer, { type Transporter } from "nodemailer";
 import { logger } from "./logger";
 
 const KSB_NAME = "Kokkola Soccer Boys";
 
-// Resend requires the "from" address to be on a domain you've verified at
-// https://resend.com/domains. Override with the MAIL_FROM env var if you verify
-// a different domain.
-const FROM_ADDRESS = process.env["MAIL_FROM"] || "noreply@kokkolasoccerboys.cc";
+// Email is sent over authenticated SMTP (the club's Spacemail mailbox). The
+// "from" address should be the authenticated mailbox (or an alias it may send
+// as), otherwise the SMTP server rejects the message. Override with MAIL_FROM.
+const FROM_ADDRESS =
+  process.env["MAIL_FROM"] || process.env["SMTP_USER"] || "info@kokkolasoccerboys.cc";
 
 function bareAddress(): string {
   const match = FROM_ADDRESS.match(/<(.+)>/);
@@ -83,7 +85,33 @@ export interface TeamRegistration {
   category?: string | null;
 }
 
-async function send(opts: {
+let cachedTransporter: Transporter | null = null;
+
+// Build (and cache) the SMTP transport from env. Returns null when SMTP isn't
+// configured so callers can degrade gracefully instead of throwing.
+function getTransporter(): Transporter | null {
+  const host = process.env["SMTP_HOST"];
+  const user = process.env["SMTP_USER"];
+  const pass = process.env["SMTP_PASS"];
+  if (!host || !user || !pass) return null;
+  if (cachedTransporter) return cachedTransporter;
+
+  const port = Number(process.env["SMTP_PORT"] || 465);
+  // Implicit TLS on 465; STARTTLS otherwise. SMTP_SECURE overrides if set.
+  const secure = process.env["SMTP_SECURE"]
+    ? process.env["SMTP_SECURE"] === "true"
+    : port === 465;
+
+  cachedTransporter = nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    auth: { user, pass },
+  });
+  return cachedTransporter;
+}
+
+export async function send(opts: {
   from: string;
   to: string;
   subject: string;
@@ -91,35 +119,29 @@ async function send(opts: {
   replyTo?: string;
   context: string;
 }): Promise<boolean> {
-  const apiKey = process.env["RESEND_API_KEY"];
-  if (!apiKey) {
-    logger.warn({ context: opts.context }, "RESEND_API_KEY not set — outgoing emails disabled");
+  const transporter = getTransporter();
+  if (!transporter) {
+    logger.warn(
+      { context: opts.context },
+      "SMTP not configured (need SMTP_HOST, SMTP_USER, SMTP_PASS) — outgoing emails disabled",
+    );
     return false;
   }
   try {
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        from: opts.from,
-        to: opts.to,
-        subject: opts.subject,
-        html: opts.html,
-        ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
-      }),
+    const info = await transporter.sendMail({
+      from: opts.from,
+      to: opts.to,
+      subject: opts.subject,
+      html: opts.html,
+      ...(opts.replyTo ? { replyTo: opts.replyTo } : {}),
     });
-    if (!res.ok) {
-      const body = await res.text().catch(() => "(unreadable)");
-      logger.error({ status: res.status, body, to: opts.to, context: opts.context }, "Resend API error");
-      return false;
-    }
-    logger.info({ to: opts.to, context: opts.context }, "Email sent via Resend");
+    logger.info(
+      { to: opts.to, context: opts.context, messageId: info.messageId },
+      "Email sent via SMTP",
+    );
     return true;
   } catch (err) {
-    logger.error({ err, to: opts.to, context: opts.context }, "Failed to send email via Resend");
+    logger.error({ err, to: opts.to, context: opts.context }, "Failed to send email via SMTP");
     return false;
   }
 }

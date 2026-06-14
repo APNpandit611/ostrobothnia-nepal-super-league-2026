@@ -42,8 +42,8 @@ channel = "stable-25_05"
 [userenv]
 
 [userenv.shared]
-SMTP_HOST = "smtp.gmail.com"
-SMTP_PORT = "587"
-SMTP_USER = "Kokkolasoccorboys@gmail.com"
-SMTP_FROM = "Kokkola Soccer Boys <Kokkolasoccorboys@gmail.com>"
-SMTP_SECURE = "false"
+SMTP_HOST = "mail.spacemail.com"
+SMTP_PORT = "465"
+SMTP_USER = "info@kokkolasoccerboys.cc"
+SMTP_SECURE = "true"
+MAIL_FROM = "info@kokkolasoccerboys.cc"
