@@ -464,7 +464,7 @@ export default function AdminTeams() {
                         {approvingId === selectedTeam.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <LockOpen className="h-3.5 w-3.5" />}
                         Revoke Approval
                       </Button>
-                    ) : selectedTeam.squadStatus === "pending" ? (
+                    ) : (
                       <Button
                         size="sm"
                         className="gap-1.5 bg-green-600 hover:bg-green-700 text-white"
@@ -474,7 +474,7 @@ export default function AdminTeams() {
                         {approvingId === selectedTeam.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
                         Approve Squad
                       </Button>
-                    ) : null}
+                    )}
                   </div>
                 </div>
                 <PlayerSection teamId={selectedTeam.id} teamColor={edit.primaryColor} />

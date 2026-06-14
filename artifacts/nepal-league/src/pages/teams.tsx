@@ -83,8 +83,8 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
               </div>
             </Link>
           </div>
-        ) : isPending ? (
-          /* Submitted but awaiting admin approval */
+        ) : !isApproved ? (
+          /* Players exist but squad not yet approved (pending or revoked) */
           <div className="flex flex-col items-center gap-3 py-6 text-center">
             <Clock className="h-8 w-8 text-yellow-500/60" />
             <div>
