@@ -10,6 +10,7 @@ A full-stack football tournament management app for the Nepal Summer League Finl
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
 - Required env: `DATABASE_URL` — Postgres connection string, `SESSION_SECRET` — admin session signing, `ADMIN_PASSWORD` — admin login password (`ADMIN_USERNAME` optional, defaults to `admin`)
+- Email env (SMTP): `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS` (secret), and `MAIL_FROM`. Currently set to the club's Spacemail mailbox (`mail.spacemail.com:465`, `info@kokkolasoccerboys.cc`)
 
 ## Stack
 
@@ -59,7 +60,9 @@ _Populate as needed._
 - After adding new schema files, run `pnpm run typecheck:libs` before typechecking leaf packages — stale declarations cause TS2305 errors
 - The `goals` route recalculates match score on every delete (counts all remaining goals)
 - Admin credentials come from the environment: `ADMIN_USERNAME` (defaults to `admin`) and `ADMIN_PASSWORD` (required secret). Login returns 503 if `ADMIN_PASSWORD` is unset
-- Email is sent via the **Resend HTTP API** (`RESEND_API_KEY`); nodemailer/SMTP was removed (Gmail SMTP fails from cloud servers). Resend only delivers from a **verified domain** — verify a domain at resend.com/domains, then point `MAIL_FROM` at it. Until then, sends to anyone but the Resend account owner return 403 and notifications won't arrive
+- Email is sent via **authenticated SMTP** (`nodemailer`) using the club's **Spacemail** mailbox (`mail.spacemail.com`, port 465 implicit TLS, user `info@kokkolasoccerboys.cc`). Config lives in `SMTP_HOST`/`SMTP_PORT`/`SMTP_SECURE`/`SMTP_USER`/`SMTP_PASS`/`MAIL_FROM`. The single transport is built in `mailer.ts` and reused by `otp.ts`
+- **Gmail SMTP does not work from this cloud environment** (outbound connections to Gmail's SMTP time out) — that's why the original setup failed. Spacemail's SMTP ports (465/587) ARE reachable. The earlier Resend HTTP API attempt was abandoned because Resend only sends from a verified domain (unverified → 403). If email stops sending, first check that `SMTP_PASS` matches the current `info@kokkolasoccerboys.cc` mailbox password
+- The `from` address must be the authenticated mailbox (or an alias it can send as), or Spacemail rejects the message — keep `MAIL_FROM` aligned with `SMTP_USER`
 
 ## Pointers
 
