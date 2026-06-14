@@ -7,7 +7,7 @@ import {
   ClipboardEdit, BookOpen, LogOut,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { useGetAdminMe, useAdminLogout, getGetAdminMeQueryKey, useListTeams } from "@workspace/api-client-react";
+import { useGetAdminMe, useAdminLogout, getGetAdminMeQueryKey, useListTeams, useListClubApplications } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "./theme-provider";
 
@@ -23,6 +23,7 @@ interface NavItem {
   icon: React.ElementType;
   children?: NavChild[];
   badge?: number;
+  badgeTitle?: string;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -63,12 +64,12 @@ function isParentActive(item: NavItem, location: string): boolean {
 }
 
 // ─── Notification badge (red count pill) ──────────────────────────────────────
-function NavBadge({ count }: { count: number }) {
+function NavBadge({ count, title }: { count: number; title?: string }) {
   if (count <= 0) return null;
   return (
     <span
       className="flex h-5 min-w-[1.25rem] flex-shrink-0 items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-bold leading-none text-white shadow-sm"
-      title={`${count} squad${count === 1 ? "" : "s"} awaiting approval`}
+      title={title ?? `${count} new`}
     >
       {count > 99 ? "99+" : count}
     </span>
@@ -94,7 +95,7 @@ function SidebarItem({ item, location }: { item: NavItem; location: string }) {
         )}>
           <Icon className="h-4 w-4 flex-shrink-0" />
           <span className="flex-1 truncate">{item.label}</span>
-          {item.badge ? <NavBadge count={item.badge} /> : null}
+          {item.badge ? <NavBadge count={item.badge} title={item.badgeTitle} /> : null}
         </div>
       </Link>
     );
@@ -155,7 +156,7 @@ function MobileItem({ item, location, onClose }: { item: NavItem; location: stri
         )}>
           <Icon className="h-5 w-5" />
           <span className="flex-1 truncate">{item.label}</span>
-          {item.badge ? <NavBadge count={item.badge} /> : null}
+          {item.badge ? <NavBadge count={item.badge} title={item.badgeTitle} /> : null}
         </div>
       </Link>
     );
@@ -214,21 +215,34 @@ export function Layout({ children }: { children: React.ReactNode }) {
     },
   });
 
-  // Pending squad approvals — drives the red count badge on the admin "Teams" nav
-  // item. Only fetched (and polled) while an admin is logged in.
-  const { data: teamsList } = useListTeams({
-    query: {
-      enabled: isAdmin,
-      refetchInterval: isAdmin ? 30_000 : false,
-      staleTime: 15_000,
-    } as never,
-  });
-  const pendingCount = isAdmin
+  // Admin notification counts — drive the red count badges in the admin nav.
+  // Only fetched (and polled) while an admin is logged in.
+  const adminQuery = {
+    enabled: isAdmin,
+    refetchInterval: isAdmin ? 30_000 : false,
+    staleTime: 15_000,
+  } as never;
+
+  // Squads awaiting approval (new team registrations) → "Teams" badge.
+  const { data: teamsList } = useListTeams({ query: adminQuery });
+  const pendingTeams = isAdmin
     ? teamsList?.filter(t => t.squadStatus === "pending").length ?? 0
     : 0;
-  const adminItems: NavItem[] = ADMIN_NAV_ITEMS.map(item =>
-    item.href === "/admin/teams" ? { ...item, badge: pendingCount } : item,
+
+  // New "Join KSB Club" applications awaiting review → "Applications" badge.
+  const { data: pendingApplications } = useListClubApplications(
+    { status: "pending" },
+    { query: adminQuery },
   );
+  const pendingAppCount = isAdmin ? pendingApplications?.length ?? 0 : 0;
+
+  const adminItems: NavItem[] = ADMIN_NAV_ITEMS.map(item => {
+    if (item.href === "/admin/teams")
+      return { ...item, badge: pendingTeams, badgeTitle: `${pendingTeams} squad${pendingTeams === 1 ? "" : "s"} awaiting approval` };
+    if (item.href === "/admin/club-applications")
+      return { ...item, badge: pendingAppCount, badgeTitle: `${pendingAppCount} new application${pendingAppCount === 1 ? "" : "s"}` };
+    return item;
+  });
 
   useEffect(() => {
     mainRef.current?.scrollTo({ top: 0, behavior: "instant" });

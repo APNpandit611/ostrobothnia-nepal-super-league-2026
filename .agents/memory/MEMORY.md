@@ -2,3 +2,4 @@
 - [Clerk OAuth integration](clerk-oauth.md) — Clerk replaces OTP for team registration/squad update; key setup quirks documented.
 - [Team approval visibility gate](team-approval-visibility.md) — public surfaces show only squadStatus="approved"; registration sets "pending"; /api/teams list stays unfiltered for admin.
 - [Admin auth state in Layout](admin-auth-nav-cache.md) — admin-gated nav uses useGetAdminMe; seed cache on login, removeQueries on logout, read !isError or the panel goes stale.
+- [Admin auth gate & session cookie](admin-auth-gate.md) — all `/admin/*` (incl GET) require a session via central gate; session cookie must be HMAC-signed with SESSION_SECRET, never a literal.

@@ -4,13 +4,17 @@ import {
   AdminLoginResponse,
   GetAdminMeResponse,
 } from "@workspace/api-zod";
+import {
+  COOKIE_NAME,
+  COOKIE_MAX_AGE_MS,
+  createSessionToken,
+  verifySessionToken,
+} from "../lib/session";
 
 const router: IRouter = Router();
 
 const ADMIN_USERNAME = "admin";
 const ADMIN_PASSWORD = "Ksoccerboys@1995!";
-const COOKIE_NAME = "nepal_admin_session";
-const COOKIE_SECRET = "nepal-league-admin-2026";
 
 router.post("/auth/login", async (req, res): Promise<void> => {
   const parsed = AdminLoginBody.safeParse(req.body);
@@ -25,10 +29,11 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
-  res.cookie(COOKIE_NAME, COOKIE_SECRET, {
+  res.cookie(COOKIE_NAME, createSessionToken(), {
     httpOnly: true,
     sameSite: "lax",
-    maxAge: 24 * 60 * 60 * 1000,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: COOKIE_MAX_AGE_MS,
   });
 
   res.json(AdminLoginResponse.parse({ isAdmin: true, username }));
@@ -40,8 +45,7 @@ router.post("/auth/logout", async (_req, res): Promise<void> => {
 });
 
 router.get("/auth/me", async (req, res): Promise<void> => {
-  const session = req.cookies?.[COOKIE_NAME];
-  if (session !== COOKIE_SECRET) {
+  if (!verifySessionToken(req.cookies?.[COOKIE_NAME])) {
     res.status(401).json({ error: "Not authenticated" });
     return;
   }

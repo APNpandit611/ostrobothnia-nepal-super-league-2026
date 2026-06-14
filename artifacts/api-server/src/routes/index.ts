@@ -30,9 +30,16 @@ const PUBLIC_WRITE_PREFIX = [
 ];
 
 // Protect all state-mutating requests with a session check.
-// GET / HEAD / OPTIONS are always public (read-only).
-// Public write paths (login, registration, OTP, club applications) are exempt.
+// GET / HEAD / OPTIONS are public (read-only) EXCEPT under /admin, whose reads
+// can expose PII (applications) or unpublished content and so always require a
+// session. Public write paths (login, registration, OTP, club applications)
+// remain exempt.
 router.use((req: Request, res: Response, next: NextFunction): void => {
+  // Admin endpoints always require a session — including reads.
+  if (req.path === "/admin" || req.path.startsWith("/admin/")) {
+    requireAuth(req, res, next);
+    return;
+  }
   if (req.method === "GET" || req.method === "HEAD" || req.method === "OPTIONS") {
     return next();
   }
