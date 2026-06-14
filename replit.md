@@ -9,7 +9,7 @@ A full-stack football tournament management app for the Nepal Summer League Finl
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string, `SESSION_SECRET` — cookie signing
+- Required env: `DATABASE_URL` — Postgres connection string, `SESSION_SECRET` — admin session signing, `ADMIN_PASSWORD` — admin login password (`ADMIN_USERNAME` optional, defaults to `admin`)
 
 ## Stack
 
@@ -31,7 +31,7 @@ A full-stack football tournament management app for the Nepal Summer League Finl
 
 ## Architecture decisions
 
-- Sessions managed via signed cookies (`nepal_admin_session`) — no JWT, no external auth service
+- Admin sessions use an HMAC-signed cookie (`nepal_admin_session`) signed with `SESSION_SECRET` — no JWT, no external auth service. All `/admin/*` API routes (including reads) require a valid session
 - Standings computed on-the-fly from finished matches (no denormalized standings table)
 - Goals update match scores directly via DB; deleting a goal recalculates score from scratch
 - Round-robin fixtures auto-generated via POST /api/matches/generate (clears old fixtures)
@@ -40,7 +40,7 @@ A full-stack football tournament management app for the Nepal Summer League Finl
 ## Product
 
 - **Public**: View fixtures, live scores, standings, results, team info, statistics
-- **Admin panel** (`/admin`): Login with admin/Ksoccerboys@1995!, manage matches (start/finish/reset), add goals & cards in real time, edit teams, generate fixtures, reset tournament
+- **Admin panel** (`/admin`): Login with username `admin` and the password stored in the `ADMIN_PASSWORD` secret; manage matches (start/finish/reset), add goals & cards in real time, edit teams, generate fixtures, reset tournament
 
 ## Teams
 
@@ -58,7 +58,7 @@ _Populate as needed._
 
 - After adding new schema files, run `pnpm run typecheck:libs` before typechecking leaf packages — stale declarations cause TS2305 errors
 - The `goals` route recalculates match score on every delete (counts all remaining goals)
-- Admin credentials are hardcoded: username `admin`, password `Ksoccerboys@1995!`
+- Admin credentials come from the environment: `ADMIN_USERNAME` (defaults to `admin`) and `ADMIN_PASSWORD` (required secret). Login returns 503 if `ADMIN_PASSWORD` is unset
 
 ## Pointers
 

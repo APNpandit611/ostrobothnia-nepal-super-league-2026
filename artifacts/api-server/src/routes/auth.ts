@@ -13,8 +13,10 @@ import {
 
 const router: IRouter = Router();
 
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "Ksoccerboys@1995!";
+// Admin credentials come from the environment so they are never committed to
+// source (the repo is intended to be pushed to a public GitHub remote).
+// Username defaults to "admin"; the password MUST be provided via ADMIN_PASSWORD.
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME ?? "admin";
 
 router.post("/auth/login", async (req, res): Promise<void> => {
   const parsed = AdminLoginBody.safeParse(req.body);
@@ -23,8 +25,15 @@ router.post("/auth/login", async (req, res): Promise<void> => {
     return;
   }
 
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    req.log.error("ADMIN_PASSWORD is not configured");
+    res.status(503).json({ error: "Admin login is not configured" });
+    return;
+  }
+
   const { username, password } = parsed.data;
-  if (username !== ADMIN_USERNAME || password !== ADMIN_PASSWORD) {
+  if (username !== ADMIN_USERNAME || password !== adminPassword) {
     res.status(401).json({ error: "Invalid credentials" });
     return;
   }
