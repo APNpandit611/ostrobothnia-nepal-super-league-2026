@@ -22,6 +22,8 @@ import AdminMatchDetail from "./pages/admin/match";
 import AdminTeams from "./pages/admin/teams";
 import About from "./pages/about";
 import AdminTournament from "./pages/admin/tournament";
+import Announcements from "./pages/announcements";
+import AdminAnnouncements from "./pages/admin/announcements";
 import Register from "./pages/register";
 import SquadPoster from "./pages/squad-poster";
 
@@ -54,6 +56,9 @@ function Router() {
       <Route path="/about">
         <Layout><About /></Layout>
       </Route>
+      <Route path="/announcements">
+        <Layout><Announcements /></Layout>
+      </Route>
 
       <Route path="/teams/:id">
         <SquadPoster />
@@ -81,6 +86,9 @@ function Router() {
       </Route>
       <Route path="/admin/tournament">
         <AuthGuard><Layout><AdminTournament /></Layout></AuthGuard>
+      </Route>
+      <Route path="/admin/announcements">
+        <AuthGuard><Layout><AdminAnnouncements /></Layout></AuthGuard>
       </Route>
       
       <Route>

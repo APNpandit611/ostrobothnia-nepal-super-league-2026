@@ -514,6 +514,85 @@ export interface TournamentInfoUpdate {
   isActive?: boolean | null;
 }
 
+export type AnnouncementCategory = typeof AnnouncementCategory[keyof typeof AnnouncementCategory];
+
+
+export const AnnouncementCategory = {
+  General: 'General',
+  Match_Update: 'Match Update',
+  Tournament: 'Tournament',
+  Training: 'Training',
+  Membership: 'Membership',
+} as const;
+
+export type AnnouncementStatus = typeof AnnouncementStatus[keyof typeof AnnouncementStatus];
+
+
+export const AnnouncementStatus = {
+  draft: 'draft',
+  published: 'published',
+} as const;
+
+export interface Announcement {
+  id: number;
+  title: string;
+  content: string;
+  category: AnnouncementCategory;
+  author: string;
+  status: AnnouncementStatus;
+  isPublished: boolean;
+  /** @nullable */
+  publishDate?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AnnouncementInputCategory = typeof AnnouncementInputCategory[keyof typeof AnnouncementInputCategory];
+
+
+export const AnnouncementInputCategory = {
+  General: 'General',
+  Match_Update: 'Match Update',
+  Tournament: 'Tournament',
+  Training: 'Training',
+  Membership: 'Membership',
+} as const;
+
+export interface AnnouncementInput {
+  title: string;
+  content: string;
+  category?: AnnouncementInputCategory;
+  author?: string;
+  isPublished?: boolean;
+  /** @nullable */
+  publishDate?: string | null;
+}
+
+export type AnnouncementUpdateCategory = typeof AnnouncementUpdateCategory[keyof typeof AnnouncementUpdateCategory];
+
+
+export const AnnouncementUpdateCategory = {
+  General: 'General',
+  Match_Update: 'Match Update',
+  Tournament: 'Tournament',
+  Training: 'Training',
+  Membership: 'Membership',
+} as const;
+
+export interface AnnouncementUpdate {
+  title?: string;
+  content?: string;
+  category?: AnnouncementUpdateCategory;
+  author?: string;
+  isPublished?: boolean;
+  /** @nullable */
+  publishDate?: string | null;
+}
+
+export interface PublishToggleInput {
+  isPublished: boolean;
+}
+
 export type ListMatchesParams = {
 status?: ListMatchesStatus;
 };
@@ -525,5 +604,19 @@ export const ListMatchesStatus = {
   upcoming: 'upcoming',
   live: 'live',
   finished: 'finished',
+} as const;
+
+export type ListAllAnnouncementsParams = {
+status?: ListAllAnnouncementsStatus;
+category?: string;
+search?: string;
+};
+
+export type ListAllAnnouncementsStatus = typeof ListAllAnnouncementsStatus[keyof typeof ListAllAnnouncementsStatus];
+
+
+export const ListAllAnnouncementsStatus = {
+  draft: 'draft',
+  published: 'published',
 } as const;
 

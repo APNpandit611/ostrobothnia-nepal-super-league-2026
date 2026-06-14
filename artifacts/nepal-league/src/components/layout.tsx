@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
-import { CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3, Settings, Menu, X, Sun, Moon, Home, UserPlus, Mail, Phone, MapPin, Facebook, Info } from "lucide-react";
+import { CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3, Settings, Menu, X, Sun, Moon, Home, UserPlus, Mail, Phone, MapPin, Facebook, Info, Megaphone } from "lucide-react";
 import { useState } from "react";
 import { useTheme } from "./theme-provider";
 
@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { href: "/results", label: "Results", icon: ClipboardList },
   { href: "/teams", label: "Teams", icon: Users },
   { href: "/stats", label: "Stats", icon: BarChart3 },
+  { href: "/announcements", label: "News", icon: Megaphone },
   { href: "/register", label: "Register Team", icon: UserPlus },
   { href: "/admin/dashboard", label: "Admin", icon: Settings },
 ];

@@ -12,6 +12,7 @@ import tournamentRouter from "./tournament";
 import tournamentInfoRouter from "./tournamentInfo";
 import playersRouter from "./players";
 import otpRouter from "./otp";
+import announcementsRouter from "./announcements";
 
 const router: IRouter = Router();
 
@@ -28,5 +29,6 @@ router.use(tournamentRouter);
 router.use(tournamentInfoRouter);
 router.use(playersRouter);
 router.use(otpRouter);
+router.use(announcementsRouter);
 
 export default router;

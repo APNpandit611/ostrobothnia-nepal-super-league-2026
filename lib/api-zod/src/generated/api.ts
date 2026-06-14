@@ -729,6 +729,124 @@ export const DeleteTournamentInfoParams = zod.object({
 
 
 /**
+ * @summary List published announcements (public)
+ */
+export const ListPublishedAnnouncementsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "content": zod.string(),
+  "category": zod.enum(['General', 'Match Update', 'Tournament', 'Training', 'Membership']),
+  "author": zod.string(),
+  "status": zod.enum(['draft', 'published']),
+  "isPublished": zod.boolean(),
+  "publishDate": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListPublishedAnnouncementsResponse = zod.array(ListPublishedAnnouncementsResponseItem)
+
+
+/**
+ * @summary List all announcements with optional filters (admin)
+ */
+export const ListAllAnnouncementsQueryParams = zod.object({
+  "status": zod.enum(['draft', 'published']).optional(),
+  "category": zod.coerce.string().optional(),
+  "search": zod.coerce.string().optional()
+})
+
+export const ListAllAnnouncementsResponseItem = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "content": zod.string(),
+  "category": zod.enum(['General', 'Match Update', 'Tournament', 'Training', 'Membership']),
+  "author": zod.string(),
+  "status": zod.enum(['draft', 'published']),
+  "isPublished": zod.boolean(),
+  "publishDate": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+export const ListAllAnnouncementsResponse = zod.array(ListAllAnnouncementsResponseItem)
+
+
+/**
+ * @summary Create a new announcement (admin)
+ */
+export const CreateAnnouncementBody = zod.object({
+  "title": zod.string(),
+  "content": zod.string(),
+  "category": zod.enum(['General', 'Match Update', 'Tournament', 'Training', 'Membership']).optional(),
+  "author": zod.string().optional(),
+  "isPublished": zod.boolean().optional(),
+  "publishDate": zod.string().nullish()
+})
+
+
+/**
+ * @summary Update an announcement (admin)
+ */
+export const UpdateAnnouncementParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateAnnouncementBody = zod.object({
+  "title": zod.string().optional(),
+  "content": zod.string().optional(),
+  "category": zod.enum(['General', 'Match Update', 'Tournament', 'Training', 'Membership']).optional(),
+  "author": zod.string().optional(),
+  "isPublished": zod.boolean().optional(),
+  "publishDate": zod.string().nullish()
+})
+
+export const UpdateAnnouncementResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "content": zod.string(),
+  "category": zod.enum(['General', 'Match Update', 'Tournament', 'Training', 'Membership']),
+  "author": zod.string(),
+  "status": zod.enum(['draft', 'published']),
+  "isPublished": zod.boolean(),
+  "publishDate": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
+ * @summary Delete an announcement (admin)
+ */
+export const DeleteAnnouncementParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Publish or unpublish an announcement (admin)
+ */
+export const ToggleAnnouncementPublishParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const ToggleAnnouncementPublishBody = zod.object({
+  "isPublished": zod.boolean()
+})
+
+export const ToggleAnnouncementPublishResponse = zod.object({
+  "id": zod.number(),
+  "title": zod.string(),
+  "content": zod.string(),
+  "category": zod.enum(['General', 'Match Update', 'Tournament', 'Training', 'Membership']),
+  "author": zod.string(),
+  "status": zod.enum(['draft', 'published']),
+  "isPublished": zod.boolean(),
+  "publishDate": zod.string().nullish(),
+  "createdAt": zod.string(),
+  "updatedAt": zod.string()
+})
+
+
+/**
  * @summary Reset the entire tournament (admin only)
  */
 export const ResetTournamentResponse = zod.object({

@@ -27,6 +27,8 @@ tags:
     description: Admin authentication
   - name: tournament
     description: Tournament info management
+  - name: announcements
+    description: Announcements management
 
 paths:
   /healthz:
@@ -725,6 +727,138 @@ paths:
         "204":
           description: Deleted
 
+  # ── Announcements (public) ────────────────────────────────────────────
+  /announcements:
+    get:
+      operationId: listPublishedAnnouncements
+      tags: [announcements]
+      summary: List published announcements (public)
+      responses:
+        "200":
+          description: Published announcements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Announcement"
+
+  # ── Announcements (admin) ──────────────────────────────────────────────
+  /admin/announcements:
+    get:
+      operationId: listAllAnnouncements
+      tags: [announcements]
+      summary: List all announcements with optional filters (admin)
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [draft, published]
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: All announcements
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Announcement"
+    post:
+      operationId: createAnnouncement
+      tags: [announcements]
+      summary: Create a new announcement (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnnouncementInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+
+  /admin/announcements/{id}:
+    patch:
+      operationId: updateAnnouncement
+      tags: [announcements]
+      summary: Update an announcement (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnnouncementUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteAnnouncement
+      tags: [announcements]
+      summary: Delete an announcement (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /admin/announcements/{id}/publish:
+    patch:
+      operationId: toggleAnnouncementPublish
+      tags: [announcements]
+      summary: Publish or unpublish an announcement (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublishToggleInput"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Announcement"
+        "404":
+          description: Not found
+
   # ── Tournament control ────────────────────────────────────────────────
   /tournament/reset:
     post:
@@ -1348,3 +1482,73 @@ components:
           enum: [upcoming, active, completed]
         isActive:
           type: ["boolean", "null"]
+
+    # ── Announcements ──────────────────────────────────────────────────
+    Announcement:
+      type: object
+      required: [id, title, content, category, author, status, isPublished, createdAt, updatedAt]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+          enum: [General, Match Update, Tournament, Training, Membership]
+        author:
+          type: string
+        status:
+          type: string
+          enum: [draft, published]
+        isPublished:
+          type: boolean
+        publishDate:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    AnnouncementInput:
+      type: object
+      required: [title, content]
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+          enum: [General, Match Update, Tournament, Training, Membership]
+        author:
+          type: string
+        isPublished:
+          type: boolean
+        publishDate:
+          type: ["string", "null"]
+
+    AnnouncementUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+          enum: [General, Match Update, Tournament, Training, Membership]
+        author:
+          type: string
+        isPublished:
+          type: boolean
+        publishDate:
+          type: ["string", "null"]
+
+    PublishToggleInput:
+      type: object
+      required: [isPublished]
+      properties:
+        isPublished:
+          type: boolean

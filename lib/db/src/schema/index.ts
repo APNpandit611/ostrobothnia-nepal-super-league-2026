@@ -6,3 +6,4 @@ export * from "./matchEvents";
 export * from "./players";
 export * from "./otpVerifications";
 export * from "./tournaments";
+export * from "./announcements";

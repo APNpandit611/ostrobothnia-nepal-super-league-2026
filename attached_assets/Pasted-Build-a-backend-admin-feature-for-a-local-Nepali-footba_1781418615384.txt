@@ -1,0 +1,97 @@
+Build a backend admin feature for a local Nepali football club in Kokkola, Finland that allows administrators to create and publish announcements to the club website.
+
+This is part of an internal admin panel (NOT a public website). The announcement system controls what content appears on the public-facing club website.
+
+## Feature: Announcement Management
+
+### Core Functionality
+
+* Create new announcements
+* Edit existing announcements
+* Delete or archive announcements
+* Save as Draft or Publish to Website
+
+### Announcement Fields
+
+* Title (required)
+* Content (rich text or markdown supported)
+* Category:
+
+  * General
+  * Match Update
+  * Tournament
+  * Training
+  * Membership
+* Author (admin user who created it)
+* Created At timestamp
+* Updated At timestamp
+* Publish Status:
+
+  * Draft
+  * Published
+* Publish Toggle:
+
+  * isPublished (boolean)
+* Publish Date (optional scheduling feature)
+
+### Website Publishing Logic
+
+* Only announcements with `isPublished = true` should be visible on the public website.
+* Draft announcements remain visible only in the admin panel.
+* Allow toggling between Draft and Published at any time.
+* Optionally support scheduled publishing by using a future publish date.
+
+### Admin Panel Features
+
+* List view with filters:
+
+  * Draft / Published
+  * Category filter
+* Search announcements by title
+* Pagination for large lists
+* Quick actions:
+
+  * Publish / Unpublish toggle
+  * Edit
+  * Delete
+
+### User Roles
+
+* Admin: full access (create, edit, publish, delete)
+* Coach: can create and edit announcements but cannot publish
+* Volunteer: can create drafts only
+* Treasurer: read-only access
+
+### UI Requirements
+
+* Simple and mobile-friendly interface
+* Rich text editor for announcement content
+* Clear “Publish to Website” button
+* Badge indicators for Draft vs Published
+* Confirmation modal before publishing or deleting
+
+### Integration Requirement
+
+* This system must integrate with the existing club website.
+* The website should fetch only published announcements from the backend API.
+
+### Technical Requirements
+
+Use:
+
+* Next.js (App Router)
+* TypeScript
+* Tailwind CSS
+* shadcn/ui components
+* Prisma ORM
+* PostgreSQL
+* NextAuth authentication
+
+Generate:
+
+* Database schema (Prisma model for announcements)
+* API routes for CRUD operations
+* Admin UI page for managing announcements
+* Role-based access control
+* Seed data with realistic Nepali club announcements in Finland
+* Clean and production-ready architecture

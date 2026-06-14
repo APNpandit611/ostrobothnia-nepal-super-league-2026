@@ -6,6 +6,13 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './announcement';
+export * from './announcementCategory';
+export * from './announcementInput';
+export * from './announcementInputCategory';
+export * from './announcementStatus';
+export * from './announcementUpdate';
+export * from './announcementUpdateCategory';
 export * from './authResponse';
 export * from './card';
 export * from './cardCardType';
@@ -14,6 +21,8 @@ export * from './cardInputCardType';
 export * from './goal';
 export * from './goalInput';
 export * from './healthStatus';
+export * from './listAllAnnouncementsParams';
+export * from './listAllAnnouncementsStatus';
 export * from './listMatchesParams';
 export * from './listMatchesStatus';
 export * from './loginInput';
@@ -32,6 +41,7 @@ export * from './messageResponse';
 export * from './player';
 export * from './playerInput';
 export * from './playerUpdate';
+export * from './publishToggleInput';
 export * from './standingRow';
 export * from './team';
 export * from './teamInput';
