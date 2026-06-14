@@ -310,7 +310,6 @@ export default function Home() {
             { href: "/live", icon: Activity, label: "Live Scores" },
             { href: "/teams", icon: Users, label: "Teams" },
             { href: "/results", icon: ArrowRight, label: "Results" },
-            { href: "/register", icon: UserPlus, label: "Register Team", highlight: true },
           ].map(({ href, icon: Icon, label, highlight }) => (
             <Link key={href} href={href}>
               <Card className={`hover:border-primary cursor-pointer transition-colors group ${highlight ? "border-primary/40 bg-primary/5" : ""}`}>
