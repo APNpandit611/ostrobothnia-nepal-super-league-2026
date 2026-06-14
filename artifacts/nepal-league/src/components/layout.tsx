@@ -10,7 +10,7 @@ const NAV_ITEMS = [
   { href: "/fixtures", label: "Fixtures", icon: CalendarDays },
   { href: "/teams", label: "Teams", icon: Users },
   { href: "/announcements", label: "News", icon: Megaphone },
-  { href: "/register", label: "Register Team", icon: UserPlus },
+  { href: "/register", label: "Register", icon: UserPlus },
   { href: "/admin/dashboard", label: "Admin", icon: Settings },
 ];
 
