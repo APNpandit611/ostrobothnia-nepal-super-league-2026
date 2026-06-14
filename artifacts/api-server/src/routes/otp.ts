@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { eq, and, gt } from "drizzle-orm";
-import { db, otpVerificationsTable } from "@workspace/db";
+import { db, otpVerificationsTable, teamsTable, playersTable } from "@workspace/db";
 import { z } from "zod";
 import nodemailer from "nodemailer";
 
@@ -123,6 +123,61 @@ router.post("/register/verify-otp", async (req, res): Promise<void> => {
     .where(eq(otpVerificationsTable.id, id));
 
   res.json({ verified: true });
+});
+
+const UpdateSquadBody = z.object({
+  teamId: z.number().int().positive(),
+  otpId: z.string().min(1),
+  players: z.array(z.object({
+    name: z.string().min(1),
+    number: z.union([z.number().int(), z.null()]).optional(),
+    position: z.string().optional().nullable(),
+  })).min(1),
+});
+
+router.post("/register/update-squad", async (req, res): Promise<void> => {
+  const parsed = UpdateSquadBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body" });
+    return;
+  }
+
+  const { teamId, otpId, players } = parsed.data;
+
+  const [otp] = await db
+    .select()
+    .from(otpVerificationsTable)
+    .where(and(
+      eq(otpVerificationsTable.id, otpId),
+      eq(otpVerificationsTable.verified, true),
+    ));
+
+  if (!otp) {
+    res.status(403).json({ error: "OTP not verified — please verify your identity first" });
+    return;
+  }
+
+  const [team] = await db.select().from(teamsTable).where(eq(teamsTable.id, teamId));
+  if (!team) {
+    res.status(404).json({ error: "Team not found" });
+    return;
+  }
+
+  await db.delete(playersTable).where(eq(playersTable.teamId, teamId));
+
+  if (players.length > 0) {
+    await db.insert(playersTable).values(
+      players.map(p => ({
+        teamId,
+        name: p.name.trim(),
+        number: p.number ?? null,
+        position: p.position ?? null,
+      }))
+    );
+  }
+
+  const newPlayers = await db.select().from(playersTable).where(eq(playersTable.teamId, teamId));
+  res.json(newPlayers);
 });
 
 export default router;

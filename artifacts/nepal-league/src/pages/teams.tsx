@@ -16,18 +16,14 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
   const { data: players, isLoading } = useListPlayers(team.id);
   const color = team.primaryColor || "hsl(var(--primary))";
 
-  // Still loading — render nothing (avoids flash)
-  if (isLoading) return null;
-
-  // No players registered — hide this team
-  if (!players || players.length === 0) return null;
-
-  const sorted = [...players].sort((a, b) => {
+  const sorted = isLoading ? [] : [...(players ?? [])].sort((a, b) => {
     const posA = POSITION_ORDER.indexOf(a.position ?? "");
     const posB = POSITION_ORDER.indexOf(b.position ?? "");
     if (posA !== posB) return (posA === -1 ? 99 : posA) - (posB === -1 ? 99 : posB);
     return (a.number ?? 99) - (b.number ?? 99);
   });
+
+  const hasPlayers = !isLoading && (players?.length ?? 0) > 0;
 
   return (
     <Card className="overflow-hidden hover:border-primary/50 transition-colors">
@@ -38,68 +34,97 @@ function TeamCard({ team, stats }: { team: Team; stats: { points: number; goalsF
             <CardTitle className="text-xl font-bold">{team.name}</CardTitle>
             <p className="text-muted-foreground font-mono text-sm">{team.shortName}</p>
           </div>
-          <Link href={`/teams/${team.id}`}>
-            <button
-              className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors hover:text-white"
-              style={{ borderColor: `${color}60`, color, backgroundColor: `${color}15` }}
-            >
-              <FileText className="h-3 w-3" /> Squad
-            </button>
-          </Link>
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <Link href={`/update-squad?team=${team.id}`}>
+              <button
+                className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors hover:bg-muted"
+              >
+                <UserPlus className="h-3 w-3" /> Update Squad
+              </button>
+            </Link>
+            {hasPlayers && (
+              <Link href={`/teams/${team.id}`}>
+                <button
+                  className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors hover:text-white"
+                  style={{ borderColor: `${color}60`, color, backgroundColor: `${color}15` }}
+                >
+                  <FileText className="h-3 w-3" /> Squad
+                </button>
+              </Link>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Stats row */}
-        {stats ? (
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="bg-muted rounded-lg p-3">
-              <div className="text-2xl font-black">{stats.points}</div>
-              <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider mt-1">Pts</div>
+        {!hasPlayers && !isLoading ? (
+          /* No players yet — prompt to update squad */
+          <div className="flex flex-col items-center gap-3 py-6 text-center">
+            <Users className="h-8 w-8 text-muted-foreground/40" />
+            <div>
+              <p className="text-sm font-semibold">Squad not submitted yet</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Click "Update Squad" above to add your players.</p>
             </div>
-            <div className="bg-muted rounded-lg p-3">
-              <div className="text-2xl font-black">{stats.goalsFor}</div>
-              <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider mt-1 flex items-center justify-center gap-1">
-                <Crosshair className="h-3 w-3" /> GF
+            <Link href={`/update-squad?team=${team.id}`}>
+              <div className="flex items-center gap-1.5 text-xs font-bold text-primary hover:underline cursor-pointer">
+                <UserPlus className="h-3.5 w-3.5" /> Submit squad now
               </div>
-            </div>
-            <div className="bg-muted rounded-lg p-3">
-              <div className="text-2xl font-black">{stats.goalsAgainst}</div>
-              <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider mt-1 flex items-center justify-center gap-1">
-                <Shield className="h-3 w-3" /> GA
-              </div>
-            </div>
+            </Link>
           </div>
         ) : (
-          <div className="text-center py-3 text-muted-foreground text-sm border border-dashed rounded-lg">
-            No stats available yet
-          </div>
-        )}
-
-        {/* Squad */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-1">
-            <Users className="h-3.5 w-3.5 text-muted-foreground" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Squad</span>
-          </div>
-          <div className="space-y-1.5 mt-3">
-            {sorted.map((p) => (
-              <div key={p.id} className="flex items-center gap-2.5 py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors">
-                <span
-                  className="text-[11px] font-black w-6 h-6 rounded-full flex items-center justify-center text-white flex-shrink-0"
-                  style={{ backgroundColor: p.number != null ? color : "transparent", border: p.number == null ? "1px dashed #666" : "none" }}
-                >
-                  {p.number ?? "—"}
-                </span>
-                <span className="text-sm font-medium flex-1">{p.name}</span>
-                {p.position && (
-                  <span className={`text-[10px] font-bold border rounded px-1.5 py-0.5 ${POSITION_COLORS[p.position] ?? "bg-muted text-muted-foreground"}`}>
-                    {p.position}
-                  </span>
-                )}
+          <>
+            {/* Stats row */}
+            {stats ? (
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-muted rounded-lg p-3">
+                  <div className="text-2xl font-black">{stats.points}</div>
+                  <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider mt-1">Pts</div>
+                </div>
+                <div className="bg-muted rounded-lg p-3">
+                  <div className="text-2xl font-black">{stats.goalsFor}</div>
+                  <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider mt-1 flex items-center justify-center gap-1">
+                    <Crosshair className="h-3 w-3" /> GF
+                  </div>
+                </div>
+                <div className="bg-muted rounded-lg p-3">
+                  <div className="text-2xl font-black">{stats.goalsAgainst}</div>
+                  <div className="text-xs text-muted-foreground uppercase font-bold tracking-wider mt-1 flex items-center justify-center gap-1">
+                    <Shield className="h-3 w-3" /> GA
+                  </div>
+                </div>
               </div>
-            ))}
-          </div>
-        </div>
+            ) : (
+              <div className="text-center py-3 text-muted-foreground text-sm border border-dashed rounded-lg">
+                No stats available yet
+              </div>
+            )}
+
+            {/* Squad */}
+            <div>
+              <div className="flex items-center gap-1.5 mb-1">
+                <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Squad</span>
+              </div>
+              <div className="space-y-1.5 mt-3">
+                {sorted.map((p) => (
+                  <div key={p.id} className="flex items-center gap-2.5 py-1.5 px-2 rounded-lg hover:bg-muted/50 transition-colors">
+                    <span
+                      className="text-[11px] font-black w-6 h-6 rounded-full flex items-center justify-center text-white flex-shrink-0"
+                      style={{ backgroundColor: p.number != null ? color : "transparent", border: p.number == null ? "1px dashed #666" : "none" }}
+                    >
+                      {p.number ?? "—"}
+                    </span>
+                    <span className="text-sm font-medium flex-1">{p.name}</span>
+                    {p.position && (
+                      <span className={`text-[10px] font-bold border rounded px-1.5 py-0.5 ${POSITION_COLORS[p.position] ?? "bg-muted text-muted-foreground"}`}>
+                        {p.position}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
       </CardContent>
     </Card>
   );
@@ -117,7 +142,7 @@ export default function Teams() {
     );
   }
 
-  const noTeamsRegistered = !teamsLoading && !standingsLoading && (standings?.length ?? 0) === 0;
+  const noTeamsInDb = !teamsLoading && (teams?.length ?? 0) === 0;
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -150,14 +175,14 @@ export default function Teams() {
         </Link>
       </div>
 
-      {noTeamsRegistered ? (
+      {noTeamsInDb ? (
         <Card className="border-dashed">
           <CardContent className="py-16 flex flex-col items-center text-center gap-4">
             <Users className="h-12 w-12 opacity-20" />
             <div>
               <p className="font-bold text-lg">No teams registered yet</p>
               <p className="text-muted-foreground text-sm mt-1">
-                Teams will appear here once they register their squad.
+                Teams will appear here once they register.
               </p>
             </div>
           </CardContent>

@@ -28,6 +28,7 @@ import AdminClubApplications from "./pages/admin/club-applications";
 import AdminClubSettings from "./pages/admin/club-settings";
 import JoinKsb from "./pages/join-ksb";
 import RegisterTeam from "./pages/register-team";
+import UpdateSquad from "./pages/update-squad";
 import SquadPoster from "./pages/squad-poster";
 
 const queryClient = new QueryClient();
@@ -72,6 +73,9 @@ function Router() {
       </Route>
       <Route path="/register-team">
         <Layout><RegisterTeam /></Layout>
+      </Route>
+      <Route path="/update-squad">
+        <Layout><UpdateSquad /></Layout>
       </Route>
 
       <Route path="/admin">
