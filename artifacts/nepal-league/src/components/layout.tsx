@@ -358,9 +358,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main Content */}
-      <main ref={mainRef} className="flex-1 overflow-y-auto flex flex-col">
+      <main ref={mainRef} className="flex-1 overflow-y-auto flex flex-col relative bg-background">
+        {/* Background image — subtle watermark across entire layout */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-[0.03] pointer-events-none select-none z-0"
+          style={{ backgroundImage: "url(/ksb-logo.png)" }}
+        />
         {/* Top bar — theme toggle pinned to top-right (desktop only) */}
-        <div className="hidden md:flex sticky top-0 z-30 justify-end px-4 py-2 bg-background/80 backdrop-blur-sm border-b">
+        <div className="hidden md:flex sticky top-0 z-30 justify-end px-4 py-2 bg-background/80 backdrop-blur-sm border-b relative z-10">
           <button
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -369,7 +374,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
           </button>
         </div>
-        <div className="flex-1 container mx-auto p-4 md:p-8 max-w-5xl">
+        <div className="flex-1 container mx-auto p-4 md:p-8 max-w-5xl relative z-10">
           {children}
         </div>
         <footer className="border-t bg-card mt-8">
