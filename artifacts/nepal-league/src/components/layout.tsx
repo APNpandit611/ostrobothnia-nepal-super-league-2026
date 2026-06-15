@@ -7,7 +7,7 @@ import {
   ClipboardEdit, BookOpen, LogOut, Archive,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { useGetAdminMe, useAdminLogout, getGetAdminMeQueryKey, useListTeams, useListClubApplications } from "@workspace/api-client-react";
+import { useGetAdminMe, useAdminLogout, getGetAdminMeQueryKey, useListTeams, useListClubApplications, useListMatches } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "./theme-provider";
 
@@ -15,6 +15,7 @@ interface NavChild {
   href: string;
   label: string;
   icon: React.ElementType;
+  liveIndicator?: boolean;
 }
 
 interface NavItem {
@@ -35,7 +36,7 @@ const NAV_ITEMS: NavItem[] = [
     icon: CalendarDays,
     children: [
       { href: "/fixtures", label: "All Fixtures", icon: CalendarDays },
-      { href: "/live", label: "Live", icon: Activity },
+      { href: "/live", label: "Live", icon: Activity, liveIndicator: true },
       { href: "/standings", label: "Standings", icon: ListOrdered },
       { href: "/results", label: "Results", icon: ClipboardList },
       { href: "/stats", label: "Stats", icon: BarChart3 },
@@ -78,7 +79,16 @@ function NavBadge({ count, title }: { count: number; title?: string }) {
 }
 
 // ─── Desktop sidebar nav item ─────────────────────────────────────────────────
-function SidebarItem({ item, location }: { item: NavItem; location: string }) {
+function LiveIndicator() {
+  return (
+    <span className="relative flex h-2.5 w-2.5 flex-shrink-0 ml-1">
+      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+    </span>
+  );
+}
+
+function SidebarItem({ item, location, hasLive }: { item: NavItem; location: string; hasLive?: boolean }) {
   const Icon = item.icon;
   const active = isParentActive(item, location);
   const [open, setOpen] = useState(active);
@@ -131,7 +141,10 @@ function SidebarItem({ item, location }: { item: NavItem; location: string }) {
                   childActive ? "bg-primary text-primary-foreground font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted",
                 )}>
                   <CIcon className="h-3.5 w-3.5 flex-shrink-0" />
-                  {child.label}
+                  <span className="flex items-center gap-1">
+                    {child.label}
+                    {child.liveIndicator && hasLive ? <LiveIndicator /> : null}
+                  </span>
                 </div>
               </Link>
             );
@@ -143,7 +156,7 @@ function SidebarItem({ item, location }: { item: NavItem; location: string }) {
 }
 
 // ─── Mobile nav item ──────────────────────────────────────────────────────────
-function MobileItem({ item, location, onClose }: { item: NavItem; location: string; onClose: () => void }) {
+function MobileItem({ item, location, onClose, hasLive }: { item: NavItem; location: string; onClose: () => void; hasLive?: boolean }) {
   const Icon = item.icon;
   const active = isParentActive(item, location);
   const [open, setOpen] = useState(active);
@@ -184,7 +197,10 @@ function MobileItem({ item, location, onClose }: { item: NavItem; location: stri
               <Link key={child.href} href={child.href} onClick={onClose}>
                 <div className="flex items-center gap-2.5 rounded-md px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
                   <CIcon className="h-4 w-4 flex-shrink-0" />
-                  {child.label}
+                  <span className="flex items-center gap-1">
+                    {child.label}
+                    {child.liveIndicator && hasLive ? <LiveIndicator /> : null}
+                  </span>
                 </div>
               </Link>
             );
@@ -237,6 +253,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
   const pendingAppCount = isAdmin ? pendingApplications?.length ?? 0 : 0;
 
+  // Check if any matches are currently live (for the green dot on "Live" nav)
+  const { data: liveMatches } = useListMatches({ status: "live" });
+  const hasLive = (liveMatches?.length ?? 0) > 0;
+
   const adminItems: NavItem[] = ADMIN_NAV_ITEMS.map(item => {
     if (item.href === "/admin/teams")
       return { ...item, badge: pendingTeams, badgeTitle: `${pendingTeams} squad${pendingTeams === 1 ? "" : "s"} awaiting approval` };
@@ -275,7 +295,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <div className="fixed inset-0 top-16 z-40 bg-background md:hidden overflow-y-auto">
           <nav className="flex min-h-full flex-col p-4 gap-0.5">
             {NAV_ITEMS.map(item => (
-              <MobileItem key={item.href} item={item} location={location} onClose={() => setMobileMenuOpen(false)} />
+              <MobileItem key={item.href} item={item} location={location} onClose={() => setMobileMenuOpen(false)} hasLive={hasLive} />
             ))}
             {isAdmin ? (
               <>
@@ -322,7 +342,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </div>
         <nav className="flex-1 space-y-0.5 p-4 overflow-y-auto">
           {NAV_ITEMS.map(item => (
-            <SidebarItem key={item.href} item={item} location={location} />
+            <SidebarItem key={item.href} item={item} location={location} hasLive={hasLive} />
           ))}
           {isAdmin && (
             <div className="mt-2 space-y-0.5 border-t pt-2">
