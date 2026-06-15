@@ -338,7 +338,7 @@ export default function AdminMatchDetail() {
                   </h3>
                   <div className="grid gap-3">
                     <div className="grid grid-cols-2 gap-3">
-                      <Input placeholder="Player Name" value={homeCardPlayer} onChange={(e) => setHomeCardPlayer(e.target.value)} />
+                      <ScorerField players={homePlayers} isLoading={homePlayersLoading} value={homeCardPlayer} onChange={setHomeCardPlayer} />
                       <Input type="number" placeholder="Minute" value={homeCardMinute} onChange={(e) => setHomeCardMinute(e.target.value)} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
@@ -396,7 +396,7 @@ export default function AdminMatchDetail() {
                   <div className="grid gap-3">
                     <div className="grid grid-cols-2 gap-3">
                       <Input type="number" placeholder="Minute" value={awayCardMinute} onChange={(e) => setAwayCardMinute(e.target.value)} />
-                      <Input placeholder="Player Name" value={awayCardPlayer} onChange={(e) => setAwayCardPlayer(e.target.value)} className="text-right" />
+                      <ScorerField players={awayPlayers} isLoading={awayPlayersLoading} value={awayCardPlayer} onChange={setAwayCardPlayer} align />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <Button variant="outline" className="bg-yellow-500/10 hover:bg-yellow-500/20 text-yellow-600 border-yellow-500/50" onClick={() => handleAddAwayCard('yellow')} disabled={addCardMutation.isPending}>
