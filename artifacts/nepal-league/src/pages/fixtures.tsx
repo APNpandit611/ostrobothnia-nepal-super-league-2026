@@ -17,7 +17,7 @@ function MatchCard({ match, large = false }: { match: any; large?: boolean }) {
         <CardContent className="p-0">
           <div className="bg-primary text-primary-foreground p-2 text-center text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2">
             <span className="animate-pulse w-2 h-2 rounded-full bg-white" />
-            Pitch {match.pitch} • Live
+            {match.matchType === "final" ? "🏆 FINAL" : `Pitch ${match.pitch}`} • Live
           </div>
           <div className="p-6 md:p-10 grid grid-cols-[1fr_auto_1fr] items-center gap-6">
             <div className="flex items-center justify-end gap-3 min-w-0">
@@ -51,12 +51,19 @@ function MatchCard({ match, large = false }: { match: any; large?: boolean }) {
               Pitch {match.pitch}
             </span>
           </div>
-          <Badge
-            variant={match.status === "live" ? "default" : match.status === "finished" ? "secondary" : "outline"}
-            className={match.status === "live" ? "animate-pulse" : ""}
-          >
-            {match.status === "finished" ? "Full Time" : match.status.toUpperCase()}
-          </Badge>
+          <div className="flex items-center gap-2">
+            {match.matchType === "final" && (
+              <Badge variant="outline" className="border-amber-500 text-amber-500 font-bold">
+                FINAL
+              </Badge>
+            )}
+            <Badge
+              variant={match.status === "live" ? "default" : match.status === "finished" ? "secondary" : "outline"}
+              className={match.status === "live" ? "animate-pulse" : ""}
+            >
+              {match.status === "finished" ? "Full Time" : match.status.toUpperCase()}
+            </Badge>
+          </div>
         </div>
         <div className="p-4 grid grid-cols-3 items-center gap-4">
           <div className="flex items-center justify-end gap-2 min-w-0">

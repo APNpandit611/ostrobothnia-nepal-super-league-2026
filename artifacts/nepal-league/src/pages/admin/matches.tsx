@@ -10,19 +10,26 @@ import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 import { TeamLogo } from "@/components/team-logo";
 
-function StatusBadge({ status }: { status: string }) {
-  if (status === "live") {
-    return (
-      <Badge className="gap-1.5 animate-pulse">
-        <span className="w-1.5 h-1.5 rounded-full bg-current" />
-        LIVE
-      </Badge>
-    );
-  }
-  if (status === "finished") {
-    return <Badge variant="secondary">Full Time</Badge>;
-  }
-  return <Badge variant="outline">UPCOMING</Badge>;
+function StatusBadge({ status, matchType }: { status: string; matchType?: string }) {
+  return (
+    <div className="flex items-center gap-1.5">
+      {matchType === "final" && (
+        <Badge variant="outline" className="border-amber-500 text-amber-500 font-bold text-[10px]">
+          FINAL
+        </Badge>
+      )}
+      {status === "live" ? (
+        <Badge className="gap-1.5 animate-pulse">
+          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+          LIVE
+        </Badge>
+      ) : status === "finished" ? (
+        <Badge variant="secondary">Full Time</Badge>
+      ) : (
+        <Badge variant="outline">UPCOMING</Badge>
+      )}
+    </div>
+  );
 }
 
 function MatchRow({ match }: { match: any }) {
@@ -53,7 +60,7 @@ function MatchRow({ match }: { match: any }) {
                 Pitch {match.pitch}
               </span>
             </div>
-            <StatusBadge status={match.status} />
+            <StatusBadge status={match.status} matchType={match.matchType} />
           </div>
 
           {/* Teams + score + action */}

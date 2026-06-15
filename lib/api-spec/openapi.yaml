@@ -348,6 +348,51 @@ paths:
                   error:
                     type: string
 
+  /matches/create-final:
+    post:
+      operationId: createFinalMatch
+      tags: [matches]
+      summary: Create final match from top-2 teams after all league matches are finished
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
+      responses:
+        "201":
+          description: Final match created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  match:
+                    $ref: "#/components/schemas/Match"
+                  finalists:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        position:
+                          type: integer
+                        teamName:
+                          type: string
+                        teamShortName:
+                          type: string
+                        points:
+                          type: integer
+                        goalDifference:
+                          type: integer
+        "400":
+          description: Not all league matches finished or other validation error
+        "409":
+          description: Final match already exists
+
   /matches/{id}:
     get:
       operationId: getMatch
@@ -1159,6 +1204,9 @@ components:
           type: integer
         matchNumber:
           type: integer
+        matchType:
+          type: string
+          enum: [league, final]
         homeTeamId:
           type: integer
         awayTeamId:
@@ -1213,6 +1261,9 @@ components:
           type: integer
         matchNumber:
           type: integer
+        matchType:
+          type: string
+          enum: [league, final]
         homeTeamId:
           type: integer
         awayTeamId:
@@ -1277,6 +1328,9 @@ components:
           type: integer
         matchNumber:
           type: integer
+        matchType:
+          type: string
+          enum: [league, final]
 
     MatchUpdate:
       type: object
@@ -1292,6 +1346,9 @@ components:
         status:
           type: string
           enum: [upcoming, live, finished]
+        matchType:
+          type: string
+          enum: [league, final]
 
     # ── Player ───────────────────────────────────────────────────────
     Player:

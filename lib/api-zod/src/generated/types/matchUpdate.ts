@@ -5,6 +5,7 @@
  * Nepal Summer League Finland 2026 Tournament API
  * OpenAPI spec version: 0.1.0
  */
+import type { MatchUpdateMatchType } from './matchUpdateMatchType';
 import type { MatchUpdateStatus } from './matchUpdateStatus';
 
 export interface MatchUpdate {
@@ -13,4 +14,5 @@ export interface MatchUpdate {
   scheduledTime?: string;
   pitch?: number;
   status?: MatchUpdateStatus;
+  matchType?: MatchUpdateMatchType;
 }

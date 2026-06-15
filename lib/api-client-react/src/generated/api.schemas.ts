@@ -84,6 +84,14 @@ export interface TeamUpdate {
   managerEmail?: string | null;
 }
 
+export type MatchMatchType = typeof MatchMatchType[keyof typeof MatchMatchType];
+
+
+export const MatchMatchType = {
+  league: 'league',
+  final: 'final',
+} as const;
+
 export type MatchStatus = typeof MatchStatus[keyof typeof MatchStatus];
 
 
@@ -132,6 +140,7 @@ export interface Card {
 export interface Match {
   id: number;
   matchNumber: number;
+  matchType?: MatchMatchType;
   homeTeamId: number;
   awayTeamId: number;
   /** @nullable */
@@ -163,6 +172,14 @@ export interface Match {
   goals?: Goal[];
   cards?: Card[];
 }
+
+export type MatchDetailMatchType = typeof MatchDetailMatchType[keyof typeof MatchDetailMatchType];
+
+
+export const MatchDetailMatchType = {
+  league: 'league',
+  final: 'final',
+} as const;
 
 export type MatchDetailStatus = typeof MatchDetailStatus[keyof typeof MatchDetailStatus];
 
@@ -208,6 +225,7 @@ export interface MatchEvent {
 export interface MatchDetail {
   id: number;
   matchNumber: number;
+  matchType?: MatchDetailMatchType;
   homeTeamId: number;
   awayTeamId: number;
   /** @nullable */
@@ -241,12 +259,21 @@ export interface MatchDetail {
   events: MatchEvent[];
 }
 
+export type MatchInputMatchType = typeof MatchInputMatchType[keyof typeof MatchInputMatchType];
+
+
+export const MatchInputMatchType = {
+  league: 'league',
+  final: 'final',
+} as const;
+
 export interface MatchInput {
   homeTeamId: number;
   awayTeamId: number;
   scheduledTime: string;
   pitch: number;
   matchNumber: number;
+  matchType?: MatchInputMatchType;
 }
 
 export type MatchUpdateStatus = typeof MatchUpdateStatus[keyof typeof MatchUpdateStatus];
@@ -258,12 +285,21 @@ export const MatchUpdateStatus = {
   finished: 'finished',
 } as const;
 
+export type MatchUpdateMatchType = typeof MatchUpdateMatchType[keyof typeof MatchUpdateMatchType];
+
+
+export const MatchUpdateMatchType = {
+  league: 'league',
+  final: 'final',
+} as const;
+
 export interface MatchUpdate {
   homeScore?: number;
   awayScore?: number;
   scheduledTime?: string;
   pitch?: number;
   status?: MatchUpdateStatus;
+  matchType?: MatchUpdateMatchType;
 }
 
 export interface Player {
@@ -727,6 +763,23 @@ export type GenerateFixtures400 = {
 
 export type GenerateFixtures403 = {
   error?: string;
+};
+
+export type CreateFinalMatchBody = {
+  password: string;
+};
+
+export type CreateFinalMatch201FinalistsItem = {
+  position?: number;
+  teamName?: string;
+  teamShortName?: string;
+  points?: number;
+  goalDifference?: number;
+};
+
+export type CreateFinalMatch201 = {
+  match?: Match;
+  finalists?: CreateFinalMatch201FinalistsItem[];
 };
 
 export type ListAllAnnouncementsParams = {

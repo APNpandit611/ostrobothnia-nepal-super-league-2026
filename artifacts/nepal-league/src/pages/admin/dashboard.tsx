@@ -7,6 +7,7 @@ import {
   useListTeams,
   useGenerateFixtures,
   useResetTournament,
+  useCreateFinalMatch,
   getListMatchesQueryKey,
   getGetTournamentStatsQueryKey,
   getGetAdminMeQueryKey
@@ -35,6 +36,7 @@ import {
   Swords,
   Building2,
   ClipboardEdit,
+  Crown,
 } from "lucide-react";
 import {
   Dialog,
@@ -57,6 +59,10 @@ export default function AdminDashboard() {
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
   const [generatePassword, setGeneratePassword] = useState("");
   const [generatePasswordError, setGeneratePasswordError] = useState(false);
+
+  const [finalDialogOpen, setFinalDialogOpen] = useState(false);
+  const [finalPassword, setFinalPassword] = useState("");
+  const [finalPasswordError, setFinalPasswordError] = useState(false);
 
   const { data: stats } = useGetTournamentStats();
   const { data: liveMatches } = useListMatches({ status: 'live' });
@@ -119,6 +125,38 @@ export default function AdminDashboard() {
     if (!resetPassword.trim()) { setResetPasswordError(true); return; }
     setResetPasswordError(false);
     resetTournamentMutation.mutate({ data: { password: resetPassword } });
+  };
+
+  const createFinalMatchMutation = useCreateFinalMatch({
+    mutation: {
+      onSuccess: (data) => {
+        const match = data.match;
+        toast({
+          title: "Final match created!",
+          description: `${match?.homeTeamName ?? "Team 1"} vs ${match?.awayTeamName ?? "Team 2"} — Match #${match?.matchNumber ?? ""}`,
+        });
+        queryClient.invalidateQueries({ queryKey: getListMatchesQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetTournamentStatsQueryKey() });
+        setFinalDialogOpen(false);
+        setFinalPassword("");
+        setFinalPasswordError(false);
+      },
+      onError: (err: unknown) => {
+        const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "";
+        if (msg.toLowerCase().includes("password") || (err as { response?: { status?: number } })?.response?.status === 403) {
+          setFinalPasswordError(true);
+          toast({ variant: "destructive", title: "Incorrect password" });
+        } else {
+          toast({ variant: "destructive", title: "Failed to create final", description: msg || "Unknown error" });
+        }
+      },
+    }
+  });
+
+  const handleFinalConfirm = () => {
+    if (!finalPassword.trim()) { setFinalPasswordError(true); return; }
+    setFinalPasswordError(false);
+    createFinalMatchMutation.mutate({ data: { password: finalPassword } });
   };
 
   return (
@@ -231,6 +269,32 @@ export default function AdminDashboard() {
                   className="flex-shrink-0"
                 >
                   Generate
+                </Button>
+              </div>
+
+              <div className="p-4 border border-amber-500/30 bg-amber-500/5 rounded-xl flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <h4 className="font-bold text-amber-500 flex items-center gap-2">
+                    <Crown className="h-4 w-4" /> Create Final Match
+                  </h4>
+                  <p className="text-sm text-muted-foreground">Top 2 teams from standings → championship final</p>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                      (stats?.matchesPlayed ?? 0) >= (stats?.totalMatches ?? 1)
+                        ? "bg-amber-500/10 text-amber-500"
+                        : "bg-muted text-muted-foreground"
+                    }`}>
+                      {stats?.matchesPlayed ?? 0} / {stats?.totalMatches ?? 0} league matches finished
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  className="border-amber-500/30 text-amber-500 hover:bg-amber-500/10 hover:text-amber-500 flex-shrink-0"
+                  onClick={() => { setFinalPassword(""); setFinalPasswordError(false); setFinalDialogOpen(true); }}
+                  disabled={(stats?.matchesPlayed ?? 0) < (stats?.totalMatches ?? 1)}
+                >
+                  Create Final
                 </Button>
               </div>
 
@@ -433,6 +497,49 @@ export default function AdminDashboard() {
               disabled={generateFixturesMutation.isPending || !generatePassword.trim() || (teams?.length ?? 0) < 2}
             >
               {generateFixturesMutation.isPending ? "Generating..." : "Generate Fixtures"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Final Dialog */}
+      <Dialog open={finalDialogOpen} onOpenChange={(open) => { if (!createFinalMatchMutation.isPending) setFinalDialogOpen(open); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-amber-500">
+              <Crown className="h-5 w-5" /> Create Championship Final
+            </DialogTitle>
+            <DialogDescription>
+              This will create the final match between the top 2 teams from the league standings. The final match will be scheduled after the last league match.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Label htmlFor="final-password" className="flex items-center gap-2">
+              <Lock className="h-4 w-4" /> Enter admin password to confirm
+            </Label>
+            <PasswordInput
+              id="final-password"
+              placeholder="Admin password"
+              value={finalPassword}
+              onChange={(e) => { setFinalPassword(e.target.value); setFinalPasswordError(false); }}
+              onKeyDown={(e) => { if (e.key === "Enter") handleFinalConfirm(); }}
+              className={finalPasswordError ? "border-destructive focus-visible:ring-destructive" : ""}
+              autoFocus
+            />
+            {finalPasswordError && (
+              <p className="text-sm text-destructive">Incorrect password. Please try again.</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFinalDialogOpen(false)} disabled={createFinalMatchMutation.isPending}>
+              Cancel
+            </Button>
+            <Button
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+              onClick={handleFinalConfirm}
+              disabled={createFinalMatchMutation.isPending || !finalPassword.trim()}
+            >
+              {createFinalMatchMutation.isPending ? "Creating..." : "Create Final Match"}
             </Button>
           </DialogFooter>
         </DialogContent>

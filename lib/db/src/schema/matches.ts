@@ -6,6 +6,7 @@ import { teamsTable } from "./teams";
 export const matchesTable = pgTable("matches", {
   id: serial("id").primaryKey(),
   matchNumber: integer("match_number").notNull(),
+  matchType: text("match_type").notNull().default("league"), // "league" | "final"
   homeTeamId: integer("home_team_id").notNull().references(() => teamsTable.id),
   awayTeamId: integer("away_team_id").notNull().references(() => teamsTable.id),
   homeScore: integer("home_score").notNull().default(0),
@@ -20,6 +21,7 @@ export const matchesTable = pgTable("matches", {
   index("matches_home_team_id_idx").on(table.homeTeamId),
   index("matches_away_team_id_idx").on(table.awayTeamId),
   index("matches_status_idx").on(table.status),
+  index("matches_match_type_idx").on(table.matchType),
 ]);
 
 export const insertMatchSchema = createInsertSchema(matchesTable).omit({ id: true, createdAt: true });

@@ -15,6 +15,7 @@ router.get("/standings", async (_req, res): Promise<void> => {
     return;
   }
   const matches = await db.select().from(matchesTable).where(eq(matchesTable.status, "finished"));
+  const leagueMatches = matches.filter(m => m.matchType !== "final");
 
   // Build standings map
   const standingsMap = new Map<number, {
@@ -34,7 +35,7 @@ router.get("/standings", async (_req, res): Promise<void> => {
     });
   }
 
-  for (const match of matches) {
+  for (const match of leagueMatches) {
     const home = standingsMap.get(match.homeTeamId);
     const away = standingsMap.get(match.awayTeamId);
     if (!home || !away) continue;

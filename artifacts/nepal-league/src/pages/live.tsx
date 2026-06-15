@@ -110,7 +110,7 @@ export default function Live() {
                 <CardContent className="p-0">
                   <div className="bg-primary text-primary-foreground p-2 text-center text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2">
                     <span className="animate-pulse w-2 h-2 rounded-full bg-white"></span>
-                    Pitch {match.pitch} • Live
+                    {match.matchType === "final" ? "🏆 FINAL" : `Pitch ${match.pitch}`} • Live
                   </div>
                   
                   <div className="p-6 md:p-10 grid grid-cols-[1fr_auto_1fr] items-start gap-6">

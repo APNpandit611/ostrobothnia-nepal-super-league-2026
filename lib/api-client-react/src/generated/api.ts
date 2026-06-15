@@ -31,6 +31,8 @@ import type {
   ClubApplicationUpdate,
   ClubSettings,
   ClubSettingsUpdate,
+  CreateFinalMatch201,
+  CreateFinalMatchBody,
   GenerateFixtures400,
   GenerateFixtures403,
   GenerateFixturesBody,
@@ -1187,6 +1189,77 @@ export const useGenerateFixtures = <TError = ErrorType<GenerateFixtures400 | Gen
         TContext
       > => {
       return useMutation(getGenerateFixturesMutationOptions(options));
+    }
+
+export const getCreateFinalMatchUrl = () => {
+
+
+
+
+  return `/api/matches/create-final`
+}
+
+/**
+ * @summary Create final match from top-2 teams after all league matches are finished
+ */
+export const createFinalMatch = async (createFinalMatchBody: CreateFinalMatchBody, options?: RequestInit): Promise<CreateFinalMatch201> => {
+
+  return customFetch<CreateFinalMatch201>(getCreateFinalMatchUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createFinalMatchBody,)
+  }
+);}
+
+
+
+
+export const getCreateFinalMatchMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFinalMatch>>, TError,{data: BodyType<CreateFinalMatchBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createFinalMatch>>, TError,{data: BodyType<CreateFinalMatchBody>}, TContext> => {
+
+const mutationKey = ['createFinalMatch'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createFinalMatch>>, {data: BodyType<CreateFinalMatchBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createFinalMatch(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateFinalMatchMutationResult = NonNullable<Awaited<ReturnType<typeof createFinalMatch>>>
+    export type CreateFinalMatchMutationBody = BodyType<CreateFinalMatchBody>
+    export type CreateFinalMatchMutationError = ErrorType<void>
+
+    /**
+ * @summary Create final match from top-2 teams after all league matches are finished
+ */
+export const useCreateFinalMatch = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFinalMatch>>, TError,{data: BodyType<CreateFinalMatchBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createFinalMatch>>,
+        TError,
+        {data: BodyType<CreateFinalMatchBody>},
+        TContext
+      > => {
+      return useMutation(getCreateFinalMatchMutationOptions(options));
     }
 
 export const getGetMatchUrl = (id: number,) => {

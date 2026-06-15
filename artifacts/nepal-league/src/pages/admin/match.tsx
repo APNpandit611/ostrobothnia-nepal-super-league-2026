@@ -194,7 +194,13 @@ export default function AdminMatchDetail() {
           <Badge variant={match.status === 'live' ? 'default' : match.status === 'finished' ? 'secondary' : 'outline'} className={match.status === 'live' ? 'animate-pulse' : ''}>
             {match.status.toUpperCase()}
           </Badge>
-          <div className="text-sm font-bold text-muted-foreground">Match {match.matchNumber} • Pitch {match.pitch}</div>
+          <div className="text-sm font-bold text-muted-foreground">
+            {match.matchType === "final" ? (
+              <span className="text-amber-500">🏆 FINAL</span>
+            ) : (
+              `Match ${match.matchNumber}`
+            )} • Pitch {match.pitch}
+          </div>
         </div>
         <CardContent className="p-5 md:p-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4 md:gap-6">
           <div className="flex items-center justify-end gap-2.5 md:gap-3 min-w-0">

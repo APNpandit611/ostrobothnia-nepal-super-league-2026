@@ -7,11 +7,13 @@
  */
 import type { Card } from './card';
 import type { Goal } from './goal';
+import type { MatchMatchType } from './matchMatchType';
 import type { MatchStatus } from './matchStatus';
 
 export interface Match {
   id: number;
   matchNumber: number;
+  matchType?: MatchMatchType;
   homeTeamId: number;
   awayTeamId: number;
   /** @nullable */

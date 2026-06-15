@@ -17,6 +17,7 @@ const router: IRouter = Router();
 function enrichMatch(match: typeof matchesTable.$inferSelect, homeTeam: typeof teamsTable.$inferSelect | undefined, awayTeam: typeof teamsTable.$inferSelect | undefined) {
   return {
     ...match,
+    matchType: match.matchType ?? "league",
     homeTeamName: homeTeam?.name ?? null,
     awayTeamName: awayTeam?.name ?? null,
     homeTeamShortName: homeTeam?.shortName ?? null,
@@ -143,6 +144,7 @@ router.post("/matches/generate", async (req, res): Promise<void> => {
   let rotation = [...ids];
   const inserts: Array<{
     matchNumber: number;
+    matchType: string;
     homeTeamId: number;
     awayTeamId: number;
     scheduledTime: string;
@@ -164,6 +166,7 @@ router.post("/matches/generate", async (req, res): Promise<void> => {
       const [homeTeamId, awayTeamId] = round % 2 === 0 ? [a, b] : [b, a];
       inserts.push({
         matchNumber: matchNumber++,
+        matchType: "league",
         homeTeamId,
         awayTeamId,
         scheduledTime: `${TOURNAMENT_DATE}T${time}:00`,
@@ -315,6 +318,119 @@ router.post("/matches/:id/reset", async (req, res): Promise<void> => {
   const teams = await db.select().from(teamsTable);
   const teamsMap = new Map(teams.map(t => [t.id, t]));
   res.json(enrichMatch(match, teamsMap.get(match.homeTeamId), teamsMap.get(match.awayTeamId)));
+});
+
+// Create final match from top-2 teams after all league matches are finished
+router.post("/matches/create-final", async (req, res): Promise<void> => {
+  const { password } = req.body as { password?: string };
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    req.log.error("ADMIN_PASSWORD is not configured");
+    res.status(503).json({ error: "Admin password is not configured" });
+    return;
+  }
+  if (!password || password !== adminPassword) {
+    res.status(403).json({ error: "Incorrect password" });
+    return;
+  }
+
+  // Fetch all approved teams
+  const teams = await db.select().from(teamsTable).where(eq(teamsTable.squadStatus, "approved")).orderBy(teamsTable.id);
+  if (teams.length < 2) {
+    res.status(400).json({ error: `Not enough approved teams — ${teams.length}, need at least 2` });
+    return;
+  }
+
+  // Fetch all finished league matches
+  const allMatches = await db.select().from(matchesTable);
+  const leagueMatches = allMatches.filter(m => m.matchType !== "final");
+  const finals = allMatches.filter(m => m.matchType === "final");
+
+  if (finals.length > 0) {
+    res.status(409).json({ error: "Final match already exists", final: finals[0] });
+    return;
+  }
+
+  const finishedLeague = leagueMatches.filter(m => m.status === "finished");
+  if (finishedLeague.length < leagueMatches.length) {
+    res.status(400).json({ error: `Not all league matches finished — ${finishedLeague.length} / ${leagueMatches.length}` });
+    return;
+  }
+
+  if (leagueMatches.length === 0) {
+    res.status(400).json({ error: "No league matches found. Generate fixtures first." });
+    return;
+  }
+
+  // Compute standings from finished league matches
+  const standingsMap = new Map<number, {
+    teamId: number; teamName: string; teamShortName: string; played: number; won: number; drawn: number; lost: number; goalsFor: number; goalsAgainst: number;
+  }>();
+  for (const t of teams) {
+    standingsMap.set(t.id, {
+      teamId: t.id, teamName: t.name, teamShortName: t.shortName, played: 0, won: 0, drawn: 0, lost: 0, goalsFor: 0, goalsAgainst: 0,
+    });
+  }
+  for (const match of finishedLeague) {
+    const home = standingsMap.get(match.homeTeamId);
+    const away = standingsMap.get(match.awayTeamId);
+    if (!home || !away) continue;
+    home.played++; away.played++;
+    home.goalsFor += match.homeScore; home.goalsAgainst += match.awayScore;
+    away.goalsFor += match.awayScore; away.goalsAgainst += match.homeScore;
+    if (match.homeScore > match.awayScore) { home.won++; away.lost++; }
+    else if (match.homeScore < match.awayScore) { away.won++; home.lost++; }
+    else { home.drawn++; away.drawn++; }
+  }
+  const rows = Array.from(standingsMap.values()).map(s => ({
+    ...s,
+    goalDifference: s.goalsFor - s.goalsAgainst,
+    points: s.won * 3 + s.drawn,
+  })).sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+    if (b.goalsFor !== a.goalsFor) return b.goalsFor - a.goalsFor;
+    return a.teamName.localeCompare(b.teamName);
+  });
+
+  if (rows.length < 2) {
+    res.status(400).json({ error: "Need at least 2 teams to create a final" });
+    return;
+  }
+
+  const top1 = rows[0];
+  const top2 = rows[1];
+
+  // Find the next available match number and last kickoff time
+  const lastMatch = leagueMatches.length > 0
+    ? leagueMatches.reduce((acc, m) => m.matchNumber > acc.matchNumber ? m : acc, leagueMatches[0])
+    : null;
+  const finalMatchNumber = (lastMatch?.matchNumber ?? 0) + 1;
+  const lastTime = lastMatch?.scheduledTime ?? "2026-06-28T10:00:00";
+  const [datePart, timePart] = lastTime.split("T");
+  const [h, m] = (timePart ?? "10:00:00").split(":").map(Number);
+  const finalTime = `${datePart}T${String(h + 1).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`;
+
+  const [match] = await db.insert(matchesTable).values({
+    matchNumber: finalMatchNumber,
+    matchType: "final",
+    homeTeamId: top1.teamId,
+    awayTeamId: top2.teamId,
+    homeScore: 0,
+    awayScore: 0,
+    scheduledTime: finalTime,
+    pitch: 1,
+    status: "upcoming",
+  }).returning();
+
+  const teamsMap = new Map(teams.map(t => [t.id, t]));
+  res.status(201).json({
+    match: enrichMatch(match, teamsMap.get(match.homeTeamId), teamsMap.get(match.awayTeamId)),
+    finalists: [
+      { position: 1, teamName: top1.teamName, teamShortName: top1.teamShortName, points: top1.points, goalDifference: top1.goalDifference },
+      { position: 2, teamName: top2.teamName, teamShortName: top2.teamShortName, points: top2.points, goalDifference: top2.goalDifference },
+    ],
+  });
 });
 
 export default router;

@@ -218,6 +218,7 @@ export const ListMatchesQueryParams = zod.object({
 export const ListMatchesResponseItem = zod.object({
   "id": zod.number(),
   "matchNumber": zod.number(),
+  "matchType": zod.enum(['league', 'final']).optional(),
   "homeTeamId": zod.number(),
   "awayTeamId": zod.number(),
   "homeTeamName": zod.string().nullish(),
@@ -269,7 +270,8 @@ export const CreateMatchBody = zod.object({
   "awayTeamId": zod.number(),
   "scheduledTime": zod.string(),
   "pitch": zod.number(),
-  "matchNumber": zod.number()
+  "matchNumber": zod.number(),
+  "matchType": zod.enum(['league', 'final']).optional()
 })
 
 
@@ -277,6 +279,14 @@ export const CreateMatchBody = zod.object({
  * @summary Auto-generate round-robin fixtures for all teams
  */
 export const GenerateFixturesBody = zod.object({
+  "password": zod.string()
+})
+
+
+/**
+ * @summary Create final match from top-2 teams after all league matches are finished
+ */
+export const CreateFinalMatchBody = zod.object({
   "password": zod.string()
 })
 
@@ -291,6 +301,7 @@ export const GetMatchParams = zod.object({
 export const GetMatchResponse = zod.object({
   "id": zod.number(),
   "matchNumber": zod.number(),
+  "matchType": zod.enum(['league', 'final']).optional(),
   "homeTeamId": zod.number(),
   "awayTeamId": zod.number(),
   "homeTeamName": zod.string().nullish(),
@@ -356,12 +367,14 @@ export const UpdateMatchBody = zod.object({
   "awayScore": zod.number().optional(),
   "scheduledTime": zod.string().optional(),
   "pitch": zod.number().optional(),
-  "status": zod.enum(['upcoming', 'live', 'finished']).optional()
+  "status": zod.enum(['upcoming', 'live', 'finished']).optional(),
+  "matchType": zod.enum(['league', 'final']).optional()
 })
 
 export const UpdateMatchResponse = zod.object({
   "id": zod.number(),
   "matchNumber": zod.number(),
+  "matchType": zod.enum(['league', 'final']).optional(),
   "homeTeamId": zod.number(),
   "awayTeamId": zod.number(),
   "homeTeamName": zod.string().nullish(),
@@ -414,6 +427,7 @@ export const StartMatchParams = zod.object({
 export const StartMatchResponse = zod.object({
   "id": zod.number(),
   "matchNumber": zod.number(),
+  "matchType": zod.enum(['league', 'final']).optional(),
   "homeTeamId": zod.number(),
   "awayTeamId": zod.number(),
   "homeTeamName": zod.string().nullish(),
@@ -466,6 +480,7 @@ export const FinishMatchParams = zod.object({
 export const FinishMatchResponse = zod.object({
   "id": zod.number(),
   "matchNumber": zod.number(),
+  "matchType": zod.enum(['league', 'final']).optional(),
   "homeTeamId": zod.number(),
   "awayTeamId": zod.number(),
   "homeTeamName": zod.string().nullish(),
@@ -518,6 +533,7 @@ export const ResetMatchParams = zod.object({
 export const ResetMatchResponse = zod.object({
   "id": zod.number(),
   "matchNumber": zod.number(),
+  "matchType": zod.enum(['league', 'final']).optional(),
   "homeTeamId": zod.number(),
   "awayTeamId": zod.number(),
   "homeTeamName": zod.string().nullish(),

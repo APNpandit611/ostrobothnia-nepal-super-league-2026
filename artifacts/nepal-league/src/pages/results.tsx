@@ -179,9 +179,16 @@ function MatchResultCard({ match }: { match: Match }) {
               </span>
             )}
           </div>
-          <Badge variant="secondary" className="text-[10px] tracking-wider uppercase">
-            Full Time
-          </Badge>
+          <div className="flex items-center gap-1.5">
+            {match.matchType === "final" && (
+              <Badge variant="outline" className="border-amber-500 text-amber-500 font-bold text-[10px] uppercase">
+                FINAL
+              </Badge>
+            )}
+            <Badge variant="secondary" className="text-[10px] tracking-wider uppercase">
+              Full Time
+            </Badge>
+          </div>
         </div>
 
         {/* Scoreboard */}

@@ -5,6 +5,7 @@
  * Nepal Summer League Finland 2026 Tournament API
  * OpenAPI spec version: 0.1.0
  */
+import type { MatchInputMatchType } from './matchInputMatchType';
 
 export interface MatchInput {
   homeTeamId: number;
@@ -12,4 +13,5 @@ export interface MatchInput {
   scheduledTime: string;
   pitch: number;
   matchNumber: number;
+  matchType?: MatchInputMatchType;
 }

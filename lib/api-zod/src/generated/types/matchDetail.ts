@@ -7,12 +7,14 @@
  */
 import type { Card } from './card';
 import type { Goal } from './goal';
+import type { MatchDetailMatchType } from './matchDetailMatchType';
 import type { MatchDetailStatus } from './matchDetailStatus';
 import type { MatchEvent } from './matchEvent';
 
 export interface MatchDetail {
   id: number;
   matchNumber: number;
+  matchType?: MatchDetailMatchType;
   homeTeamId: number;
   awayTeamId: number;
   /** @nullable */
