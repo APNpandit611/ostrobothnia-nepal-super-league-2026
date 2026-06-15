@@ -1,5 +1,6 @@
 import { useListMatches, getListMatchesQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { TeamLogo } from "@/components/team-logo";
 import { Loader2, Activity } from "lucide-react";
 import { Link } from "wouter";
 import { useEffect, useState } from "react";
@@ -62,15 +63,17 @@ export default function Live() {
                 </div>
                 
                 <div className="p-6 md:p-10 grid grid-cols-[1fr_auto_1fr] items-center gap-6">
-                  <div className="text-right">
+                  <div className="flex items-center justify-end gap-3 min-w-0">
                     <h2 className="text-xl md:text-3xl font-black truncate">{match.homeTeamName}</h2>
+                    <TeamLogo name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} size="lg" />
                   </div>
                   
                   <div className="bg-background border-2 border-border shadow-inner px-6 py-4 rounded-xl font-mono text-4xl md:text-6xl font-black tracking-tighter">
                     {match.homeScore} - {match.awayScore}
                   </div>
                   
-                  <div className="text-left">
+                  <div className="flex items-center justify-start gap-3 min-w-0">
+                    <TeamLogo name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} size="lg" />
                     <h2 className="text-xl md:text-3xl font-black truncate">{match.awayTeamName}</h2>
                   </div>
                 </div>

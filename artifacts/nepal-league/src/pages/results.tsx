@@ -10,8 +10,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, MapPin, CalendarDays, ClipboardList, Clock, Crosshair, ArrowDownWideNarrow } from "lucide-react";
+import { Loader2, MapPin, CalendarDays, ClipboardList, Clock, ArrowDownWideNarrow } from "lucide-react";
 import { format, differenceInMinutes } from "date-fns";
+import { TeamLogo } from "@/components/team-logo";
 
 type SortOrder = "latest" | "earliest";
 
@@ -19,6 +20,49 @@ function matchTimestamp(m: Match): number {
   const raw = m.finishedAt ?? m.scheduledTime;
   const t = raw ? new Date(raw).getTime() : NaN;
   return Number.isNaN(t) ? 0 : t;
+}
+
+/** A small soccer ball icon used to mark goals. */
+function SoccerBall({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.4"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="9.5" />
+      <path d="M12 7.8 15.99 10.7 14.47 15.4 9.53 15.4 8.01 10.7Z" fill="currentColor" />
+      <path d="M12 7.8 12 2.8M15.99 10.7 20.7 9.2M14.47 15.4 17.4 19.7M9.53 15.4 6.6 19.7M8.01 10.7 3.3 9.2" />
+    </svg>
+  );
+}
+
+interface ScorerLine {
+  name: string;
+  minutes: number[];
+  count: number;
+}
+
+/** Group goals by scorer, preserving order, so repeat scorers show one line with a count. */
+function groupGoals(goals: Goal[]): ScorerLine[] {
+  const order: string[] = [];
+  const map = new Map<string, ScorerLine>();
+  for (const g of goals) {
+    const name = g.scorerName || "Unknown";
+    const existing = map.get(name);
+    if (existing) {
+      existing.count += 1;
+      existing.minutes.push(g.minute);
+    } else {
+      order.push(name);
+      map.set(name, { name, minutes: [g.minute], count: 1 });
+    }
+  }
+  return order.map((n) => map.get(n)!);
 }
 
 export default function Results() {
@@ -144,20 +188,29 @@ function MatchResultCard({ match }: { match: Match }) {
         <div className="px-4 py-5 md:px-6 md:py-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-6">
           {/* Home team */}
           <div className="text-right space-y-2">
-            <h2 className="text-base md:text-xl font-bold truncate">{match.homeTeamName}</h2>
+            <div className="flex items-center justify-end gap-2">
+              <h2 className="text-base md:text-xl font-bold truncate">{match.homeTeamName}</h2>
+              <TeamLogo name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} size="md" />
+            </div>
             <div className="space-y-0.5">
-              {homeGoals.map((g, i) => (
+              {groupGoals(homeGoals).map((g, i) => (
                 <div key={i} className="flex items-center justify-end gap-1.5 text-[11px] text-muted-foreground">
-                  <span className="truncate">{g.scorerName || "Unknown"}</span>
-                  <span className="text-muted-foreground/70 font-mono">{g.minute}'</span>
-                  <Crosshair className="h-3 w-3 text-primary" />
+                  <span className="truncate">{g.name}</span>
+                  <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
+                  <span className="flex items-center gap-0.5 text-primary">
+                    <SoccerBall className="h-3 w-3" />
+                    {g.count > 1 && <span className="font-bold text-[10px]">×{g.count}</span>}
+                  </span>
                 </div>
               ))}
-              {ownGoalsForHome.map((g, i) => (
+              {groupGoals(ownGoalsForHome).map((g, i) => (
                 <div key={`og-${i}`} className="flex items-center justify-end gap-1.5 text-[11px] text-muted-foreground">
-                  <span className="truncate">(OG) {g.scorerName || "Unknown"}</span>
-                  <span className="text-muted-foreground/70 font-mono">{g.minute}'</span>
-                  <Crosshair className="h-3 w-3 text-muted-foreground/60" />
+                  <span className="truncate">(OG) {g.name}</span>
+                  <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
+                  <span className="flex items-center gap-0.5 text-muted-foreground/60">
+                    <SoccerBall className="h-3 w-3" />
+                    {g.count > 1 && <span className="font-bold text-[10px]">×{g.count}</span>}
+                  </span>
                 </div>
               ))}
             </div>
@@ -185,20 +238,29 @@ function MatchResultCard({ match }: { match: Match }) {
 
           {/* Away team */}
           <div className="text-left space-y-2">
-            <h2 className="text-base md:text-xl font-bold truncate">{match.awayTeamName}</h2>
+            <div className="flex items-center gap-2">
+              <TeamLogo name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} size="md" />
+              <h2 className="text-base md:text-xl font-bold truncate">{match.awayTeamName}</h2>
+            </div>
             <div className="space-y-0.5">
-              {awayGoals.map((g, i) => (
+              {groupGoals(awayGoals).map((g, i) => (
                 <div key={i} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <Crosshair className="h-3 w-3 text-primary" />
-                  <span className="text-muted-foreground/70 font-mono">{g.minute}'</span>
-                  <span className="truncate">{g.scorerName || "Unknown"}</span>
+                  <span className="flex items-center gap-0.5 text-primary">
+                    <SoccerBall className="h-3 w-3" />
+                    {g.count > 1 && <span className="font-bold text-[10px]">×{g.count}</span>}
+                  </span>
+                  <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
+                  <span className="truncate">{g.name}</span>
                 </div>
               ))}
-              {ownGoalsForAway.map((g, i) => (
+              {groupGoals(ownGoalsForAway).map((g, i) => (
                 <div key={`og-${i}`} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <Crosshair className="h-3 w-3 text-muted-foreground/60" />
-                  <span className="text-muted-foreground/70 font-mono">{g.minute}'</span>
-                  <span className="truncate">(OG) {g.scorerName || "Unknown"}</span>
+                  <span className="flex items-center gap-0.5 text-muted-foreground/60">
+                    <SoccerBall className="h-3 w-3" />
+                    {g.count > 1 && <span className="font-bold text-[10px]">×{g.count}</span>}
+                  </span>
+                  <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
+                  <span className="truncate">(OG) {g.name}</span>
                 </div>
               ))}
             </div>

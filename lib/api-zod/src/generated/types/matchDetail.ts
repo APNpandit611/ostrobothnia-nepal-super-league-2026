@@ -27,6 +27,10 @@ export interface MatchDetail {
   homeTeamColor?: string | null;
   /** @nullable */
   awayTeamColor?: string | null;
+  /** @nullable */
+  homeTeamLogo?: string | null;
+  /** @nullable */
+  awayTeamLogo?: string | null;
   homeScore?: number;
   awayScore?: number;
   scheduledTime: string;

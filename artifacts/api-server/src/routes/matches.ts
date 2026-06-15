@@ -23,6 +23,8 @@ function enrichMatch(match: typeof matchesTable.$inferSelect, homeTeam: typeof t
     awayTeamShortName: awayTeam?.shortName ?? null,
     homeTeamColor: homeTeam?.primaryColor ?? null,
     awayTeamColor: awayTeam?.primaryColor ?? null,
+    homeTeamLogo: homeTeam?.logoUrl ?? null,
+    awayTeamLogo: awayTeam?.logoUrl ?? null,
   };
 }
 

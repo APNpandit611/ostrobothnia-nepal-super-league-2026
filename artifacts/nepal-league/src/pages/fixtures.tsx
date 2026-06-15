@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import {
   CalendarDays, Clock, MapPin, Loader2,
 } from "lucide-react";
+import { TeamLogo } from "@/components/team-logo";
 // ─── Shared match card ────────────────────────────────────────────────────────
 function MatchCard({ match, large = false }: { match: any; large?: boolean }) {
   if (large) {
@@ -19,11 +20,17 @@ function MatchCard({ match, large = false }: { match: any; large?: boolean }) {
             Pitch {match.pitch} • Live
           </div>
           <div className="p-6 md:p-10 grid grid-cols-[1fr_auto_1fr] items-center gap-6">
-            <h2 className="text-xl md:text-3xl font-black text-right truncate">{match.homeTeamName}</h2>
+            <div className="flex items-center justify-end gap-3 min-w-0">
+              <h2 className="text-xl md:text-3xl font-black text-right truncate">{match.homeTeamName}</h2>
+              <TeamLogo name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} size="lg" />
+            </div>
             <div className="bg-background border-2 border-border shadow-inner px-6 py-4 rounded-xl font-mono text-4xl md:text-6xl font-black tracking-tighter">
               {match.homeScore} – {match.awayScore}
             </div>
-            <h2 className="text-xl md:text-3xl font-black text-left truncate">{match.awayTeamName}</h2>
+            <div className="flex items-center justify-start gap-3 min-w-0">
+              <TeamLogo name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} size="lg" />
+              <h2 className="text-xl md:text-3xl font-black text-left truncate">{match.awayTeamName}</h2>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -52,7 +59,10 @@ function MatchCard({ match, large = false }: { match: any; large?: boolean }) {
           </Badge>
         </div>
         <div className="p-4 grid grid-cols-3 items-center gap-4">
-          <div className="text-right font-bold md:text-lg truncate">{match.homeTeamName}</div>
+          <div className="flex items-center justify-end gap-2 min-w-0">
+            <span className="text-right font-bold md:text-lg truncate">{match.homeTeamName}</span>
+            <TeamLogo name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} size="sm" />
+          </div>
           <div className="text-center">
             {match.status === "upcoming" ? (
               <div className="bg-muted px-4 py-2 rounded font-mono text-xl font-bold tracking-widest text-muted-foreground">VS</div>
@@ -62,7 +72,10 @@ function MatchCard({ match, large = false }: { match: any; large?: boolean }) {
               </div>
             )}
           </div>
-          <div className="text-left font-bold md:text-lg truncate">{match.awayTeamName}</div>
+          <div className="flex items-center justify-start gap-2 min-w-0">
+            <TeamLogo name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} size="sm" />
+            <span className="text-left font-bold md:text-lg truncate">{match.awayTeamName}</span>
+          </div>
         </div>
       </CardContent>
     </Card>
