@@ -52,7 +52,7 @@ export default function Stats() {
               <div className="text-2xl font-black truncate">{stats?.mostGoalsTeam?.teamName || "-"}</div>
             </div>
             <p className="text-sm mt-2 text-primary font-bold">
-              {stats?.mostGoalsTeam?.goals || 0} goals scored
+              {stats?.mostGoalsTeam?.goals || 0} goal{stats?.mostGoalsTeam?.goals === 1 ? "" : "s"} scored
             </p>
           </CardContent>
         </Card>
@@ -70,7 +70,7 @@ export default function Stats() {
               <div className="text-2xl font-black truncate">{stats?.bestDefenseTeam?.teamName || "-"}</div>
             </div>
             <p className="text-sm mt-2 text-primary font-bold">
-              Only {stats?.bestDefenseTeam?.goalsAgainst || 0} goals conceded
+              Only {stats?.bestDefenseTeam?.goalsAgainst || 0} goal{stats?.bestDefenseTeam?.goalsAgainst === 1 ? "" : "s"} conceded
             </p>
           </CardContent>
         </Card>
@@ -88,7 +88,7 @@ export default function Stats() {
               <div className="text-2xl font-black truncate">{stats?.mostWinsTeam?.teamName || "-"}</div>
             </div>
             <p className="text-sm mt-2 text-primary font-bold">
-              {stats?.mostWinsTeam?.wins || 0} matches won
+              {stats?.mostWinsTeam?.wins || 0} match{stats?.mostWinsTeam?.wins === 1 ? "" : "es"} won
             </p>
           </CardContent>
         </Card>
@@ -186,8 +186,55 @@ export default function Stats() {
                     <TeamLogo size="md" name={stats.highestScoringMatch.awayTeam} shortName={findTeam(stats.highestScoringMatch.awayTeam)?.shortName} logoUrl={findTeam(stats.highestScoringMatch.awayTeam)?.logoUrl} />
                   </div>
                 </div>
-                <div className="text-center mt-4 text-sm font-medium text-primary">
-                  {stats.highestScoringMatch.totalGoals} Total Goals
+                {/* Goal scorers */}
+                <div className="mt-3 grid grid-cols-2 gap-3 text-[11px] text-muted-foreground">
+                  <div className="text-right space-y-0.5">
+                    {(stats.highestScoringMatch as any).homeScorers?.length > 0 && (
+                      <div className="space-y-0.5">
+                        {(stats.highestScoringMatch as any).homeScorers.map((name: string, i: number) => (
+                          <div key={i} className="flex items-center justify-end gap-1.5">
+                            <span className="truncate">{name}</span>
+                            <span className="text-primary"><Target className="h-2.5 w-2.5" /></span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {(stats.highestScoringMatch as any).ownGoalsForHome?.length > 0 && (
+                      <div className="space-y-0.5">
+                        {(stats.highestScoringMatch as any).ownGoalsForHome.map((name: string, i: number) => (
+                          <div key={`og-home-${i}`} className="flex items-center justify-end gap-1.5 opacity-60">
+                            <span className="truncate">(OG) {name}</span>
+                            <span className="text-muted-foreground"><Target className="h-2.5 w-2.5" /></span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-left space-y-0.5">
+                    {(stats.highestScoringMatch as any).awayScorers?.length > 0 && (
+                      <div className="space-y-0.5">
+                        {(stats.highestScoringMatch as any).awayScorers.map((name: string, i: number) => (
+                          <div key={i} className="flex items-center gap-1.5">
+                            <span className="text-primary"><Target className="h-2.5 w-2.5" /></span>
+                            <span className="truncate">{name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {(stats.highestScoringMatch as any).ownGoalsForAway?.length > 0 && (
+                      <div className="space-y-0.5">
+                        {(stats.highestScoringMatch as any).ownGoalsForAway.map((name: string, i: number) => (
+                          <div key={`og-away-${i}`} className="flex items-center gap-1.5 opacity-60">
+                            <span className="text-muted-foreground"><Target className="h-2.5 w-2.5" /></span>
+                            <span className="truncate">(OG) {name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="text-center mt-3 text-sm font-medium text-primary">
+                  {stats.highestScoringMatch.totalGoals} Total Goal{stats.highestScoringMatch.totalGoals === 1 ? "" : "s"}
                 </div>
               </CardContent>
             </Card>

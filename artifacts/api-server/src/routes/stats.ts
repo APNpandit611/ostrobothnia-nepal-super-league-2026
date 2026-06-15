@@ -63,6 +63,11 @@ router.get("/stats", async (_req, res): Promise<void> => {
       maxGoals = total;
       const homeTeam = teams.find(t => t.id === m.homeTeamId);
       const awayTeam = teams.find(t => t.id === m.awayTeamId);
+      const matchGoals = allGoals.filter(g => g.matchId === m.id);
+      const homeScorers = matchGoals.filter(g => g.teamId === m.homeTeamId && !g.isOwnGoal).map(g => g.scorerName ?? "Unknown");
+      const awayScorers = matchGoals.filter(g => g.teamId === m.awayTeamId && !g.isOwnGoal).map(g => g.scorerName ?? "Unknown");
+      const ownGoalsForHome = matchGoals.filter(g => g.teamId === m.awayTeamId && g.isOwnGoal).map(g => g.scorerName ?? "Unknown");
+      const ownGoalsForAway = matchGoals.filter(g => g.teamId === m.homeTeamId && g.isOwnGoal).map(g => g.scorerName ?? "Unknown");
       highestScoringMatch = {
         matchId: m.id,
         homeTeam: homeTeam?.name ?? "Unknown",
@@ -70,6 +75,10 @@ router.get("/stats", async (_req, res): Promise<void> => {
         homeScore: m.homeScore,
         awayScore: m.awayScore,
         totalGoals: total,
+        homeScorers,
+        awayScorers,
+        ownGoalsForHome,
+        ownGoalsForAway,
       };
     }
   }
