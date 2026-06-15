@@ -1,12 +1,29 @@
+import { useState } from "react";
 import { useListMatches } from "@workspace/api-client-react";
 import type { Match, Goal, Card as MatchCard } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MapPin, CalendarDays, ClipboardList, Clock, Crosshair } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader2, MapPin, CalendarDays, ClipboardList, Clock, Crosshair, ArrowDownWideNarrow } from "lucide-react";
 import { format, differenceInMinutes } from "date-fns";
+
+type SortOrder = "latest" | "earliest";
+
+function matchTimestamp(m: Match): number {
+  const raw = m.finishedAt ?? m.scheduledTime;
+  const t = raw ? new Date(raw).getTime() : NaN;
+  return Number.isNaN(t) ? 0 : t;
+}
 
 export default function Results() {
   const { data: matches, isLoading } = useListMatches({ status: 'finished' });
+  const [sortOrder, setSortOrder] = useState<SortOrder>("latest");
 
   if (isLoading) {
     return (
@@ -16,12 +33,36 @@ export default function Results() {
     );
   }
 
-  const finishedMatches = matches?.filter(m => m.status === 'finished') || [];
+  const finishedMatches = (matches?.filter(m => m.status === 'finished') || [])
+    .slice()
+    .sort((a, b) => {
+      const diff =
+        sortOrder === "latest"
+          ? matchTimestamp(b) - matchTimestamp(a)
+          : matchTimestamp(a) - matchTimestamp(b);
+      if (diff !== 0) return diff;
+      // Deterministic tiebreaker when timestamps are equal/missing.
+      return sortOrder === "latest"
+        ? b.matchNumber - a.matchNumber
+        : a.matchNumber - b.matchNumber;
+    });
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-3xl font-black tracking-tight uppercase italic">Results</h1>
+        {finishedMatches.length > 0 && (
+          <Select value={sortOrder} onValueChange={(v) => setSortOrder(v as SortOrder)}>
+            <SelectTrigger className="w-[180px] h-9 text-sm" aria-label="Sort results">
+              <ArrowDownWideNarrow className="h-4 w-4 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="latest">Latest first</SelectItem>
+              <SelectItem value="earliest">Earliest first</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {finishedMatches.length === 0 ? (
