@@ -7,6 +7,8 @@ import {
   useDeletePlayer,
   useUpdatePlayer,
   getListPlayersQueryKey,
+  useListClubApplications,
+  getListClubApplicationsQueryKey,
 } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -25,15 +27,164 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   Loader2, Save, Users, UserPlus, Trash2, Pencil, X, Check, ShieldCheck, AlertTriangle,
-  CheckCircle2, Clock, LockOpen,
+  CheckCircle2, Clock, LockOpen, Heart,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const POSITIONS = ["GK", "C", "V.C", "Player", "Manager"];
+
+/* ─── Club Application Picker (KSB squad import) ───────────────────────── */
+
+function ClubApplicationPicker({
+  teamId,
+  teamColor,
+  teamName,
+}: {
+  teamId: number;
+  teamColor: string;
+  teamName: string;
+}) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { data: applications, isLoading } = useListClubApplications({ status: "accepted" });
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedApp, setSelectedApp] = useState<{ id: number; name: string; email: string } | null>(null);
+  const [pickNumber, setPickNumber] = useState("");
+  const [pickPosition, setPickPosition] = useState("");
+  const [importedIds, setImportedIds] = useState<Set<number>>(new Set());
+
+  const addMutation = useAddPlayer({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: `${selectedApp?.name} added to squad` });
+        if (selectedApp) setImportedIds((prev) => new Set(prev).add(selectedApp.id));
+        setDialogOpen(false);
+        setSelectedApp(null);
+        setPickNumber("");
+        setPickPosition("");
+        queryClient.invalidateQueries({ queryKey: getListPlayersQueryKey(teamId) });
+        queryClient.invalidateQueries({ queryKey: getListClubApplicationsQueryKey() });
+      },
+      onError: () => toast({ variant: "destructive", title: "Failed to add player" }),
+    },
+  });
+
+  const handleImport = () => {
+    if (!selectedApp || !pickNumber.trim()) {
+      toast({ variant: "destructive", title: "Jersey number is required" });
+      return;
+    }
+    addMutation.mutate({
+      teamId,
+      data: {
+        name: selectedApp.name,
+        number: parseInt(pickNumber.trim()),
+        position: pickPosition || null,
+        email: null,
+        phone: null,
+      },
+    });
+  };
+
+  const acceptedApps = applications?.filter((a) => !importedIds.has(a.id)) ?? [];
+  const isKsb = teamName === "Kokkola Soccer Boys";
+
+  if (!isKsb) return null;
+  if (isLoading) return <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>;
+  if (!acceptedApps.length) return null;
+
+  return (
+    <div className="mb-6">
+      <div className="flex items-center gap-2 mb-2">
+        <Heart className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Accepted Club Applications</span>
+      </div>
+      <div className="rounded-xl border divide-y overflow-hidden">
+        {acceptedApps.map((app) => (
+          <div key={app.id} className="flex items-center justify-between gap-3 px-4 py-3 bg-card hover:bg-muted/30 transition-colors">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <UserPlus className="h-4 w-4 text-primary" />
+              </div>
+              <div className="min-w-0">
+                <span className="font-semibold text-sm">{app.name}</span>
+                <span className="ml-1 text-xs text-muted-foreground">{app.email}</span>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              className="h-8 gap-1.5"
+              onClick={() => {
+                setSelectedApp({ id: app.id, name: app.name, email: app.email });
+                setPickNumber("");
+                setPickPosition("");
+                setDialogOpen(true);
+              }}
+            >
+              <UserPlus className="h-3.5 w-3.5" /> Pick for Squad
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Pick {selectedApp?.name} for Squad</DialogTitle>
+            <DialogDescription>
+              Assign a jersey number and tournament role before importing.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-semibold w-28">Jersey Number</span>
+              <Input
+                type="number"
+                min={1}
+                max={99}
+                placeholder="#"
+                value={pickNumber}
+                onChange={(e) => setPickNumber(e.target.value)}
+                className="w-20"
+              />
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-semibold w-28">Tournament Role</span>
+              <Select value={pickPosition} onValueChange={setPickPosition}>
+                <SelectTrigger className="w-32">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {POSITIONS.map((pos) => (
+                    <SelectItem key={pos} value={pos}>{pos}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button
+              onClick={handleImport}
+              disabled={!pickNumber.trim() || addMutation.isPending}
+              className="gap-1.5"
+            >
+              {addMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+              Add to Squad
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
 
 /* ─── Player Section ────────────────────────────────────────────────────── */
 
@@ -584,6 +735,10 @@ export default function AdminTeams() {
                     )}
                   </div>
                 </div>
+
+                {/* KSB Club Application Picker */}
+                <ClubApplicationPicker teamId={selectedTeam.id} teamColor={edit.primaryColor} teamName={selectedTeam.name} />
+
                 <PlayerSection teamId={selectedTeam.id} teamColor={edit.primaryColor} />
               </TabsContent>
             </Tabs>
