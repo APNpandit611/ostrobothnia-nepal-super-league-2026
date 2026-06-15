@@ -14,6 +14,17 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -331,11 +342,10 @@ export default function AdminTeams() {
             <div key={team.id} className="relative group">
               <button
                 onClick={() => { setSelectedId(team.id); setConfirmDeleteId(null); }}
-                className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border-2 transition-all font-semibold text-sm pr-9"
+                className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border-2 transition-all font-semibold text-sm pr-9 text-foreground"
                 style={{
                   borderColor: isSelected ? (edits[team.id]?.primaryColor || team.primaryColor) : isPendingSquad ? "#eab308" : "transparent",
                   backgroundColor: isSelected ? `${edits[team.id]?.primaryColor || team.primaryColor}18` : "hsl(var(--muted)/0.5)",
-                  color: isSelected ? (edits[team.id]?.primaryColor || team.primaryColor) : undefined,
                 }}
               >
                 {(edits[team.id]?.logoUrl || team.logoUrl) ? (
@@ -388,18 +398,48 @@ export default function AdminTeams() {
           <CardContent className="p-0">
             <Tabs defaultValue="info">
               <div className="px-6 pt-5 pb-0 border-b">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between gap-3 mb-3">
+                  <div className="flex items-center gap-3 min-w-0">
                     {edit.logoUrl ? (
                       <img src={edit.logoUrl} alt={edit.shortName} className="h-10 w-10 rounded-full object-contain border" />
                     ) : (
                       <span className="h-10 w-10 rounded-full flex-shrink-0 border" style={{ backgroundColor: edit.primaryColor }} />
                     )}
-                    <div>
-                      <p className="font-black text-base leading-tight">{edit.name}</p>
-                      <p className="text-xs text-muted-foreground font-mono">{edit.shortName}</p>
+                    <div className="min-w-0">
+                      <p className="font-black text-base leading-tight truncate">{edit.name}</p>
+                      <p className="text-xs text-muted-foreground font-mono truncate">{edit.shortName}</p>
                     </div>
                   </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="link"
+                        size="sm"
+                        className="h-auto p-0 gap-1.5 font-semibold text-destructive hover:text-destructive flex-shrink-0"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete {edit.name}?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This permanently removes the team and its squad. This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => handleDeleteTeam(selectedTeam.id)}
+                          disabled={deleting}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Delete Team"}
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </div>
                 <TabsList className="mb-0 bg-transparent p-0 gap-4 h-auto border-none rounded-none">
                   <TabsTrigger
