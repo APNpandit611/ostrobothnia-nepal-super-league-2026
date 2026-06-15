@@ -62,10 +62,18 @@ function MatchResultCard({ match }: { match: Match }) {
       ? differenceInMinutes(new Date(match.finishedAt), new Date(match.startedAt))
       : null;
 
+  const homeColor = match.homeTeamColor ?? "#16a34a";
+  const awayColor = match.awayTeamColor ?? "#16a34a";
+
   return (
     <Card className="overflow-hidden border shadow-sm relative">
-      {/* Subtle gradient top bar */}
-      <div className="h-1 w-full bg-gradient-to-r from-primary via-emerald-400 to-primary" />
+      {/* Split top bar — left half home team color, right half away team color */}
+      <div
+        className="h-1.5 w-full"
+        style={{
+          background: `linear-gradient(to right, ${homeColor} 0%, ${homeColor} 50%, ${awayColor} 50%, ${awayColor} 100%)`,
+        }}
+      />
 
       <CardContent className="p-0 relative z-10">
         {/* Meta header */}

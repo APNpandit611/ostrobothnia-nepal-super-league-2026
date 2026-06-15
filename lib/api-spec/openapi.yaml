@@ -1171,6 +1171,10 @@ components:
           type: ["string", "null"]
         awayTeamShortName:
           type: ["string", "null"]
+        homeTeamColor:
+          type: ["string", "null"]
+        awayTeamColor:
+          type: ["string", "null"]
         homeScore:
           type: integer
         awayScore:
@@ -1216,6 +1220,10 @@ components:
         homeTeamShortName:
           type: ["string", "null"]
         awayTeamShortName:
+          type: ["string", "null"]
+        homeTeamColor:
+          type: ["string", "null"]
+        awayTeamColor:
           type: ["string", "null"]
         homeScore:
           type: integer

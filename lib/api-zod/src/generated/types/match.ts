@@ -22,6 +22,10 @@ export interface Match {
   homeTeamShortName?: string | null;
   /** @nullable */
   awayTeamShortName?: string | null;
+  /** @nullable */
+  homeTeamColor?: string | null;
+  /** @nullable */
+  awayTeamColor?: string | null;
   homeScore?: number;
   awayScore?: number;
   scheduledTime: string;
