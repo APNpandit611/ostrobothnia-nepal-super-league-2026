@@ -11,7 +11,7 @@ interface TeamLogoProps {
 const SIZES = {
   sm: "w-6 h-6 text-[9px]",
   md: "w-9 h-9 text-xs",
-  lg: "w-14 h-14 text-lg",
+  lg: "w-11 h-11 md:w-14 md:h-14 text-base md:text-lg",
 } as const;
 
 export function TeamLogo({ name, shortName, logoUrl, size = "md", className = "" }: TeamLogoProps) {

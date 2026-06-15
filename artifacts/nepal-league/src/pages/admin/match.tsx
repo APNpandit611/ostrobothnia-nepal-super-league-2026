@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Play, Square, RotateCcw, Target, AlertTriangle, Clock } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { format } from "date-fns";
+import { TeamLogo } from "@/components/team-logo";
 
 export default function AdminMatchDetail() {
   const [, params] = useRoute("/admin/match/:id");
@@ -196,16 +197,18 @@ export default function AdminMatchDetail() {
           <div className="text-sm font-bold text-muted-foreground">Match {match.matchNumber} • Pitch {match.pitch}</div>
         </div>
         <CardContent className="p-8 grid grid-cols-[1fr_auto_1fr] items-center gap-8">
-          <div className="text-right">
-            <h2 className="text-2xl md:text-4xl font-black">{match.homeTeamName}</h2>
+          <div className="flex items-center justify-end gap-3 md:gap-4 min-w-0">
+            <TeamLogo size="lg" name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} />
+            <h2 className="text-2xl md:text-4xl font-black truncate">{match.homeTeamName}</h2>
           </div>
           
           <div className="bg-background border-2 border-border shadow-inner px-8 py-4 rounded-xl font-mono text-5xl md:text-7xl font-black tracking-tighter text-center">
             {match.homeScore} - {match.awayScore}
           </div>
           
-          <div className="text-left">
-            <h2 className="text-2xl md:text-4xl font-black">{match.awayTeamName}</h2>
+          <div className="flex items-center justify-start gap-3 md:gap-4 min-w-0">
+            <TeamLogo size="lg" name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} />
+            <h2 className="text-2xl md:text-4xl font-black truncate">{match.awayTeamName}</h2>
           </div>
         </CardContent>
       </Card>

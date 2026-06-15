@@ -64,8 +64,8 @@ export default function Live() {
                 
                 <div className="p-6 md:p-10 grid grid-cols-[1fr_auto_1fr] items-center gap-6">
                   <div className="flex items-center justify-end gap-3 min-w-0">
-                    <h2 className="text-xl md:text-3xl font-black truncate">{match.homeTeamName}</h2>
                     <TeamLogo name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} size="lg" />
+                    <h2 className="text-xl md:text-3xl font-black truncate">{match.homeTeamName}</h2>
                   </div>
                   
                   <div className="bg-background border-2 border-border shadow-inner px-6 py-4 rounded-xl font-mono text-4xl md:text-6xl font-black tracking-tighter">

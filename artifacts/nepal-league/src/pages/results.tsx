@@ -187,10 +187,10 @@ function MatchResultCard({ match }: { match: Match }) {
         {/* Scoreboard */}
         <div className="px-4 py-5 md:px-6 md:py-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-6">
           {/* Home team */}
-          <div className="text-right space-y-2">
-            <div className="flex items-center justify-end gap-2">
-              <h2 className="text-base md:text-xl font-bold truncate">{match.homeTeamName}</h2>
+          <div className="text-right space-y-2 min-w-0">
+            <div className="flex items-center justify-end gap-2 min-w-0">
               <TeamLogo name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} size="md" />
+              <h2 className="text-base md:text-xl font-bold truncate">{match.homeTeamName}</h2>
             </div>
             <div className="space-y-0.5">
               {groupGoals(homeGoals).map((g, i) => (
@@ -237,8 +237,8 @@ function MatchResultCard({ match }: { match: Match }) {
           </div>
 
           {/* Away team */}
-          <div className="text-left space-y-2">
-            <div className="flex items-center gap-2">
+          <div className="text-left space-y-2 min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
               <TeamLogo name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} size="md" />
               <h2 className="text-base md:text-xl font-bold truncate">{match.awayTeamName}</h2>
             </div>

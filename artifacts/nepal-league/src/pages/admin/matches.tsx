@@ -1,4 +1,4 @@
-import { useListMatches, useGetStandings } from "@workspace/api-client-react";
+import { useListMatches, useGetStandings, useListTeams } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
+import { TeamLogo } from "@/components/team-logo";
 
 function StatusBadge({ status }: { status: string }) {
   if (status === "live") {
@@ -58,11 +59,14 @@ function MatchRow({ match }: { match: any }) {
           {/* Teams + score + action */}
           <div className="p-4 flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1 grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-              <div className="text-right min-w-0">
-                <div className="font-bold truncate">{match.homeTeamName}</div>
-                {match.homeTeamShortName && (
-                  <div className="text-xs text-muted-foreground font-mono">{match.homeTeamShortName}</div>
-                )}
+              <div className="flex items-center justify-end gap-2.5 min-w-0">
+                <TeamLogo size="md" name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} />
+                <div className="text-right min-w-0">
+                  <div className="font-bold truncate">{match.homeTeamName}</div>
+                  {match.homeTeamShortName && (
+                    <div className="text-xs text-muted-foreground font-mono">{match.homeTeamShortName}</div>
+                  )}
+                </div>
               </div>
               {isUpcoming ? (
                 <div className="bg-muted px-3 py-1.5 rounded font-mono text-lg font-bold tracking-widest text-muted-foreground">
@@ -73,11 +77,14 @@ function MatchRow({ match }: { match: any }) {
                   {match.homeScore} – {match.awayScore}
                 </div>
               )}
-              <div className="text-left min-w-0">
-                <div className="font-bold truncate">{match.awayTeamName}</div>
-                {match.awayTeamShortName && (
-                  <div className="text-xs text-muted-foreground font-mono">{match.awayTeamShortName}</div>
-                )}
+              <div className="flex items-center justify-start gap-2.5 min-w-0">
+                <TeamLogo size="md" name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} />
+                <div className="text-left min-w-0">
+                  <div className="font-bold truncate">{match.awayTeamName}</div>
+                  {match.awayTeamShortName && (
+                    <div className="text-xs text-muted-foreground font-mono">{match.awayTeamShortName}</div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -135,6 +142,8 @@ function Section({ title, count, accent, children }: { title: string; count: num
 export default function AdminMatches() {
   const { data: matches, isLoading } = useListMatches();
   const { data: standings } = useGetStandings();
+  const { data: teams } = useListTeams();
+  const logoById = new Map((teams ?? []).map((t) => [t.id, t]));
 
   if (isLoading) {
     return (
@@ -222,9 +231,9 @@ export default function AdminMatches() {
                       {idx === 0 ? <Trophy className="h-4 w-4 mx-auto text-primary" /> : <span className="text-muted-foreground">{idx + 1}</span>}
                     </td>
                     <td className="px-4 py-2.5">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: row.primaryColor ?? "#888" }} />
-                        <span className="font-semibold">{row.teamName}</span>
+                      <div className="flex items-center gap-2.5">
+                        <TeamLogo size="sm" name={row.teamName} shortName={logoById.get(row.teamId)?.shortName} logoUrl={logoById.get(row.teamId)?.logoUrl} />
+                        <span className="font-semibold truncate">{row.teamName}</span>
                       </div>
                     </td>
                     <td className="px-3 py-2.5 text-center">{row.played}</td>

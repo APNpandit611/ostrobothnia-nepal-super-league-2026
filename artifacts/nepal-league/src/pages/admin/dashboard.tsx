@@ -17,6 +17,7 @@ import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { TeamLogo } from "@/components/team-logo";
 import { 
   LogOut, 
   Settings, 
@@ -268,12 +269,18 @@ export default function AdminDashboard() {
                       <div className="p-4 border rounded-xl hover:border-primary cursor-pointer transition-colors flex items-center justify-between group">
                         <div className="flex-1">
                           <div className="text-xs text-muted-foreground mb-1">Pitch {match.pitch}</div>
-                          <div className="flex items-center justify-between pr-4">
-                            <span className="font-bold">{match.homeTeamShortName}</span>
-                            <span className="font-mono font-bold bg-muted px-3 py-1 rounded">
+                          <div className="flex items-center justify-between gap-2 pr-4">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <TeamLogo size="sm" name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} />
+                              <span className="font-bold truncate">{match.homeTeamShortName}</span>
+                            </div>
+                            <span className="font-mono font-bold bg-muted px-3 py-1 rounded whitespace-nowrap">
                               {match.homeScore} - {match.awayScore}
                             </span>
-                            <span className="font-bold">{match.awayTeamShortName}</span>
+                            <div className="flex items-center gap-2 min-w-0 justify-end">
+                              <TeamLogo size="sm" name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} />
+                              <span className="font-bold truncate">{match.awayTeamShortName}</span>
+                            </div>
                           </div>
                         </div>
                         <Button variant="secondary" size="sm" className="group-hover:bg-primary group-hover:text-primary-foreground">

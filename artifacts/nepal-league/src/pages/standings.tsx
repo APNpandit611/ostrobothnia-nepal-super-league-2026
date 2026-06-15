@@ -1,11 +1,14 @@
-import { useGetStandings } from "@workspace/api-client-react";
+import { useGetStandings, useListTeams } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Loader2, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { TeamLogo } from "@/components/team-logo";
 
 export default function Standings() {
   const { data: standings, isLoading } = useGetStandings();
+  const { data: teams } = useListTeams();
+  const logoById = new Map((teams ?? []).map((t) => [t.id, t]));
 
   if (isLoading) {
     return (
@@ -51,7 +54,15 @@ export default function Standings() {
                     {idx === 0 ? <Trophy className="h-4 w-4 mx-auto text-primary" /> : row.position}
                   </TableCell>
                   <TableCell className="font-bold">
-                    {row.teamName}
+                    <div className="flex items-center gap-2.5">
+                      <TeamLogo
+                        size="sm"
+                        name={row.teamName}
+                        shortName={logoById.get(row.teamId)?.shortName}
+                        logoUrl={logoById.get(row.teamId)?.logoUrl}
+                      />
+                      <span className="truncate">{row.teamName}</span>
+                    </div>
                   </TableCell>
                   <TableCell className="text-center">{row.played}</TableCell>
                   <TableCell className="text-center">{row.won}</TableCell>
