@@ -25,7 +25,7 @@ export default function Stats() {
         <h1 className="text-3xl font-black tracking-tight uppercase italic">Tournament Stats</h1>
       </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card className="bg-primary text-primary-foreground border-none">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
@@ -45,11 +45,11 @@ export default function Stats() {
               <h3 className="font-bold uppercase tracking-wider text-sm text-muted-foreground">Most Goals</h3>
               <Flame className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
               {stats?.mostGoalsTeam && (
                 <TeamLogo size="md" name={stats.mostGoalsTeam.teamName} shortName={findTeam(stats.mostGoalsTeam.teamName)?.shortName} logoUrl={findTeam(stats.mostGoalsTeam.teamName)?.logoUrl} />
               )}
-              <div className="text-2xl font-black truncate">{stats?.mostGoalsTeam?.teamName || "-"}</div>
+              <div className="text-sm font-bold leading-tight break-words">{stats?.mostGoalsTeam?.teamName || "-"}</div>
             </div>
             <p className="text-sm mt-2 text-primary font-bold">
               {stats?.mostGoalsTeam?.goals || 0} goal{stats?.mostGoalsTeam?.goals === 1 ? "" : "s"} scored
@@ -63,11 +63,11 @@ export default function Stats() {
               <h3 className="font-bold uppercase tracking-wider text-sm text-muted-foreground">Best Defense</h3>
               <Shield className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
               {stats?.bestDefenseTeam && (
                 <TeamLogo size="md" name={stats.bestDefenseTeam.teamName} shortName={findTeam(stats.bestDefenseTeam.teamName)?.shortName} logoUrl={findTeam(stats.bestDefenseTeam.teamName)?.logoUrl} />
               )}
-              <div className="text-2xl font-black truncate">{stats?.bestDefenseTeam?.teamName || "-"}</div>
+              <div className="text-sm font-bold leading-tight break-words">{stats?.bestDefenseTeam?.teamName || "-"}</div>
             </div>
             <p className="text-sm mt-2 text-primary font-bold">
               Only {stats?.bestDefenseTeam?.goalsAgainst || 0} goal{stats?.bestDefenseTeam?.goalsAgainst === 1 ? "" : "s"} conceded
@@ -81,31 +81,29 @@ export default function Stats() {
               <h3 className="font-bold uppercase tracking-wider text-sm text-muted-foreground">Most Wins</h3>
               <Trophy className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
               {stats?.mostWinsTeam && (
                 <TeamLogo size="md" name={stats.mostWinsTeam.teamName} shortName={findTeam(stats.mostWinsTeam.teamName)?.shortName} logoUrl={findTeam(stats.mostWinsTeam.teamName)?.logoUrl} />
               )}
-              <div className="text-2xl font-black truncate">{stats?.mostWinsTeam?.teamName || "-"}</div>
+              <div className="text-sm font-bold leading-tight break-words">{stats?.mostWinsTeam?.teamName || "-"}</div>
             </div>
             <p className="text-sm mt-2 text-primary font-bold">
               {stats?.mostWinsTeam?.wins || 0} match{stats?.mostWinsTeam?.wins === 1 ? "" : "es"} won
             </p>
           </CardContent>
         </Card>
-      </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold uppercase tracking-wider text-sm text-muted-foreground">Most Draws</h3>
               <X className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
               {stats?.mostDrawsTeam && (
                 <TeamLogo size="md" name={stats.mostDrawsTeam.teamName} shortName={findTeam(stats.mostDrawsTeam.teamName)?.shortName} logoUrl={findTeam(stats.mostDrawsTeam.teamName)?.logoUrl} />
               )}
-              <div className="text-2xl font-black truncate">{stats?.mostDrawsTeam?.teamName || "-"}</div>
+              <div className="text-sm font-bold leading-tight break-words">{stats?.mostDrawsTeam?.teamName || "-"}</div>
             </div>
             <p className="text-sm mt-2 text-primary font-bold">
               {stats?.mostDrawsTeam?.draws || 0} draw{stats?.mostDrawsTeam?.draws === 1 ? "" : "s"}
@@ -119,11 +117,11 @@ export default function Stats() {
               <h3 className="font-bold uppercase tracking-wider text-sm text-muted-foreground">Clean Sheets</h3>
               <Shield className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
               {stats?.mostCleanSheetsTeam && (
                 <TeamLogo size="md" name={stats.mostCleanSheetsTeam.teamName} shortName={findTeam(stats.mostCleanSheetsTeam.teamName)?.shortName} logoUrl={findTeam(stats.mostCleanSheetsTeam.teamName)?.logoUrl} />
               )}
-              <div className="text-2xl font-black truncate">{stats?.mostCleanSheetsTeam?.teamName || "-"}</div>
+              <div className="text-sm font-bold leading-tight break-words">{stats?.mostCleanSheetsTeam?.teamName || "-"}</div>
             </div>
             <p className="text-sm mt-2 text-primary font-bold">
               {stats?.mostCleanSheetsTeam?.cleanSheets || 0} clean sheet{stats?.mostCleanSheetsTeam?.cleanSheets === 1 ? "" : "s"}
@@ -137,15 +135,16 @@ export default function Stats() {
               <h3 className="font-bold uppercase tracking-wider text-sm text-muted-foreground">Biggest Win</h3>
               <Crown className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className="flex items-center gap-2.5">
-              <div className="text-xl font-black truncate">
-                {(stats?.biggestWin as any)?.winner || "-"}
-              </div>
+            <div className="flex items-center gap-2 min-w-0">
+              {(stats?.biggestWin as any)?.winner && (
+                <TeamLogo size="md" name={(stats?.biggestWin as any)?.winner} shortName={findTeam((stats?.biggestWin as any)?.winner)?.shortName} logoUrl={findTeam((stats?.biggestWin as any)?.winner)?.logoUrl} />
+              )}
+              <div className="text-sm font-bold leading-tight break-words">{(stats?.biggestWin as any)?.winner || "-"}</div>
             </div>
             <p className="text-sm mt-2 text-primary font-bold">
               {(stats?.biggestWin as any)?.winnerScore ?? 0} - {(stats?.biggestWin as any)?.loserScore ?? 0}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground truncate">
               vs {(stats?.biggestWin as any)?.loser || "-"}
             </p>
           </CardContent>
@@ -157,10 +156,10 @@ export default function Stats() {
               <h3 className="font-bold uppercase tracking-wider text-sm text-muted-foreground">Most Goals (Single Match)</h3>
               <Minimize2 className="h-5 w-5 text-muted-foreground" />
             </div>
-            <div className="flex items-center gap-2.5">
-              <div className="text-xl font-black truncate">
-                {stats?.highestScoringMatch?.homeTeam || "-"} vs {stats?.highestScoringMatch?.awayTeam || "-"}
-              </div>
+            <div className="text-sm font-bold leading-tight">
+              <span>{findTeam(stats?.highestScoringMatch?.homeTeam)?.shortName || stats?.highestScoringMatch?.homeTeam || "-"}</span>
+              <span className="text-muted-foreground mx-1">vs</span>
+              <span>{findTeam(stats?.highestScoringMatch?.awayTeam)?.shortName || stats?.highestScoringMatch?.awayTeam || "-"}</span>
             </div>
             <p className="text-sm mt-2 text-primary font-bold">
               {stats?.highestScoringMatch?.homeScore ?? 0} - {stats?.highestScoringMatch?.awayScore ?? 0}
@@ -252,16 +251,16 @@ export default function Stats() {
               </CardHeader>
               <CardContent>
                 <div className="flex justify-between items-center gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
+                  <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
+                    <div className="font-bold text-sm truncate min-w-0 text-right">{findTeam(stats.highestScoringMatch.homeTeam)?.shortName || stats.highestScoringMatch.homeTeam}</div>
                     <TeamLogo size="md" name={stats.highestScoringMatch.homeTeam} shortName={findTeam(stats.highestScoringMatch.homeTeam)?.shortName} logoUrl={findTeam(stats.highestScoringMatch.homeTeam)?.logoUrl} />
-                    <div className="font-bold text-lg truncate min-w-0">{stats.highestScoringMatch.homeTeam}</div>
                   </div>
-                  <div className="bg-muted px-4 py-2 rounded font-mono text-xl font-black whitespace-nowrap">
+                  <div className="bg-muted px-4 py-2 rounded font-mono text-xl font-black whitespace-nowrap mx-2">
                     {stats.highestScoringMatch.homeScore} - {stats.highestScoringMatch.awayScore}
                   </div>
-                  <div className="flex items-center gap-2 min-w-0 justify-end">
-                    <div className="font-bold text-lg truncate min-w-0">{stats.highestScoringMatch.awayTeam}</div>
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
                     <TeamLogo size="md" name={stats.highestScoringMatch.awayTeam} shortName={findTeam(stats.highestScoringMatch.awayTeam)?.shortName} logoUrl={findTeam(stats.highestScoringMatch.awayTeam)?.logoUrl} />
+                    <div className="font-bold text-sm truncate min-w-0">{findTeam(stats.highestScoringMatch.awayTeam)?.shortName || stats.highestScoringMatch.awayTeam}</div>
                   </div>
                 </div>
                 {/* Goal scorers */}
