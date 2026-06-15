@@ -23,13 +23,14 @@ router.get("/api/club-settings", async (req, res): Promise<void> => {
 });
 
 router.put("/api/admin/club-settings", async (req, res): Promise<void> => {
-  const { storyParagraphs, tagline, email, phone, homeGround, values } = req.body as {
+  const { storyParagraphs, tagline, email, phone, homeGround, values, primaryColor } = req.body as {
     storyParagraphs?: string[];
     tagline?: string | null;
     email?: string | null;
     phone?: string | null;
     homeGround?: string | null;
     values?: { title: string; description: string }[] | null;
+    primaryColor?: string | null;
   };
   try {
     const existing = await getOrCreate();
@@ -42,6 +43,7 @@ router.put("/api/admin/club-settings", async (req, res): Promise<void> => {
         ...(phone !== undefined && { phone: phone ?? null }),
         ...(homeGround !== undefined && { homeGround: homeGround ?? null }),
         ...(values !== undefined && { values: values ?? null }),
+        ...(primaryColor !== undefined && { primaryColor: primaryColor ?? "#16a34a" }),
         updatedAt: new Date(),
       })
       .where(eq(clubSettingsTable.id, existing.id))

@@ -8,6 +8,7 @@ export const clubSettingsTable = pgTable("club_settings", {
   phone: text("phone"),
   homeGround: text("home_ground"),
   values: jsonb("values").$type<{ title: string; description: string }[]>(),
+  primaryColor: text("primary_color").notNull().default("#16a34a"),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

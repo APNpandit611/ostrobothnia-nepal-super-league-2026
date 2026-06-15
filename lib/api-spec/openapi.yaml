@@ -1872,7 +1872,7 @@ components:
 
     ClubSettings:
       type: object
-      required: [id, storyParagraphs, updatedAt]
+      required: [id, storyParagraphs, updatedAt, primaryColor]
       properties:
         id:
           type: integer
@@ -1892,6 +1892,8 @@ components:
           type: ["array", "null"]
           items:
             $ref: "#/components/schemas/ClubValueItem"
+        primaryColor:
+          type: string
         updatedAt:
           type: string
 
@@ -1914,3 +1916,5 @@ components:
           type: ["array", "null"]
           items:
             $ref: "#/components/schemas/ClubValueItem"
+        primaryColor:
+          type: string

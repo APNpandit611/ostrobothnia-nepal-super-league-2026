@@ -19,4 +19,5 @@ export interface ClubSettingsUpdate {
   homeGround?: string | null;
   /** @nullable */
   values?: ClubValueItem[] | null;
+  primaryColor?: string;
 }

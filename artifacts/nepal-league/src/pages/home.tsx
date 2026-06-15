@@ -101,6 +101,12 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-primary/5 pointer-events-none" />
         <div className="absolute -top-16 -right-16 h-64 w-64 rounded-full bg-primary/5 pointer-events-none" />
         <div className="absolute -bottom-12 -left-12 h-48 w-48 rounded-full bg-primary/5 pointer-events-none" />
+        {/* KSB logo watermark */}
+        <img
+          src="/ksb-logo.png"
+          alt=""
+          className="absolute inset-0 w-full h-full object-contain opacity-[0.03] pointer-events-none select-none"
+        />
 
         <div className="relative p-6 md:p-12 flex flex-col items-center text-center space-y-6">
           {/* Badges */}

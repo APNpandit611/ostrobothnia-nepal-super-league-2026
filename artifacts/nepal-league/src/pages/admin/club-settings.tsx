@@ -36,6 +36,7 @@ export default function AdminClubSettings() {
   const [phone, setPhone] = useState("");
   const [homeGround, setHomeGround] = useState("");
   const [values, setValues] = useState<ValueRow[]>(DEFAULT_VALUES);
+  const [primaryColor, setPrimaryColor] = useState("#16a34a");
   const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
@@ -46,6 +47,7 @@ export default function AdminClubSettings() {
       setPhone(settings.phone ?? "");
       setHomeGround(settings.homeGround ?? "");
       setValues(settings.values && settings.values.length > 0 ? settings.values : DEFAULT_VALUES);
+      setPrimaryColor(settings.primaryColor ?? "#16a34a");
       setDirty(false);
     }
   }, [settings]);
@@ -72,6 +74,7 @@ export default function AdminClubSettings() {
         phone: phone.trim() || null,
         homeGround: homeGround.trim() || null,
         values: values.filter((v) => v.title.trim()),
+        primaryColor: primaryColor.trim() || "#16a34a",
       },
     });
   };
@@ -162,6 +165,33 @@ export default function AdminClubSettings() {
                   placeholder="e.g. Kokkola, Finland"
                   value={homeGround}
                   onChange={(e) => { setHomeGround(e.target.value); mark(); }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ── Club Color ── */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                <div className="w-4 h-4 rounded-full border" style={{ backgroundColor: primaryColor }} /> Club Colour
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-xs text-muted-foreground">This colour appears on the About page identity strip and the Home page hero.</p>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-lg border" style={{ backgroundColor: primaryColor }} />
+                <input
+                  type="color"
+                  value={primaryColor}
+                  onChange={(e) => { setPrimaryColor(e.target.value); mark(); }}
+                  className="h-10 w-16 cursor-pointer rounded-md border p-0.5 bg-transparent"
+                />
+                <Input
+                  value={primaryColor}
+                  onChange={(e) => { setPrimaryColor(e.target.value); mark(); }}
+                  placeholder="#16a34a"
+                  className="w-32"
                 />
               </div>
             </CardContent>

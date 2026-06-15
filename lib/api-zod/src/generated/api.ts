@@ -785,6 +785,7 @@ export const GetClubSettingsResponse = zod.object({
   "title": zod.string(),
   "description": zod.string()
 })).nullish(),
+  "primaryColor": zod.string(),
   "updatedAt": zod.string()
 })
 
@@ -801,7 +802,8 @@ export const UpdateClubSettingsBody = zod.object({
   "values": zod.array(zod.object({
   "title": zod.string(),
   "description": zod.string()
-})).nullish()
+})).nullish(),
+  "primaryColor": zod.string().optional()
 })
 
 export const UpdateClubSettingsResponse = zod.object({
@@ -815,6 +817,7 @@ export const UpdateClubSettingsResponse = zod.object({
   "title": zod.string(),
   "description": zod.string()
 })).nullish(),
+  "primaryColor": zod.string(),
   "updatedAt": zod.string()
 })
 

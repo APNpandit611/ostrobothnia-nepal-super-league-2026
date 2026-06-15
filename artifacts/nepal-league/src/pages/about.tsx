@@ -34,6 +34,7 @@ export default function About() {
   const homeGround = settings?.homeGround || "Kokkola, Finland";
   const values =
     settings?.values && settings.values.length > 0 ? settings.values : DEFAULT_VALUES;
+  const color = settings?.primaryColor || "#16a34a";
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-500 max-w-3xl">
@@ -95,13 +96,13 @@ export default function About() {
 
       {/* Identity strip */}
       <div className="rounded-2xl border overflow-hidden">
-        <div className="h-2 bg-[#16a34a]" />
+        <div className="h-2" style={{ backgroundColor: color }} />
         <div className="p-6 grid sm:grid-cols-3 gap-6 text-center">
           <div>
             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-1">Club Colours</p>
             <div className="flex items-center justify-center gap-2 mt-2">
-              <div className="w-6 h-6 rounded-full bg-[#16a34a] border-2 border-white/20" />
-              <span className="text-sm font-semibold">KSB Green</span>
+              <div className="w-6 h-6 rounded-full border-2 border-white/20" style={{ backgroundColor: color }} />
+              <span className="text-sm font-semibold">KSB</span>
             </div>
           </div>
           <div>

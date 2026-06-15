@@ -723,6 +723,7 @@ export interface ClubSettings {
   homeGround?: string | null;
   /** @nullable */
   values?: ClubValueItem[] | null;
+  primaryColor: string;
   updatedAt: string;
 }
 
@@ -738,6 +739,7 @@ export interface ClubSettingsUpdate {
   homeGround?: string | null;
   /** @nullable */
   values?: ClubValueItem[] | null;
+  primaryColor?: string;
 }
 
 export type ListMatchesParams = {
