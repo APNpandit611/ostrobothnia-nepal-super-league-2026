@@ -33,7 +33,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const POSITIONS = ["GK", "C", "V.C", "Manager"];
+const POSITIONS = ["GK", "C", "V.C", "Player", "Manager"];
 
 /* ─── Player Section ────────────────────────────────────────────────────── */
 
