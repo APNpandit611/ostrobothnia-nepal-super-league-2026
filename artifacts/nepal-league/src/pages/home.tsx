@@ -1,9 +1,11 @@
+import { useMemo } from "react";
 import {
   useListTeams,
   useListMatches,
   useGetStandings,
   useGetActiveTournament,
 } from "@workspace/api-client-react";
+import type { Match } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -49,6 +51,130 @@ function Countdown({ target }: { target: Date }) {
   );
 }
 
+/* ─── Featured Match Card ───────────────────────────────────────────────── */
+function FeaturedMatch({ match }: { match: Match }) {
+  const isFinal = match.matchType === "final";
+  const isLive = match.status === "live";
+  const isFinished = match.status === "finished";
+  const isUpcoming = match.status === "upcoming";
+
+  const linkHref = isLive ? "/live" : isFinished ? "/results" : "/fixtures";
+
+  return (
+    <Link href={linkHref}>
+      <Card
+        className={`overflow-hidden cursor-pointer transition-transform hover:scale-[1.01] shadow-lg ${
+          isFinal
+            ? "border-2 border-amber-500/60 shadow-amber-500/15"
+            : isLive
+            ? "border-2 border-primary/60 shadow-primary/20"
+            : "border-2 border-emerald-500/60 shadow-emerald-500/15"
+        }`}
+      >
+        <CardContent className="p-0">
+          {/* Top bar */}
+          <div
+            className={`flex items-center justify-between px-4 py-2 text-sm font-bold uppercase tracking-widest text-white ${
+              isFinal
+                ? "bg-amber-500"
+                : isLive
+                ? "bg-primary"
+                : "bg-emerald-500"
+            }`}
+          >
+            <div className="flex items-center gap-2">
+              {isFinal && <Crown className="h-4 w-4" />}
+              {isLive && (
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white" />
+                </span>
+              )}
+              {isFinal ? "Championship Final" : isLive ? "Live Now" : isFinished ? "Match Finished" : "Next Match"}
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1">
+                <MapPin className="h-3.5 w-3.5" />
+                Pitch {match.pitch}
+              </span>
+              <span className="flex items-center gap-1">
+                <CalendarDays className="h-3.5 w-3.5" />
+                {format(new Date(match.scheduledTime), "HH:mm")}
+              </span>
+            </div>
+          </div>
+
+          {/* Teams & Score */}
+          <div className="px-4 py-5 md:py-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4 md:gap-6">
+            {/* Home */}
+            <div className="flex items-center justify-end gap-3 min-w-0">
+              <TeamLogo
+                name={match.homeTeamName}
+                shortName={match.homeTeamShortName}
+                logoUrl={match.homeTeamLogo}
+                size="lg"
+              />
+              <h2 className="text-xl md:text-2xl font-black truncate min-w-0">{match.homeTeamName}</h2>
+            </div>
+
+            {/* Score / VS */}
+            <div className="text-center">
+              {isUpcoming ? (
+                <div className="bg-muted px-5 py-2 rounded-lg font-mono text-2xl font-bold tracking-widest text-muted-foreground">
+                  VS
+                </div>
+              ) : (
+                <div className="bg-background border-2 border-border shadow-inner px-5 py-2 rounded-xl font-mono text-4xl md:text-5xl font-black tracking-tighter">
+                  {match.homeScore} – {match.awayScore}
+                </div>
+              )}
+              {isFinished && (
+                <p className="text-xs font-medium text-muted-foreground mt-1.5 uppercase tracking-wider">
+                  Full Time
+                </p>
+              )}
+              {isLive && (
+                <p className="text-xs font-medium text-primary mt-1.5 uppercase tracking-wider animate-pulse">
+                  In Progress
+                </p>
+              )}
+            </div>
+
+            {/* Away */}
+            <div className="flex items-center justify-start gap-3 min-w-0">
+              <h2 className="text-xl md:text-2xl font-black text-left truncate min-w-0">{match.awayTeamName}</h2>
+              <TeamLogo
+                name={match.awayTeamName}
+                shortName={match.awayTeamShortName}
+                logoUrl={match.awayTeamLogo}
+                size="lg"
+              />
+            </div>
+          </div>
+
+          {/* Bottom strip */}
+          <div className="flex items-center justify-between px-4 py-2 border-t bg-muted/30 text-xs text-muted-foreground">
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                {match.matchType === "final" ? "Final" : `Match ${match.matchNumber}`}
+              </span>
+              {isUpcoming && (
+                <span className="text-muted-foreground/60">
+                  {format(new Date(match.scheduledTime), "HH:mm")}
+                </span>
+              )}
+            </div>
+            <span className="font-semibold text-primary flex items-center gap-1">
+              View details <ArrowRight className="h-3 w-3" />
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+}
+
 export default function Home() {
   const { data: allTeams } = useListTeams();
   const { data: standings } = useGetStandings();
@@ -73,6 +199,19 @@ export default function Home() {
     ? parseTournamentDate(tournament.date, tournament.kickoffTime)
     : new Date(2026, 5, 28, 10, 0, 0);
   const tournamentStarted = tournamentDate <= new Date();
+
+  // Featured match: live > final finished > upcoming (by matchNumber)
+  const featuredMatch = useMemo(() => {
+    const list = allMatches ?? [];
+    const live = list.find((m) => m.status === "live");
+    if (live) return live;
+    const finalFinished = list.find((m) => m.matchType === "final" && m.status === "finished");
+    if (finalFinished) return finalFinished;
+    const upcoming = list
+      .filter((m) => m.status === "upcoming")
+      .sort((a, b) => a.matchNumber - b.matchNumber);
+    return upcoming[0] ?? null;
+  }, [allMatches]);
 
   const displayDate = tournament
     ? format(parseTournamentDate(tournament.date, null), "d MMMM yyyy")
@@ -176,6 +315,24 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      {/* Featured Match */}
+      {featuredMatch && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+              <Activity className="h-4 w-4 text-primary" />
+              {featuredMatch.status === "live"
+                ? "Match Live Now"
+                : featuredMatch.matchType === "final" && featuredMatch.status === "finished"
+                ? "Championship Final"
+                : "Next Match"}
+            </h2>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <FeaturedMatch match={featuredMatch} />
+        </div>
+      )}
 
       {/* Champion Banner */}
       {winnerTeam && (
