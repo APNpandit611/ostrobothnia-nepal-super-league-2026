@@ -773,7 +773,8 @@ export const GetTournamentStatsResponse = zod.object({
   "winnerScore": zod.number().optional(),
   "loserScore": zod.number().optional(),
   "goalDifference": zod.number().optional()
-}).nullish()
+}).nullish(),
+  "finalExists": zod.boolean().optional()
 })
 
 

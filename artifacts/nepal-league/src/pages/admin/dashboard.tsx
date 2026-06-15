@@ -253,7 +253,9 @@ export default function AdminDashboard() {
                   <p className="text-sm text-muted-foreground">
                     {(stats?.totalMatches ?? 0) === 0
                       ? "Create the 10-match round-robin schedule"
-                      : "Championship final from top 2 standings"}
+                      : stats?.finalExists
+                        ? "Final already created"
+                        : "Championship final from top 2 standings"}
                   </p>
                   <div className="flex items-center gap-1.5 mt-1.5">
                     {(stats?.totalMatches ?? 0) === 0 ? (
@@ -267,7 +269,9 @@ export default function AdminDashboard() {
                     ) : (
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                         (stats?.matchesPlayed ?? 0) >= (stats?.totalMatches ?? 1)
-                          ? "bg-amber-500/10 text-amber-500"
+                          ? stats?.finalExists
+                            ? "bg-primary/10 text-primary"
+                            : "bg-amber-500/10 text-amber-500"
                           : "bg-muted text-muted-foreground"
                       }`}>
                         {stats?.matchesPlayed ?? 0} / {stats?.totalMatches ?? 0} league matches finished
@@ -286,11 +290,11 @@ export default function AdminDashboard() {
                   disabled={
                     (stats?.totalMatches ?? 0) === 0
                       ? (teams?.length ?? 0) < 2
-                      : (stats?.matchesPlayed ?? 0) < (stats?.totalMatches ?? 1)
+                      : (stats?.matchesPlayed ?? 0) < (stats?.totalMatches ?? 1) || stats?.finalExists
                   }
                   className="flex-shrink-0"
                 >
-                  {(stats?.totalMatches ?? 0) === 0 ? "Generate" : "Create Final"}
+                  {(stats?.totalMatches ?? 0) === 0 ? "Generate" : stats?.finalExists ? "Final Ready" : "Create Final"}
                 </Button>
               </div>
 

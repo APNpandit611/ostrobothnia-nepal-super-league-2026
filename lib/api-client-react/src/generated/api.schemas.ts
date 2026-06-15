@@ -507,6 +507,7 @@ export interface TournamentStats {
   mostCleanSheetsTeam?: TournamentStatsMostCleanSheetsTeam;
   /** @nullable */
   biggestWin?: TournamentStatsBiggestWin;
+  finalExists?: boolean;
 }
 
 export type TournamentInfoStatus = typeof TournamentInfoStatus[keyof typeof TournamentInfoStatus];

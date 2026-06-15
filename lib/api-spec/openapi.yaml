@@ -1755,6 +1755,8 @@ components:
               type: integer
             goalDifference:
               type: integer
+        finalExists:
+          type: boolean
 
     # ── Tournament Info ────────────────────────────────────────────────
     TournamentInfo:

@@ -33,4 +33,5 @@ export interface TournamentStats {
   mostCleanSheetsTeam?: TournamentStatsMostCleanSheetsTeam;
   /** @nullable */
   biggestWin?: TournamentStatsBiggestWin;
+  finalExists?: boolean;
 }

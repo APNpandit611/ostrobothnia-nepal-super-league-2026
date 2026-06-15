@@ -46,6 +46,8 @@ router.get("/stats", async (_req, res): Promise<void> => {
   const allMatchesRaw = await db.select().from(matchesTable);
   // Only count matches where both teams are registered
   const allMatches = allMatchesRaw.filter(m => registeredSet.has(m.homeTeamId) && registeredSet.has(m.awayTeamId));
+  const leagueMatches = allMatches.filter(m => m.matchType !== "final");
+  const finalMatches = allMatches.filter(m => m.matchType === "final");
   const finishedMatches = allMatches.filter(m => m.status === "finished");
   const liveMatches = allMatches.filter(m => m.status === "live");
   const allGoals = (await db.select().from(goalsTable)).filter(g => registeredSet.has(g.teamId));
@@ -171,7 +173,7 @@ router.get("/stats", async (_req, res): Promise<void> => {
   }
 
   res.json({
-    totalMatches: allMatches.length,
+    totalMatches: leagueMatches.length,
     matchesPlayed,
     liveMatches: liveMatches.length,
     totalGoals,
@@ -183,6 +185,7 @@ router.get("/stats", async (_req, res): Promise<void> => {
     mostDrawsTeam,
     mostCleanSheetsTeam,
     biggestWin,
+    finalExists: finalMatches.length > 0,
   });
 });
 
