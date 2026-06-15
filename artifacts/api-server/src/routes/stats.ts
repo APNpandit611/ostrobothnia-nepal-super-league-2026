@@ -46,7 +46,7 @@ router.get("/stats", async (_req, res): Promise<void> => {
   const allMatchesRaw = await db.select().from(matchesTable);
   // Only count matches where both teams are registered
   const allMatches = allMatchesRaw.filter(m => registeredSet.has(m.homeTeamId) && registeredSet.has(m.awayTeamId));
-  const finishedMatches = allMatches.filter(m => m.status === "finished" && m.matchType !== "final");
+  const finishedMatches = allMatches.filter(m => m.status === "finished");
   const liveMatches = allMatches.filter(m => m.status === "live");
   const allGoals = (await db.select().from(goalsTable)).filter(g => registeredSet.has(g.teamId));
 

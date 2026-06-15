@@ -1,9 +1,11 @@
 import { useListPublishedAnnouncements, useGetActiveTournament, useListSeasonArchives } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Collapsible, CollapsibleTrigger, CollapsibleContent } from "@/components/ui/collapsible";
 import {
   Megaphone, CalendarDays, Calendar, MapPin, Clock, Users,
   ListChecks, Award, Trophy, Goal, Medal, Table,
+  ChevronDown,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
@@ -77,46 +79,60 @@ export default function Announcements() {
 
       {/* Tournament Rules */}
       {tournament?.rules && tournament.rules.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-              <ListChecks className="h-4 w-4 text-primary" /> Tournament Rules
-            </h2>
-            <div className="flex-1 h-px bg-border" />
+        <Collapsible defaultOpen>
+          <div className="space-y-3">
+            <CollapsibleTrigger className="w-full">
+              <div className="flex items-center gap-2 cursor-pointer group">
+                <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                  <ListChecks className="h-4 w-4 text-primary" /> Tournament Rules
+                </h2>
+                <div className="flex-1 h-px bg-border" />
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <ol className="space-y-2">
+                {tournament.rules.map((rule, i) => (
+                  <li key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/15 text-primary text-xs font-black flex items-center justify-center mt-0.5">
+                      {i + 1}
+                    </span>
+                    <p className="text-sm leading-relaxed">{rule}</p>
+                  </li>
+                ))}
+              </ol>
+            </CollapsibleContent>
           </div>
-          <ol className="space-y-2">
-            {tournament.rules.map((rule, i) => (
-              <li key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/15 text-primary text-xs font-black flex items-center justify-center mt-0.5">
-                  {i + 1}
-                </span>
-                <p className="text-sm leading-relaxed">{rule}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
+        </Collapsible>
       )}
 
       {/* Prizes */}
       {tournament?.prizes && tournament.prizes.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-              <Award className="h-4 w-4 text-yellow-500" /> Prizes
-            </h2>
-            <div className="flex-1 h-px bg-border" />
+        <Collapsible defaultOpen>
+          <div className="space-y-3">
+            <CollapsibleTrigger className="w-full">
+              <div className="flex items-center gap-2 cursor-pointer group">
+                <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                  <Award className="h-4 w-4 text-yellow-500" /> Prizes
+                </h2>
+                <div className="flex-1 h-px bg-border" />
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <ol className="space-y-2">
+                {tournament.prizes.map((prize, i) => (
+                  <li key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-yellow-500/15 text-yellow-500 text-xs font-black flex items-center justify-center mt-0.5">
+                      {i + 1}
+                    </span>
+                    <p className="text-sm leading-relaxed">{prize}</p>
+                  </li>
+                ))}
+              </ol>
+            </CollapsibleContent>
           </div>
-          <ol className="space-y-2">
-            {tournament.prizes.map((prize, i) => (
-              <li key={i} className="flex items-start gap-3 p-3 rounded-lg bg-muted/40 border">
-                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-yellow-500/15 text-yellow-500 text-xs font-black flex items-center justify-center mt-0.5">
-                  {i + 1}
-                </span>
-                <p className="text-sm leading-relaxed">{prize}</p>
-              </li>
-            ))}
-          </ol>
-        </div>
+        </Collapsible>
       )}
 
       {/* Past Season Archives */}
