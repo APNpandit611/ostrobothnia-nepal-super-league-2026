@@ -63,30 +63,30 @@ function MatchResultCard({ match }: { match: Match }) {
       : null;
 
   return (
-    <Card className="overflow-hidden border-0 shadow-sm relative bg-slate-900 text-white">
+    <Card className="overflow-hidden border shadow-sm relative">
       {/* Subtle gradient top bar */}
       <div className="h-1 w-full bg-gradient-to-r from-primary via-emerald-400 to-primary" />
 
       <CardContent className="p-0 relative z-10">
         {/* Meta header */}
-        <div className="flex justify-between items-center p-3 text-xs font-medium border-b border-white/5 bg-white/[0.02]">
+        <div className="flex justify-between items-center p-3 text-xs font-medium border-b bg-muted/50">
           <div className="flex items-center gap-3">
-            <span className="text-slate-400 flex items-center gap-1">
+            <span className="text-muted-foreground flex items-center gap-1">
               <CalendarDays className="h-3.5 w-3.5" />
               {format(new Date(match.scheduledTime), "HH:mm")}
             </span>
-            <span className="text-slate-400 flex items-center gap-1">
+            <span className="text-muted-foreground flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" />
               Pitch {match.pitch}
             </span>
             {duration !== null && (
-              <span className="text-slate-400 flex items-center gap-1">
+              <span className="text-muted-foreground flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" />
                 {duration} min
               </span>
             )}
           </div>
-          <Badge variant="secondary" className="bg-white/10 text-white hover:bg-white/15 border-0 text-[10px] tracking-wider uppercase">
+          <Badge variant="secondary" className="text-[10px] tracking-wider uppercase">
             FT
           </Badge>
         </div>
@@ -95,20 +95,20 @@ function MatchResultCard({ match }: { match: Match }) {
         <div className="px-4 py-5 md:px-6 md:py-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-6">
           {/* Home team */}
           <div className="text-right space-y-2">
-            <h2 className="text-base md:text-xl font-bold truncate text-white">{match.homeTeamName}</h2>
+            <h2 className="text-base md:text-xl font-bold truncate">{match.homeTeamName}</h2>
             <div className="space-y-0.5">
               {homeGoals.map((g, i) => (
-                <div key={i} className="flex items-center justify-end gap-1.5 text-[11px] text-slate-300">
+                <div key={i} className="flex items-center justify-end gap-1.5 text-[11px] text-muted-foreground">
                   <span className="truncate">{g.scorerName || "Unknown"}</span>
-                  <span className="text-slate-500 font-mono">{g.minute}'</span>
-                  <Crosshair className="h-3 w-3 text-emerald-400" />
+                  <span className="text-muted-foreground/70 font-mono">{g.minute}'</span>
+                  <Crosshair className="h-3 w-3 text-primary" />
                 </div>
               ))}
               {ownGoalsForHome.map((g, i) => (
-                <div key={`og-${i}`} className="flex items-center justify-end gap-1.5 text-[11px] text-slate-400">
+                <div key={`og-${i}`} className="flex items-center justify-end gap-1.5 text-[11px] text-muted-foreground">
                   <span className="truncate">(OG) {g.scorerName || "Unknown"}</span>
-                  <span className="text-slate-500 font-mono">{g.minute}'</span>
-                  <Crosshair className="h-3 w-3 text-slate-500" />
+                  <span className="text-muted-foreground/70 font-mono">{g.minute}'</span>
+                  <Crosshair className="h-3 w-3 text-muted-foreground/60" />
                 </div>
               ))}
             </div>
@@ -130,25 +130,25 @@ function MatchResultCard({ match }: { match: Match }) {
           </div>
 
           {/* Score */}
-          <div className="bg-white/5 border border-white/10 px-4 py-2 md:px-6 md:py-3 rounded-lg font-mono text-3xl md:text-4xl font-black tracking-tighter text-white text-center shadow-sm">
+          <div className="bg-background border-2 border-border px-4 py-2 md:px-6 md:py-3 rounded-lg font-mono text-3xl md:text-4xl font-black tracking-tighter text-center shadow-inner">
             {match.homeScore} - {match.awayScore}
           </div>
 
           {/* Away team */}
           <div className="text-left space-y-2">
-            <h2 className="text-base md:text-xl font-bold truncate text-white">{match.awayTeamName}</h2>
+            <h2 className="text-base md:text-xl font-bold truncate">{match.awayTeamName}</h2>
             <div className="space-y-0.5">
               {awayGoals.map((g, i) => (
-                <div key={i} className="flex items-center gap-1.5 text-[11px] text-slate-300">
-                  <Crosshair className="h-3 w-3 text-emerald-400" />
-                  <span className="text-slate-500 font-mono">{g.minute}'</span>
+                <div key={i} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <Crosshair className="h-3 w-3 text-primary" />
+                  <span className="text-muted-foreground/70 font-mono">{g.minute}'</span>
                   <span className="truncate">{g.scorerName || "Unknown"}</span>
                 </div>
               ))}
               {ownGoalsForAway.map((g, i) => (
-                <div key={`og-${i}`} className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                  <Crosshair className="h-3 w-3 text-slate-500" />
-                  <span className="text-slate-500 font-mono">{g.minute}'</span>
+                <div key={`og-${i}`} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                  <Crosshair className="h-3 w-3 text-muted-foreground/60" />
+                  <span className="text-muted-foreground/70 font-mono">{g.minute}'</span>
                   <span className="truncate">(OG) {g.scorerName || "Unknown"}</span>
                 </div>
               ))}
