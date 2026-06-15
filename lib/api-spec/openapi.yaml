@@ -1722,6 +1722,39 @@ components:
               type: string
             wins:
               type: integer
+        mostDrawsTeam:
+          type: ["object", "null"]
+          properties:
+            teamId:
+              type: integer
+            teamName:
+              type: string
+            draws:
+              type: integer
+        mostCleanSheetsTeam:
+          type: ["object", "null"]
+          properties:
+            teamId:
+              type: integer
+            teamName:
+              type: string
+            cleanSheets:
+              type: integer
+        biggestWin:
+          type: ["object", "null"]
+          properties:
+            matchId:
+              type: integer
+            winner:
+              type: string
+            loser:
+              type: string
+            winnerScore:
+              type: integer
+            loserScore:
+              type: integer
+            goalDifference:
+              type: integer
 
     # ── Tournament Info ────────────────────────────────────────────────
     TournamentInfo:

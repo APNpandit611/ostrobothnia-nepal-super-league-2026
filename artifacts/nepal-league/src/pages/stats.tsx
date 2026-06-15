@@ -1,7 +1,7 @@
 import { useGetTournamentStats, useGetTopScorers, useListTeams } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Trophy, Target, Shield, Flame, Activity } from "lucide-react";
+import { Loader2, Trophy, Target, Shield, Flame, Activity, X, Crown, Minimize2 } from "lucide-react";
 import { TeamLogo } from "@/components/team-logo";
 
 export default function Stats() {
@@ -38,7 +38,7 @@ export default function Stats() {
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
@@ -89,6 +89,84 @@ export default function Stats() {
             </div>
             <p className="text-sm mt-2 text-primary font-bold">
               {stats?.mostWinsTeam?.wins || 0} match{stats?.mostWinsTeam?.wins === 1 ? "" : "es"} won
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold uppercase tracking-wider text-sm text-muted-foreground">Most Draws</h3>
+              <X className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="flex items-center gap-2.5">
+              {stats?.mostDrawsTeam && (
+                <TeamLogo size="md" name={stats.mostDrawsTeam.teamName} shortName={findTeam(stats.mostDrawsTeam.teamName)?.shortName} logoUrl={findTeam(stats.mostDrawsTeam.teamName)?.logoUrl} />
+              )}
+              <div className="text-2xl font-black truncate">{stats?.mostDrawsTeam?.teamName || "-"}</div>
+            </div>
+            <p className="text-sm mt-2 text-primary font-bold">
+              {stats?.mostDrawsTeam?.draws || 0} draw{stats?.mostDrawsTeam?.draws === 1 ? "" : "s"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold uppercase tracking-wider text-sm text-muted-foreground">Clean Sheets</h3>
+              <Shield className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="flex items-center gap-2.5">
+              {stats?.mostCleanSheetsTeam && (
+                <TeamLogo size="md" name={stats.mostCleanSheetsTeam.teamName} shortName={findTeam(stats.mostCleanSheetsTeam.teamName)?.shortName} logoUrl={findTeam(stats.mostCleanSheetsTeam.teamName)?.logoUrl} />
+              )}
+              <div className="text-2xl font-black truncate">{stats?.mostCleanSheetsTeam?.teamName || "-"}</div>
+            </div>
+            <p className="text-sm mt-2 text-primary font-bold">
+              {stats?.mostCleanSheetsTeam?.cleanSheets || 0} clean sheet{stats?.mostCleanSheetsTeam?.cleanSheets === 1 ? "" : "s"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold uppercase tracking-wider text-sm text-muted-foreground">Biggest Win</h3>
+              <Crown className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="flex items-center gap-2.5">
+              <div className="text-xl font-black truncate">
+                {(stats?.biggestWin as any)?.winner || "-"}
+              </div>
+            </div>
+            <p className="text-sm mt-2 text-primary font-bold">
+              {(stats?.biggestWin as any)?.winnerScore ?? 0} - {(stats?.biggestWin as any)?.loserScore ?? 0}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              vs {(stats?.biggestWin as any)?.loser || "-"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold uppercase tracking-wider text-sm text-muted-foreground">Most Goals (Single Match)</h3>
+              <Minimize2 className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <div className="flex items-center gap-2.5">
+              <div className="text-xl font-black truncate">
+                {stats?.highestScoringMatch?.homeTeam || "-"} vs {stats?.highestScoringMatch?.awayTeam || "-"}
+              </div>
+            </div>
+            <p className="text-sm mt-2 text-primary font-bold">
+              {stats?.highestScoringMatch?.homeScore ?? 0} - {stats?.highestScoringMatch?.awayScore ?? 0}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {stats?.highestScoringMatch?.totalGoals ?? 0} total goals
             </p>
           </CardContent>
         </Card>

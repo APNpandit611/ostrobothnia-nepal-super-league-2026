@@ -6,7 +6,10 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { TournamentStatsBestDefenseTeam } from './tournamentStatsBestDefenseTeam';
+import type { TournamentStatsBiggestWin } from './tournamentStatsBiggestWin';
 import type { TournamentStatsHighestScoringMatch } from './tournamentStatsHighestScoringMatch';
+import type { TournamentStatsMostCleanSheetsTeam } from './tournamentStatsMostCleanSheetsTeam';
+import type { TournamentStatsMostDrawsTeam } from './tournamentStatsMostDrawsTeam';
 import type { TournamentStatsMostGoalsTeam } from './tournamentStatsMostGoalsTeam';
 import type { TournamentStatsMostWinsTeam } from './tournamentStatsMostWinsTeam';
 
@@ -24,4 +27,10 @@ export interface TournamentStats {
   bestDefenseTeam?: TournamentStatsBestDefenseTeam;
   /** @nullable */
   mostWinsTeam?: TournamentStatsMostWinsTeam;
+  /** @nullable */
+  mostDrawsTeam?: TournamentStatsMostDrawsTeam;
+  /** @nullable */
+  mostCleanSheetsTeam?: TournamentStatsMostCleanSheetsTeam;
+  /** @nullable */
+  biggestWin?: TournamentStatsBiggestWin;
 }

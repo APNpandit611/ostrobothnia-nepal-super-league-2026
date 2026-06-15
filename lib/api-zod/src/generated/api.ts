@@ -755,6 +755,24 @@ export const GetTournamentStatsResponse = zod.object({
   "teamId": zod.number().optional(),
   "teamName": zod.string().optional(),
   "wins": zod.number().optional()
+}).nullish(),
+  "mostDrawsTeam": zod.object({
+  "teamId": zod.number().optional(),
+  "teamName": zod.string().optional(),
+  "draws": zod.number().optional()
+}).nullish(),
+  "mostCleanSheetsTeam": zod.object({
+  "teamId": zod.number().optional(),
+  "teamName": zod.string().optional(),
+  "cleanSheets": zod.number().optional()
+}).nullish(),
+  "biggestWin": zod.object({
+  "matchId": zod.number().optional(),
+  "winner": zod.string().optional(),
+  "loser": zod.string().optional(),
+  "winnerScore": zod.number().optional(),
+  "loserScore": zod.number().optional(),
+  "goalDifference": zod.number().optional()
 }).nullish()
 })
 

@@ -457,6 +457,36 @@ export type TournamentStatsMostWinsTeam = {
   wins?: number;
 } | null;
 
+/**
+ * @nullable
+ */
+export type TournamentStatsMostDrawsTeam = {
+  teamId?: number;
+  teamName?: string;
+  draws?: number;
+} | null;
+
+/**
+ * @nullable
+ */
+export type TournamentStatsMostCleanSheetsTeam = {
+  teamId?: number;
+  teamName?: string;
+  cleanSheets?: number;
+} | null;
+
+/**
+ * @nullable
+ */
+export type TournamentStatsBiggestWin = {
+  matchId?: number;
+  winner?: string;
+  loser?: string;
+  winnerScore?: number;
+  loserScore?: number;
+  goalDifference?: number;
+} | null;
+
 export interface TournamentStats {
   totalMatches: number;
   matchesPlayed: number;
@@ -471,6 +501,12 @@ export interface TournamentStats {
   bestDefenseTeam?: TournamentStatsBestDefenseTeam;
   /** @nullable */
   mostWinsTeam?: TournamentStatsMostWinsTeam;
+  /** @nullable */
+  mostDrawsTeam?: TournamentStatsMostDrawsTeam;
+  /** @nullable */
+  mostCleanSheetsTeam?: TournamentStatsMostCleanSheetsTeam;
+  /** @nullable */
+  biggestWin?: TournamentStatsBiggestWin;
 }
 
 export type TournamentInfoStatus = typeof TournamentInfoStatus[keyof typeof TournamentInfoStatus];

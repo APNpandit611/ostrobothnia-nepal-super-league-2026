@@ -289,7 +289,7 @@ function ArchiveDetailView({ archive }: { archive: any }) {
       </Card>
 
       {/* Stats row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2 rounded-lg bg-primary/10">
@@ -311,6 +311,30 @@ function ArchiveDetailView({ archive }: { archive: any }) {
               <p className="text-xs text-muted-foreground uppercase tracking-wider">Teams</p>
               <p className="font-bold">{standings.length}</p>
               <p className="text-xs text-muted-foreground">{matches.length} matches played</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Goal className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Total Goals</p>
+              <p className="font-bold">{matches.reduce((acc: number, m: any) => acc + (m.homeScore ?? 0) + (m.awayScore ?? 0), 0)}</p>
+              <p className="text-xs text-muted-foreground">Avg {matches.length > 0 ? ((matches.reduce((acc: number, m: any) => acc + (m.homeScore ?? 0) + (m.awayScore ?? 0), 0)) / matches.length).toFixed(1) : "0"} per match</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <Trophy className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Champion</p>
+              <p className="font-bold">{archive.winnerTeamName || "N/A"}</p>
+              <p className="text-xs text-muted-foreground">Final: {archive.finalScore}</p>
             </div>
           </CardContent>
         </Card>
@@ -373,24 +397,69 @@ function ArchiveDetailView({ archive }: { archive: any }) {
           </CardHeader>
           <CardContent className="p-0">
             <div className="divide-y">
-              {matches.map((m, i) => (
-                <div key={i} className="px-4 py-3 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span className="text-xs font-bold text-muted-foreground">#{m.matchNumber}</span>
-                    <div className="min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {m.homeTeam} <span className="font-mono font-bold">{m.homeScore} - {m.awayScore}</span> {m.awayTeam}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {m.goals?.length ?? 0} goals · {m.matchType === "final" ? "Final" : "League"}
-                      </p>
+              {matches.map((m, i) => {
+                const homeGoals = (m.goals ?? []).filter((g: any) => g.team === m.homeTeam && !g.isOwnGoal);
+                const awayGoals = (m.goals ?? []).filter((g: any) => g.team === m.awayTeam && !g.isOwnGoal);
+                const homeOwnGoals = (m.goals ?? []).filter((g: any) => g.team === m.awayTeam && g.isOwnGoal);
+                const awayOwnGoals = (m.goals ?? []).filter((g: any) => g.team === m.homeTeam && g.isOwnGoal);
+                return (
+                  <div key={i} className="px-4 py-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <span className="text-xs font-bold text-muted-foreground">#{m.matchNumber}</span>
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium truncate">
+                            {m.homeTeam} <span className="font-mono font-bold">{m.homeScore} - {m.awayScore}</span> {m.awayTeam}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {m.goals?.length ?? 0} goals · {m.matchType === "final" ? "Final" : "League"}
+                          </p>
+                        </div>
+                      </div>
+                      {m.matchType === "final" && (
+                        <Badge variant="outline" className="border-amber-500 text-amber-500 text-[10px] shrink-0">FINAL</Badge>
+                      )}
                     </div>
+                    {/* Scorers */}
+                    {(homeGoals.length > 0 || awayGoals.length > 0 || homeOwnGoals.length > 0 || awayOwnGoals.length > 0) && (
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-[11px] text-muted-foreground">
+                        <div className="text-right space-y-0.5">
+                          {homeGoals.map((g: any, gi: number) => (
+                            <div key={gi} className="flex items-center justify-end gap-1.5">
+                              <span className="truncate">{g.scorer}</span>
+                              <span className="text-primary"><Goal className="h-2.5 w-2.5" /></span>
+                              {g.minute != null && <span className="text-[10px] opacity-60">{g.minute}'</span>}
+                            </div>
+                          ))}
+                          {homeOwnGoals.map((g: any, gi: number) => (
+                            <div key={`og-${gi}`} className="flex items-center justify-end gap-1.5 opacity-60">
+                              <span className="truncate">(OG) {g.scorer}</span>
+                              <span className="text-muted-foreground"><Goal className="h-2.5 w-2.5" /></span>
+                              {g.minute != null && <span className="text-[10px] opacity-60">{g.minute}'</span>}
+                            </div>
+                          ))}
+                        </div>
+                        <div className="text-left space-y-0.5">
+                          {awayGoals.map((g: any, gi: number) => (
+                            <div key={gi} className="flex items-center gap-1.5">
+                              <span className="text-primary"><Goal className="h-2.5 w-2.5" /></span>
+                              <span className="truncate">{g.scorer}</span>
+                              {g.minute != null && <span className="text-[10px] opacity-60">{g.minute}'</span>}
+                            </div>
+                          ))}
+                          {awayOwnGoals.map((g: any, gi: number) => (
+                            <div key={`og-${gi}`} className="flex items-center gap-1.5 opacity-60">
+                              <span className="text-muted-foreground"><Goal className="h-2.5 w-2.5" /></span>
+                              <span className="truncate">(OG) {g.scorer}</span>
+                              {g.minute != null && <span className="text-[10px] opacity-60">{g.minute}'</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  {m.matchType === "final" && (
-                    <Badge variant="outline" className="border-amber-500 text-amber-500 text-[10px] shrink-0">FINAL</Badge>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </CardContent>
         </Card>
