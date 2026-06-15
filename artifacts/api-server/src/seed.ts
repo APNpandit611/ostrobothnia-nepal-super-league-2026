@@ -1,5 +1,5 @@
-import { db, tournamentsTable, clubSettingsTable } from "@workspace/db";
-import { count } from "drizzle-orm";
+import { db, tournamentsTable, clubSettingsTable, teamsTable } from "@workspace/db";
+import { count, eq } from "drizzle-orm";
 import { logger } from "./lib/logger";
 
 const TOURNAMENT = {
@@ -48,6 +48,15 @@ const CLUB_SETTINGS = {
   website: "https://kokkolasoccerboys.cc",
 };
 
+const KSB_TEAM = {
+  name: "Kokkola Soccer Boys",
+  shortName: "KSB",
+  primaryColor: "#16a34a",
+  logoUrl: "/ksb-logo.png",
+  city: "Kokkola, Finland",
+  squadStatus: "approved" as const,
+};
+
 export async function seed() {
   try {
     // ── Tournament ──────────────────────────────────────────────────────────
@@ -68,6 +77,18 @@ export async function seed() {
     if (Number(csCount) === 0) {
       await db.insert(clubSettingsTable).values(CLUB_SETTINGS);
       logger.info("Seeded club settings");
+    }
+
+    // ── KSB team (tournament organizer) ───────────────────────────────────────
+    // Always ensure KSB exists as the pre-registered organizer team
+    const ksbRows = await db
+      .select()
+      .from(teamsTable)
+      .where(eq(teamsTable.shortName, "KSB"));
+
+    if (ksbRows.length === 0) {
+      await db.insert(teamsTable).values(KSB_TEAM);
+      logger.info("Seeded KSB team");
     }
   } catch (err) {
     logger.error({ err }, "Seed failed — continuing anyway");
