@@ -1,5 +1,5 @@
-import { db, tournamentsTable, teamsTable, clubSettingsTable } from "@workspace/db";
-import { eq, count } from "drizzle-orm";
+import { db, tournamentsTable, clubSettingsTable } from "@workspace/db";
+import { count } from "drizzle-orm";
 import { logger } from "./lib/logger";
 
 const TOURNAMENT = {
@@ -37,14 +37,6 @@ const TOURNAMENT = {
   isActive: true,
 };
 
-const TEAMS = [
-  { name: "Kokkola Soccer Boys",           shortName: "KSB", primaryColor: "#16a34a" },
-  { name: "Jeppis Nepal Klub",             shortName: "JNK", primaryColor: "#2563eb" },
-  { name: "Oulu Nepalese Sports",          shortName: "ONS", primaryColor: "#dc2626" },
-  { name: "Seinajoki International Society", shortName: "SIS", primaryColor: "#7c3aed" },
-  { name: "Vaasan Nepali Ry",              shortName: "VNR", primaryColor: "#ea580c" },
-];
-
 const CLUB_SETTINGS = {
   name: "Kokkola Soccer Boys",
   shortName: "KSB",
@@ -66,16 +58,6 @@ export async function seed() {
     if (Number(tCount) === 0) {
       await db.insert(tournamentsTable).values(TOURNAMENT);
       logger.info("Seeded tournament");
-    }
-
-    // ── Teams ────────────────────────────────────────────────────────────────
-    const [{ n: teamCount }] = await db
-      .select({ n: count() })
-      .from(teamsTable);
-
-    if (Number(teamCount) === 0) {
-      await db.insert(teamsTable).values(TEAMS);
-      logger.info("Seeded 5 teams");
     }
 
     // ── Club settings ────────────────────────────────────────────────────────
