@@ -77,9 +77,13 @@ function PlayerSection({ teamId, teamColor }: { teamId: number; teamColor: strin
 
   const handleAdd = () => {
     if (!newName.trim()) return;
+    if (!newNumber.trim()) {
+      toast({ variant: "destructive", title: "Jersey number is required" });
+      return;
+    }
     addMutation.mutate({
       teamId,
-      data: { name: newName.trim(), number: newNumber ? parseInt(newNumber) : null, position: newPosition || null, email: null, phone: null },
+      data: { name: newName.trim(), number: parseInt(newNumber.trim()), position: newPosition || null, email: null, phone: null },
     });
   };
 
@@ -90,9 +94,13 @@ function PlayerSection({ teamId, teamColor }: { teamId: number; teamColor: strin
 
   const saveEdit = (playerId: number) => {
     if (!editValues.name.trim()) return;
+    if (!editValues.number.trim()) {
+      toast({ variant: "destructive", title: "Jersey number is required" });
+      return;
+    }
     updateMutation.mutate({
       teamId, playerId,
-      data: { name: editValues.name.trim(), number: editValues.number ? parseInt(editValues.number) : null, position: editValues.position || null, email: null, phone: null },
+      data: { name: editValues.name.trim(), number: parseInt(editValues.number.trim()), position: editValues.position || null, email: null, phone: null },
     });
   };
 

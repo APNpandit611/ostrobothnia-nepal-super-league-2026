@@ -128,7 +128,7 @@ router.post("/register/verify-otp", async (req, res): Promise<void> => {
 // Public: register a new team + players in one atomic call (requires a verified OTP)
 const RegisterPlayerInput = z.object({
   name: z.string().min(1).max(100),
-  number: z.union([z.number().int().min(1).max(99), z.null()]).optional(),
+  number: z.number().int().min(1).max(99),
   position: z.string().max(30).optional().nullable(),
   email: z.string().max(320).optional().nullable(),
   phone: z.string().max(30).optional().nullable(),
@@ -145,6 +145,17 @@ const RegisterTeamBody = z.object({
   managerPhone: z.string().max(30).optional().nullable(),
   managerEmail: z.string().max(320).optional().nullable(),
   players: z.array(RegisterPlayerInput).min(1).max(MAX_PLAYERS),
+}).refine((data) => {
+  const positions = data.players.map(p => p.position ?? "Player");
+  const counts = {
+    Manager: positions.filter(p => p === "Manager").length,
+    C: positions.filter(p => p === "C").length,
+    "V.C": positions.filter(p => p === "V.C").length,
+    GK: positions.filter(p => p === "GK").length,
+  };
+  return counts.Manager === 1 && counts.C === 1 && counts["V.C"] === 1 && counts.GK >= 1;
+}, {
+  message: "Squad must have exactly 1 Manager, 1 Captain (C), 1 Vice Captain (V.C), and at least 1 Goalkeeper (GK)",
 });
 
 router.post("/register/team", async (req, res): Promise<void> => {
@@ -194,7 +205,7 @@ router.post("/register/team", async (req, res): Promise<void> => {
     players.map(p => ({
       teamId: team.id,
       name: p.name.trim(),
-      number: p.number ?? null,
+      number: p.number,
       position: p.position ?? null,
       email: p.email ?? null,
       phone: p.phone ?? null,
@@ -220,7 +231,7 @@ const UpdateSquadBody = z.object({
   captainIndex: z.number().int().min(0).optional().nullable(),
   players: z.array(z.object({
     name: z.string().min(1).max(100),
-    number: z.union([z.number().int().min(1).max(99), z.null()]).optional(),
+    number: z.number().int().min(1).max(99),
     position: z.string().max(30).optional().nullable(),
   })).min(1).max(MAX_PLAYERS),
 });
@@ -277,7 +288,7 @@ router.post("/register/update-squad", async (req, res): Promise<void> => {
     players.map((p, i) => ({
       teamId,
       name: p.name.trim(),
-      number: p.number ?? null,
+      number: p.number,
       position: p.position ?? null,
       isCaptain: captainIndex != null ? i === captainIndex : false,
     }))

@@ -16,6 +16,12 @@ import { Link } from "wouter";
 import { format, differenceInDays } from "date-fns";
 
 const POSITIONS = ["GK", "C", "V.C", "Player", "Manager"];
+const POSITION_BADGES: Record<string, string> = {
+  GK: "bg-yellow-500/15 text-yellow-600 border border-yellow-500/30",
+  C: "bg-primary/15 text-primary border border-primary/30",
+  "V.C": "bg-blue-500/15 text-blue-600 border border-blue-500/30",
+  Manager: "bg-purple-500/15 text-purple-600 border border-purple-500/30",
+};
 const MIN_PLAYERS = 7;
 const MAX_PLAYERS = 15;
 const CATEGORIES = ["Open", "U18", "U21", "Veterans", "Mixed", "Other"];
@@ -26,12 +32,46 @@ interface PlayerRow {
   name: string;
   number: string;
   position: string;
-  email: string;
-  phone: string;
 }
 
 function newRow(): PlayerRow {
-  return { id: crypto.randomUUID(), name: "", number: "", position: "", email: "", phone: "" };
+  return { id: crypto.randomUUID(), name: "", number: "", position: "" };
+}
+
+function countPositions(rows: PlayerRow[]) {
+  const positions = rows.map(r => r.position || "Player");
+  return {
+    Manager: positions.filter(p => p === "Manager").length,
+    C: positions.filter(p => p === "C").length,
+    "V.C": positions.filter(p => p === "V.C").length,
+    GK: positions.filter(p => p === "GK").length,
+    Player: positions.filter(p => p === "Player").length,
+  };
+}
+
+function validateSquad(rows: PlayerRow[]): string | null {
+  const counts = countPositions(rows);
+  const validRows = rows.filter(r => r.name.trim());
+  if (validRows.length < MIN_PLAYERS) {
+    return `At least ${MIN_PLAYERS} players required (you have ${validRows.length})`;
+  }
+  if (counts.Manager !== 1) {
+    return `Squad must have exactly 1 Manager (currently ${counts.Manager})`;
+  }
+  if (counts.C !== 1) {
+    return `Squad must have exactly 1 Captain (C) (currently ${counts.C})`;
+  }
+  if (counts["V.C"] !== 1) {
+    return `Squad must have exactly 1 Vice Captain (V.C) (currently ${counts["V.C"]})`;
+  }
+  if (counts.GK < 1) {
+    return `Squad must have at least 1 Goalkeeper (GK) (currently ${counts.GK})`;
+  }
+  const missingNumbers = validRows.filter(r => !r.number.trim());
+  if (missingNumbers.length > 0) {
+    return `All players must have a jersey number (${missingNumbers.length} missing)`;
+  }
+  return null;
 }
 
 function autoShortName(name: string): string {
@@ -104,8 +144,6 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [managerName, setManagerName] = useState("");
-  const [managerPhone, setManagerPhone] = useState("");
-  const [managerEmail, setManagerEmail] = useState("");
 
   const [rows, setRows] = useState<PlayerRow[]>(Array.from({ length: MIN_PLAYERS }, newRow));
   const [submitting, setSubmitting] = useState(false);
@@ -113,12 +151,8 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
   const [createdTeamId, setCreatedTeamId] = useState<number | null>(null);
   const [createdTeamName, setCreatedTeamName] = useState("");
 
-  // Pre-fill manager email from Clerk
+  // Pre-fill manager name from Clerk
   useEffect(() => {
-    if (user && !managerEmail) {
-      const email = user.primaryEmailAddress?.emailAddress ?? "";
-      if (email) setManagerEmail(email);
-    }
     if (user && !managerName) {
       const name = user.fullName ?? "";
       if (name) setManagerName(name);
@@ -150,8 +184,9 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
 
   const handleSubmit = async () => {
     const validRows = rows.filter((r) => r.name.trim());
-    if (validRows.length < MIN_PLAYERS) {
-      toast({ variant: "destructive", title: `At least ${MIN_PLAYERS} players required`, description: `You have ${validRows.length}. Please fill in at least ${MIN_PLAYERS} names.` });
+    const validationError = validateSquad(rows);
+    if (validationError) {
+      toast({ variant: "destructive", title: "Squad validation failed", description: validationError });
       return;
     }
     setSubmitting(true);
@@ -169,14 +204,14 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
           city: teamCity.trim() || null,
           category: category || null,
           managerName: managerName.trim() || null,
-          managerPhone: managerPhone.trim() || null,
-          managerEmail: managerEmail.trim() || null,
+          managerPhone: null,
+          managerEmail: null,
           players: validRows.map(r => ({
             name: r.name.trim(),
-            number: r.number ? parseInt(r.number) : null,
+            number: parseInt(r.number.trim(), 10),
             position: r.position || null,
-            email: r.email.trim() || null,
-            phone: r.phone.trim() || null,
+            email: null,
+            phone: null,
           })),
         }),
       });
@@ -409,21 +444,10 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
               </div>
 
               <div className="space-y-3 pt-1 border-t">
-                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground pt-2">Manager / Contact</p>
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground pt-2">Manager</p>
                 <div className="space-y-1">
                   <Label>Manager Name</Label>
                   <Input placeholder="e.g. Raj Kumar" value={managerName} onChange={(e) => setManagerName(e.target.value)} />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <Label>Manager Phone</Label>
-                    <Input type="tel" placeholder="+358 …" value={managerPhone} onChange={(e) => setManagerPhone(e.target.value)} />
-                  </div>
-                  <div className="space-y-1">
-                    <Label>Manager Email</Label>
-                    <Input type="email" placeholder="manager@email.com" value={managerEmail} onChange={(e) => setManagerEmail(e.target.value)} />
-                    <p className="text-xs text-muted-foreground">Auto-filled from your sign-in</p>
-                  </div>
                 </div>
               </div>
 
@@ -454,7 +478,7 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
                   <span className="flex items-center gap-2"><UserPlus className="h-5 w-5 text-primary" /> Register Players</span>
                   <span className={`text-sm font-semibold tabular-nums ${rows.length >= MAX_PLAYERS ? "text-destructive" : "text-muted-foreground"}`}>{rows.length} / {MAX_PLAYERS}</span>
                 </CardTitle>
-                <CardDescription>Min {MIN_PLAYERS} players required · Max {MAX_PLAYERS} · Manager can also be a player.</CardDescription>
+                <CardDescription>Min {MIN_PLAYERS} players required · Max {MAX_PLAYERS} · Exactly 1 Manager, 1 Captain (C), 1 Vice Captain (V.C), and at least 1 Goalkeeper (GK) required. All players must have a jersey number.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {rows.map((row, idx) => (
@@ -467,16 +491,16 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
                         </Button>
                       )}
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs">Full Name *</Label>
-                      <Input placeholder="e.g. Suman Thapa" value={row.name} onChange={(e) => setRows((r) => r.map((x) => x.id === row.id ? { ...x, name: e.target.value } : x))} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-[1fr_auto_auto] gap-3 items-end">
                       <div className="space-y-1">
-                        <Label className="text-xs">Jersey Number</Label>
-                        <Input type="number" min={1} max={99} placeholder="e.g. 10" value={row.number} onChange={(e) => setRows((r) => r.map((x) => x.id === row.id ? { ...x, number: e.target.value } : x))} />
+                        <Label className="text-xs">Full Name *</Label>
+                        <Input placeholder="e.g. Suman Thapa" value={row.name} onChange={(e) => setRows((r) => r.map((x) => x.id === row.id ? { ...x, name: e.target.value } : x))} />
                       </div>
-                      <div className="space-y-1">
+                      <div className="space-y-1 w-20">
+                        <Label className="text-xs">Number *</Label>
+                        <Input type="number" min={1} max={99} placeholder="#" value={row.number} onChange={(e) => setRows((r) => r.map((x) => x.id === row.id ? { ...x, number: e.target.value } : x))} />
+                      </div>
+                      <div className="space-y-1 w-32">
                         <Label className="text-xs">Role</Label>
                         <Select value={row.position} onValueChange={(v) => setRows((r) => r.map((x) => x.id === row.id ? { ...x, position: v } : x))}>
                           <SelectTrigger><SelectValue placeholder="Select…" /></SelectTrigger>
@@ -484,16 +508,19 @@ function RegistrationForm({ tournamentName, tournamentDate, venue, city, format_
                         </Select>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-1">
-                        <Label className="text-xs">Email</Label>
-                        <Input type="email" placeholder="optional" value={row.email} onChange={(e) => setRows((r) => r.map((x) => x.id === row.id ? { ...x, email: e.target.value } : x))} />
+                    {row.position && row.position !== "Player" && (
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-bold rounded px-1.5 py-0.5 ${POSITION_BADGES[row.position] ?? "bg-muted text-muted-foreground"}`}>
+                          {row.position}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {row.position === "Manager" && "Team manager"}
+                          {row.position === "C" && "Captain"}
+                          {row.position === "V.C" && "Vice Captain"}
+                          {row.position === "GK" && "Goalkeeper"}
+                        </span>
                       </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs">Phone</Label>
-                        <Input type="tel" placeholder="optional" value={row.phone} onChange={(e) => setRows((r) => r.map((x) => x.id === row.id ? { ...x, phone: e.target.value } : x))} />
-                      </div>
-                    </div>
+                    )}
                   </div>
                 ))}
 

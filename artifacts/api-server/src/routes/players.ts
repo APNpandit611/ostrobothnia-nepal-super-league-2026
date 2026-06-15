@@ -9,14 +9,14 @@ const TeamIdParam = z.object({ teamId: z.coerce.number().int().positive() });
 const PlayerIdParam = z.object({ teamId: z.coerce.number().int().positive(), playerId: z.coerce.number().int().positive() });
 const PlayerInput = z.object({
   name: z.string().min(1),
-  number: z.number().int().min(1).max(99).optional().nullable(),
+  number: z.number().int().min(1).max(99),
   position: z.string().optional().nullable(),
   email: z.string().email().optional().nullable(),
   phone: z.string().optional().nullable(),
 });
 const PlayerUpdate = z.object({
   name: z.string().min(1).optional(),
-  number: z.number().int().min(1).max(99).optional().nullable(),
+  number: z.number().int().min(1).max(99).optional(),
   position: z.string().optional().nullable(),
   email: z.string().email().optional().nullable(),
   phone: z.string().optional().nullable(),
@@ -39,7 +39,7 @@ router.post("/teams/:teamId/players", async (req, res): Promise<void> => {
   const [player] = await db.insert(playersTable).values({
     teamId: params.data.teamId,
     name: parsed.data.name,
-    number: parsed.data.number ?? null,
+    number: parsed.data.number,
     position: parsed.data.position ?? null,
     email: parsed.data.email ?? null,
     phone: parsed.data.phone ?? null,
