@@ -19,9 +19,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { PasswordInput } from "@/components/ui/password-input";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Play, Square, RotateCcw, Target, AlertTriangle, Clock, Lock } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -53,6 +57,11 @@ export default function AdminMatchDetail() {
   // Kickoff time editor state
   const [kickoffTime, setKickoffTime] = useState("");
   const [showTimeEditor, setShowTimeEditor] = useState(false);
+
+  // Reset password dialog state
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [resetPassword, setResetPassword] = useState("");
+  const [resetPasswordError, setResetPasswordError] = useState(false);
 
   useEffect(() => {
     if (match?.scheduledTime) {
@@ -102,6 +111,18 @@ export default function AdminMatchDetail() {
       onSuccess: () => {
         toast({ title: "Match Reset to Upcoming" });
         invalidateQueries();
+        setResetDialogOpen(false);
+        setResetPassword("");
+        setResetPasswordError(false);
+      },
+      onError: (err: unknown) => {
+        const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "";
+        if (msg.toLowerCase().includes("password") || (err as { response?: { status?: number } })?.response?.status === 403) {
+          setResetPasswordError(true);
+          toast({ variant: "destructive", title: "Incorrect password" });
+        } else {
+          toast({ variant: "destructive", title: "Failed to reset match", description: msg || "Unknown error" });
+        }
       }
     }
   });
@@ -260,7 +281,7 @@ export default function AdminMatchDetail() {
           </Button>
         )}
         {(match.status === 'live' || match.status === 'finished') && (
-          <Button size="lg" variant="outline" onClick={() => resetMutation.mutate({ id: matchId })} disabled={resetMutation.isPending}>
+          <Button size="lg" variant="outline" onClick={() => { setResetPassword(""); setResetPasswordError(false); setResetDialogOpen(true); }} disabled={resetMutation.isPending}>
             <RotateCcw className="mr-2 h-5 w-5" /> Reset to Upcoming
           </Button>
         )}
@@ -440,6 +461,58 @@ export default function AdminMatchDetail() {
           )}
         </CardContent>
       </Card>
+
+      {/* Reset Password Dialog */}
+      <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <RotateCcw className="h-5 w-5 text-primary" /> Reset Match to Upcoming
+            </DialogTitle>
+            <DialogDescription>
+              This will permanently delete all goals, cards, and events for this match. The match score will be reset to 0-0. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Label htmlFor="reset-password" className="flex items-center gap-2">
+              <Lock className="h-4 w-4" /> Enter admin password to confirm
+            </Label>
+            <PasswordInput
+              id="reset-password"
+              placeholder="Admin password"
+              value={resetPassword}
+              onChange={(e) => { setResetPassword(e.target.value); setResetPasswordError(false); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  if (!resetPassword.trim()) { setResetPasswordError(true); return; }
+                  setResetPasswordError(false);
+                  resetMutation.mutate({ id: matchId, data: { password: resetPassword } });
+                }
+              }}
+              className={resetPasswordError ? "border-destructive focus-visible:ring-destructive" : ""}
+              autoFocus
+            />
+            {resetPasswordError && (
+              <p className="text-sm text-destructive">Incorrect password. Please try again.</p>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setResetDialogOpen(false)} disabled={resetMutation.isPending}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (!resetPassword.trim()) { setResetPasswordError(true); return; }
+                setResetPasswordError(false);
+                resetMutation.mutate({ id: matchId, data: { password: resetPassword } });
+              }}
+              disabled={resetMutation.isPending || !resetPassword.trim()}
+            >
+              {resetMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Reset Match"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
