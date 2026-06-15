@@ -180,7 +180,7 @@ function MatchResultCard({ match }: { match: Match }) {
             )}
           </div>
           <Badge variant="secondary" className="text-[10px] tracking-wider uppercase">
-            FT
+            Full Time
           </Badge>
         </div>
 

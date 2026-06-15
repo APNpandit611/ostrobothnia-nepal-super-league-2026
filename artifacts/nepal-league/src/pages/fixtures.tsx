@@ -55,7 +55,7 @@ function MatchCard({ match, large = false }: { match: any; large?: boolean }) {
             variant={match.status === "live" ? "default" : match.status === "finished" ? "secondary" : "outline"}
             className={match.status === "live" ? "animate-pulse" : ""}
           >
-            {match.status === "finished" ? "FT" : match.status.toUpperCase()}
+            {match.status === "finished" ? "Full Time" : match.status.toUpperCase()}
           </Badge>
         </div>
         <div className="p-4 grid grid-cols-3 items-center gap-4">

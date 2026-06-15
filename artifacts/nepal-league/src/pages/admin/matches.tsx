@@ -19,7 +19,7 @@ function StatusBadge({ status }: { status: string }) {
     );
   }
   if (status === "finished") {
-    return <Badge variant="secondary">FT</Badge>;
+    return <Badge variant="secondary">Full Time</Badge>;
   }
   return <Badge variant="outline">UPCOMING</Badge>;
 }
