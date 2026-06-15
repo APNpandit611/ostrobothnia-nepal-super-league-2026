@@ -1,14 +1,25 @@
-import { useGetStandings, useListTeams } from "@workspace/api-client-react";
+import { useGetStandings, useListTeams, useListMatches } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, Trophy } from "lucide-react";
+import { Loader2, Trophy, Crown, CalendarDays } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { TeamLogo } from "@/components/team-logo";
+import { format } from "date-fns";
 
 export default function Standings() {
   const { data: standings, isLoading } = useGetStandings();
   const { data: teams } = useListTeams();
+  const { data: matches } = useListMatches();
   const logoById = new Map((teams ?? []).map((t) => [t.id, t]));
+
+  const finalMatch = (matches ?? []).find((m) => m.matchType === "final");
+  const winner = finalMatch?.status === "finished"
+    ? (finalMatch.homeScore ?? 0) > (finalMatch.awayScore ?? 0)
+      ? logoById.get(finalMatch.homeTeamId)
+      : (finalMatch.homeScore ?? 0) < (finalMatch.awayScore ?? 0)
+        ? logoById.get(finalMatch.awayTeamId)
+        : null
+    : null;
 
   if (isLoading) {
     return (
@@ -23,6 +34,43 @@ export default function Standings() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-black tracking-tight uppercase italic">Standings</h1>
       </div>
+
+      {/* Final preview card */}
+      {finalMatch && (
+        <Card className={`overflow-hidden border-2 shadow-lg ${finalMatch.status === "finished" ? "border-amber-500/50 shadow-amber-500/10" : "border-amber-500/30"}`}>
+          <CardContent className="p-0">
+            <div className={`p-2 text-center text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2 text-white ${finalMatch.status === "finished" ? "bg-amber-500" : "bg-amber-500/80"}`}>
+              <Crown className="h-4 w-4" /> Championship Final
+            </div>
+            <div className="p-5 md:p-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4 md:gap-6">
+              <div className="flex items-center justify-end gap-2.5 md:gap-3 min-w-0">
+                <TeamLogo size="md" name={finalMatch.homeTeamName} shortName={finalMatch.homeTeamShortName} logoUrl={finalMatch.homeTeamLogo} />
+                <h2 className="text-lg md:text-xl font-black truncate min-w-0">{finalMatch.homeTeamName}</h2>
+              </div>
+              <div className="text-center space-y-1">
+                <div className="bg-background border-2 border-border shadow-inner px-4 py-2 rounded-xl font-mono text-3xl font-black tracking-tighter">
+                  {finalMatch.homeScore} – {finalMatch.awayScore}
+                </div>
+                <div className="text-xs text-muted-foreground flex items-center justify-center gap-1">
+                  <CalendarDays className="h-3 w-3" />
+                  {format(new Date(finalMatch.scheduledTime), "HH:mm")}
+                </div>
+              </div>
+              <div className="flex items-center justify-start gap-2.5 md:gap-3 min-w-0">
+                <h2 className="text-lg md:text-xl font-black truncate min-w-0">{finalMatch.awayTeamName}</h2>
+                <TeamLogo size="md" name={finalMatch.awayTeamName} shortName={finalMatch.awayTeamShortName} logoUrl={finalMatch.awayTeamLogo} />
+              </div>
+            </div>
+            {winner && (
+              <div className="px-6 pb-4 text-center">
+                <div className="inline-flex items-center gap-2 text-amber-600 font-bold text-sm">
+                  <Trophy className="h-4 w-4" /> Winner: {winner.name}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card className="overflow-hidden">
         <CardContent className="p-0 overflow-x-auto">

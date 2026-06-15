@@ -9,10 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import {
   CalendarDays, MapPin, Clock, ArrowRight, Users,
   Trophy, Facebook, Mail, Phone, UserPlus, Activity,
+  Crown,
 } from "lucide-react";
 import { Link } from "wouter";
 import { differenceInDays, differenceInHours, differenceInMinutes, format } from "date-fns";
 import { QRCodeSVG } from "qrcode.react";
+import { TeamLogo } from "@/components/team-logo";
 
 const APP_URL = "http://kokkolasoccerboys.cc/";
 
@@ -51,10 +53,21 @@ export default function Home() {
   const { data: allTeams } = useListTeams();
   const { data: standings } = useGetStandings();
   const { data: liveMatches } = useListMatches({ status: "live" });
+  const { data: allMatches } = useListMatches();
   const { data: tournament } = useGetActiveTournament();
 
   const registeredIds = new Set((standings ?? []).map((s) => s.teamId));
   const registeredTeams = (allTeams ?? []).filter((t) => registeredIds.has(t.id));
+
+  // Champion banner: final match finished → show winner
+  const finalMatch = (allMatches ?? []).find((m) => m.matchType === "final" && m.status === "finished");
+  const winnerTeam = finalMatch
+    ? (finalMatch.homeScore ?? 0) > (finalMatch.awayScore ?? 0)
+      ? allTeams?.find((t) => t.id === finalMatch.homeTeamId)
+      : (finalMatch.homeScore ?? 0) < (finalMatch.awayScore ?? 0)
+        ? allTeams?.find((t) => t.id === finalMatch.awayTeamId)
+        : null
+    : null;
 
   const tournamentDate = tournament
     ? parseTournamentDate(tournament.date, tournament.kickoffTime)
@@ -170,6 +183,48 @@ export default function Home() {
           )}
         </div>
       </div>
+
+      {/* Champion Banner */}
+      {winnerTeam && (
+        <div className="relative overflow-hidden rounded-2xl border-2 border-amber-500/40 bg-amber-500/5 shadow-xl shadow-amber-500/10">
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/15 via-transparent to-amber-500/5 pointer-events-none" />
+          <div className="absolute -top-16 -right-16 h-64 w-64 rounded-full bg-amber-500/5 pointer-events-none" />
+          <div className="absolute -bottom-12 -left-12 h-48 w-48 rounded-full bg-amber-500/5 pointer-events-none" />
+          <div className="relative p-6 md:p-12 flex flex-col items-center text-center space-y-5">
+            <div className="flex items-center gap-2 text-amber-600 font-black uppercase tracking-widest text-sm">
+              <Crown className="h-5 w-5" />
+              Championship Winner
+              <Crown className="h-5 w-5" />
+            </div>
+            <div className="flex items-center gap-4 md:gap-6">
+              <TeamLogo
+                size="lg"
+                name={winnerTeam.name}
+                shortName={winnerTeam.shortName}
+                logoUrl={winnerTeam.logoUrl}
+              />
+              <div className="text-left">
+                <h2 className="text-4xl md:text-6xl font-black uppercase italic tracking-tight leading-none">
+                  {winnerTeam.name}
+                </h2>
+                <p className="text-amber-600 font-black uppercase tracking-widest text-sm mt-2">
+                  {winnerTeam.shortName} — ONSL 2026 Champions
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-wrap justify-center gap-3 text-sm font-medium text-muted-foreground">
+              <span className="flex items-center gap-2 bg-background border px-3 py-1.5 rounded-full">
+                <Trophy className="h-4 w-4 text-amber-500" />
+                Champion of Ostrobothnia Nepal Super League 2026
+              </span>
+            </div>
+            <p className="text-muted-foreground max-w-md text-sm">
+              Congratulations to {winnerTeam.name} for winning the championship final!
+              A brilliant display of football throughout the tournament.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Register CTA */}
       <Card className="border-primary/30 bg-gradient-to-br from-primary/10 to-transparent overflow-hidden relative">

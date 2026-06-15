@@ -69,7 +69,13 @@ export default function Live() {
     );
   }
 
-  const liveMatches = matches?.filter(m => m.status === 'live') || [];
+  const liveMatches = (matches?.filter(m => m.status === 'live') || [])
+    .slice()
+    .sort((a, b) => {
+      if (a.matchType === "final" && b.matchType !== "final") return -1;
+      if (b.matchType === "final" && a.matchType !== "final") return 1;
+      return a.matchNumber - b.matchNumber;
+    });
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">

@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, MapPin, CalendarDays, ClipboardList, Clock, ArrowDownWideNarrow } from "lucide-react";
+import { Loader2, MapPin, CalendarDays, ClipboardList, Clock, ArrowDownWideNarrow, Crown } from "lucide-react";
 import { format, differenceInMinutes } from "date-fns";
 import { TeamLogo } from "@/components/team-logo";
 
@@ -80,6 +80,9 @@ export default function Results() {
   const finishedMatches = (matches?.filter(m => m.status === 'finished') || [])
     .slice()
     .sort((a, b) => {
+      // Finals always at top
+      if (a.matchType === "final" && b.matchType !== "final") return -1;
+      if (b.matchType === "final" && a.matchType !== "final") return 1;
       const diff =
         sortOrder === "latest"
           ? matchTimestamp(b) - matchTimestamp(a)
@@ -150,8 +153,10 @@ function MatchResultCard({ match }: { match: Match }) {
   const homeColor = match.homeTeamColor ?? "#16a34a";
   const awayColor = match.awayTeamColor ?? "#16a34a";
 
+  const isFinal = match.matchType === "final";
+
   return (
-    <Card className="overflow-hidden border shadow-sm relative">
+    <Card className={`overflow-hidden border shadow-sm relative ${isFinal ? "border-2 border-amber-500/50 shadow-md shadow-amber-500/10" : ""}`}>
       {/* Split top bar — left half home team color, right half away team color */}
       <div
         className="h-1.5 w-full"
@@ -162,7 +167,7 @@ function MatchResultCard({ match }: { match: Match }) {
 
       <CardContent className="p-0 relative z-10">
         {/* Meta header */}
-        <div className="flex justify-between items-center p-3 text-xs font-medium border-b bg-muted/50">
+        <div className={`flex justify-between items-center p-3 text-xs font-medium border-b ${isFinal ? "bg-amber-500/10" : "bg-muted/50"}`}>
           <div className="flex items-center gap-3">
             <span className="text-muted-foreground flex items-center gap-1">
               <CalendarDays className="h-3.5 w-3.5" />
@@ -180,9 +185,9 @@ function MatchResultCard({ match }: { match: Match }) {
             )}
           </div>
           <div className="flex items-center gap-1.5">
-            {match.matchType === "final" && (
-              <Badge variant="outline" className="border-amber-500 text-amber-500 font-bold text-[10px] uppercase">
-                FINAL
+            {isFinal && (
+              <Badge variant="outline" className="border-amber-500 text-amber-500 font-bold text-[10px] uppercase bg-amber-500/10">
+                <Crown className="h-3 w-3 mr-1" /> FINAL
               </Badge>
             )}
             <Badge variant="secondary" className="text-[10px] tracking-wider uppercase">

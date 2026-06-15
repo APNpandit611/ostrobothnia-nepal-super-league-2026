@@ -56,13 +56,10 @@ export default function AdminDashboard() {
   const [resetPassword, setResetPassword] = useState("");
   const [resetPasswordError, setResetPasswordError] = useState(false);
 
-  const [generateDialogOpen, setGenerateDialogOpen] = useState(false);
-  const [generatePassword, setGeneratePassword] = useState("");
-  const [generatePasswordError, setGeneratePasswordError] = useState(false);
-
-  const [finalDialogOpen, setFinalDialogOpen] = useState(false);
-  const [finalPassword, setFinalPassword] = useState("");
-  const [finalPasswordError, setFinalPasswordError] = useState(false);
+  const [scheduleMode, setScheduleMode] = useState<"fixtures" | "final">("fixtures");
+  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+  const [schedulePassword, setSchedulePassword] = useState("");
+  const [schedulePasswordError, setSchedulePasswordError] = useState(false);
 
   const { data: stats } = useGetTournamentStats();
   const { data: liveMatches } = useListMatches({ status: 'live' });
@@ -83,14 +80,14 @@ export default function AdminDashboard() {
         toast({ title: "Fixtures generated!", description: "The match schedule is ready." });
         queryClient.invalidateQueries({ queryKey: getListMatchesQueryKey() });
         queryClient.invalidateQueries({ queryKey: getGetTournamentStatsQueryKey() });
-        setGenerateDialogOpen(false);
-        setGeneratePassword("");
-        setGeneratePasswordError(false);
+        setScheduleDialogOpen(false);
+        setSchedulePassword("");
+        setSchedulePasswordError(false);
       },
       onError: (err: unknown) => {
         const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "";
         if (msg.toLowerCase().includes("password") || (err as { response?: { status?: number } })?.response?.status === 403) {
-          setGeneratePasswordError(true);
+          setSchedulePasswordError(true);
           toast({ variant: "destructive", title: "Incorrect password" });
         } else {
           toast({ variant: "destructive", title: "Failed to generate fixtures", description: msg || "Unknown error" });
@@ -99,10 +96,42 @@ export default function AdminDashboard() {
     }
   });
 
-  const handleGenerateConfirm = () => {
-    if (!generatePassword.trim()) { setGeneratePasswordError(true); return; }
-    setGeneratePasswordError(false);
-    generateFixturesMutation.mutate({ data: { password: generatePassword } });
+  const createFinalMatchMutation = useCreateFinalMatch({
+    mutation: {
+      onSuccess: (data) => {
+        const match = data.match;
+        const home = match?.homeTeamName ?? "Team 1";
+        const away = match?.awayTeamName ?? "Team 2";
+        toast({
+          title: "Championship Final created!",
+          description: `${home} vs ${away} — scheduled as Match #${match?.matchNumber ?? ""}`,
+        });
+        queryClient.invalidateQueries({ queryKey: getListMatchesQueryKey() });
+        queryClient.invalidateQueries({ queryKey: getGetTournamentStatsQueryKey() });
+        setScheduleDialogOpen(false);
+        setSchedulePassword("");
+        setSchedulePasswordError(false);
+      },
+      onError: (err: unknown) => {
+        const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "";
+        if (msg.toLowerCase().includes("password") || (err as { response?: { status?: number } })?.response?.status === 403) {
+          setSchedulePasswordError(true);
+          toast({ variant: "destructive", title: "Incorrect password" });
+        } else {
+          toast({ variant: "destructive", title: "Failed to create final", description: msg || "Unknown error" });
+        }
+      },
+    }
+  });
+
+  const handleScheduleConfirm = () => {
+    if (!schedulePassword.trim()) { setSchedulePasswordError(true); return; }
+    setSchedulePasswordError(false);
+    if (scheduleMode === "fixtures") {
+      generateFixturesMutation.mutate({ data: { password: schedulePassword } });
+    } else {
+      createFinalMatchMutation.mutate({ data: { password: schedulePassword } });
+    }
   };
 
   const resetTournamentMutation = useResetTournament({
@@ -127,37 +156,9 @@ export default function AdminDashboard() {
     resetTournamentMutation.mutate({ data: { password: resetPassword } });
   };
 
-  const createFinalMatchMutation = useCreateFinalMatch({
-    mutation: {
-      onSuccess: (data) => {
-        const match = data.match;
-        toast({
-          title: "Final match created!",
-          description: `${match?.homeTeamName ?? "Team 1"} vs ${match?.awayTeamName ?? "Team 2"} — Match #${match?.matchNumber ?? ""}`,
-        });
-        queryClient.invalidateQueries({ queryKey: getListMatchesQueryKey() });
-        queryClient.invalidateQueries({ queryKey: getGetTournamentStatsQueryKey() });
-        setFinalDialogOpen(false);
-        setFinalPassword("");
-        setFinalPasswordError(false);
-      },
-      onError: (err: unknown) => {
-        const msg = (err as { response?: { data?: { error?: string } } })?.response?.data?.error ?? "";
-        if (msg.toLowerCase().includes("password") || (err as { response?: { status?: number } })?.response?.status === 403) {
-          setFinalPasswordError(true);
-          toast({ variant: "destructive", title: "Incorrect password" });
-        } else {
-          toast({ variant: "destructive", title: "Failed to create final", description: msg || "Unknown error" });
-        }
-      },
-    }
-  });
-
-  const handleFinalConfirm = () => {
-    if (!finalPassword.trim()) { setFinalPasswordError(true); return; }
-    setFinalPasswordError(false);
-    createFinalMatchMutation.mutate({ data: { password: finalPassword } });
-  };
+  const scheduleDialogPending =
+    (scheduleMode === "fixtures" && generateFixturesMutation.isPending) ||
+    (scheduleMode === "final" && createFinalMatchMutation.isPending);
 
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -248,53 +249,48 @@ export default function AdminDashboard() {
             <CardContent className="space-y-4">
               <div className="p-4 border rounded-xl flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <h4 className="font-bold">Generate Fixtures</h4>
-                  <p className="text-sm text-muted-foreground">Creates the 10-match schedule</p>
+                  <h4 className="font-bold">Generate Tournament Schedule</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {(stats?.totalMatches ?? 0) === 0
+                      ? "Create the 10-match round-robin schedule"
+                      : "Championship final from top 2 standings"}
+                  </p>
                   <div className="flex items-center gap-1.5 mt-1.5">
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      (teams?.length ?? 0) >= 2
-                        ? "bg-primary/10 text-primary"
-                        : "bg-destructive/10 text-destructive"
-                    }`}>
-                      {teams?.length ?? 0} team{(teams?.length ?? 0) !== 1 ? "s" : ""} registered
-                    </span>
-                    {(teams?.length ?? 0) < 2 && (
-                      <span className="text-xs text-destructive">— need at least 2</span>
+                    {(stats?.totalMatches ?? 0) === 0 ? (
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        (teams?.length ?? 0) >= 2
+                          ? "bg-primary/10 text-primary"
+                          : "bg-destructive/10 text-destructive"
+                      }`}>
+                        {teams?.length ?? 0} team{(teams?.length ?? 0) !== 1 ? "s" : ""} registered
+                      </span>
+                    ) : (
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        (stats?.matchesPlayed ?? 0) >= (stats?.totalMatches ?? 1)
+                          ? "bg-amber-500/10 text-amber-500"
+                          : "bg-muted text-muted-foreground"
+                      }`}>
+                        {stats?.matchesPlayed ?? 0} / {stats?.totalMatches ?? 0} league matches finished
+                      </span>
                     )}
                   </div>
                 </div>
                 <Button
-                  onClick={() => { setGeneratePassword(""); setGeneratePasswordError(false); setGenerateDialogOpen(true); }}
-                  disabled={(stats?.totalMatches || 0) > 0}
+                  onClick={() => {
+                    const mode = (stats?.totalMatches ?? 0) === 0 ? "fixtures" : "final";
+                    setScheduleMode(mode);
+                    setSchedulePassword("");
+                    setSchedulePasswordError(false);
+                    setScheduleDialogOpen(true);
+                  }}
+                  disabled={
+                    (stats?.totalMatches ?? 0) === 0
+                      ? (teams?.length ?? 0) < 2
+                      : (stats?.matchesPlayed ?? 0) < (stats?.totalMatches ?? 1)
+                  }
                   className="flex-shrink-0"
                 >
-                  Generate
-                </Button>
-              </div>
-
-              <div className="p-4 border border-amber-500/30 bg-amber-500/5 rounded-xl flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <h4 className="font-bold text-amber-500 flex items-center gap-2">
-                    <Crown className="h-4 w-4" /> Create Final Match
-                  </h4>
-                  <p className="text-sm text-muted-foreground">Top 2 teams from standings → championship final</p>
-                  <div className="flex items-center gap-1.5 mt-1.5">
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                      (stats?.matchesPlayed ?? 0) >= (stats?.totalMatches ?? 1)
-                        ? "bg-amber-500/10 text-amber-500"
-                        : "bg-muted text-muted-foreground"
-                    }`}>
-                      {stats?.matchesPlayed ?? 0} / {stats?.totalMatches ?? 0} league matches finished
-                    </span>
-                  </div>
-                </div>
-                <Button
-                  variant="outline"
-                  className="border-amber-500/30 text-amber-500 hover:bg-amber-500/10 hover:text-amber-500 flex-shrink-0"
-                  onClick={() => { setFinalPassword(""); setFinalPasswordError(false); setFinalDialogOpen(true); }}
-                  disabled={(stats?.matchesPlayed ?? 0) < (stats?.totalMatches ?? 1)}
-                >
-                  Create Final
+                  {(stats?.totalMatches ?? 0) === 0 ? "Generate" : "Create Final"}
                 </Button>
               </div>
 
@@ -436,110 +432,81 @@ export default function AdminDashboard() {
         </div>
       </section>
 
-      {/* Generate Fixtures Dialog */}
-      <Dialog open={generateDialogOpen} onOpenChange={(open) => { if (!generateFixturesMutation.isPending) setGenerateDialogOpen(open); }}>
+      {/* Unified Schedule Dialog */}
+      <Dialog open={scheduleDialogOpen} onOpenChange={(open) => { if (!scheduleDialogPending) setScheduleDialogOpen(open); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-primary" /> Generate Fixtures
+            <DialogTitle className={scheduleMode === "final" ? "flex items-center gap-2 text-amber-500" : "flex items-center gap-2"}>
+              {scheduleMode === "final" ? (
+                <>
+                  <Crown className="h-5 w-5" /> Create Championship Final
+                </>
+              ) : (
+                <>
+                  <CalendarDays className="h-5 w-5 text-primary" /> Generate Fixtures
+                </>
+              )}
             </DialogTitle>
             <DialogDescription>
-              This will create the 10-match round-robin schedule. Any existing fixtures and match data will be cleared first.
+              {scheduleMode === "final"
+                ? "This will create the championship final between the top 2 teams from the league standings. The final will be scheduled after the last league match."
+                : "This will create the 10-match round-robin schedule. Any existing fixtures and match data will be cleared first."}
             </DialogDescription>
           </DialogHeader>
 
-          {/* Team count status */}
-          <div className={`rounded-xl border p-4 space-y-1 ${(teams?.length ?? 0) < 2 ? "border-destructive/40 bg-destructive/5" : "border-primary/30 bg-primary/5"}`}>
-            <div className="flex items-center gap-2">
-              <Users className={`h-4 w-4 ${(teams?.length ?? 0) < 2 ? "text-destructive" : "text-primary"}`} />
-              <span className="font-semibold text-sm">
-                {teams?.length ?? 0} team{(teams?.length ?? 0) !== 1 ? "s" : ""} currently registered
-              </span>
-            </div>
-            {(teams?.length ?? 0) < 2 ? (
-              <p className="text-xs text-destructive pl-6">You need at least 2 teams registered before generating fixtures. Go to <strong>Teams</strong> and add teams first.</p>
-            ) : (
-              <div className="pl-6 flex flex-col gap-0.5">
-                {teams?.map(t => (
-                  <span key={t.id} className="text-xs text-muted-foreground flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ backgroundColor: t.primaryColor ?? "#888" }} />
-                    {t.name}
-                  </span>
-                ))}
+          {scheduleMode === "fixtures" && (
+            <div className={`rounded-xl border p-4 space-y-1 ${(teams?.length ?? 0) < 2 ? "border-destructive/40 bg-destructive/5" : "border-primary/30 bg-primary/5"}`}>
+              <div className="flex items-center gap-2">
+                <Users className={`h-4 w-4 ${(teams?.length ?? 0) < 2 ? "text-destructive" : "text-primary"}`} />
+                <span className="font-semibold text-sm">
+                  {teams?.length ?? 0} team{(teams?.length ?? 0) !== 1 ? "s" : ""} currently registered
+                </span>
               </div>
-            )}
-          </div>
+              {(teams?.length ?? 0) < 2 ? (
+                <p className="text-xs text-destructive pl-6">You need at least 2 teams registered before generating fixtures. Go to <strong>Teams</strong> and add teams first.</p>
+              ) : (
+                <div className="pl-6 flex flex-col gap-0.5">
+                  {teams?.map(t => (
+                    <span key={t.id} className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full inline-block flex-shrink-0" style={{ backgroundColor: t.primaryColor ?? "#888" }} />
+                      {t.name}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
-          <div className="space-y-3 py-1">
-            <Label htmlFor="generate-password" className="flex items-center gap-2">
-              <Lock className="h-4 w-4" /> Enter admin password to confirm
-            </Label>
-            <PasswordInput
-              id="generate-password"
-              placeholder="Admin password"
-              value={generatePassword}
-              onChange={(e) => { setGeneratePassword(e.target.value); setGeneratePasswordError(false); }}
-              onKeyDown={(e) => { if (e.key === "Enter" && (teams?.length ?? 0) >= 2) handleGenerateConfirm(); }}
-              className={generatePasswordError ? "border-destructive focus-visible:ring-destructive" : ""}
-              autoFocus
-            />
-            {generatePasswordError && (
-              <p className="text-sm text-destructive">Incorrect password. Please try again.</p>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setGenerateDialogOpen(false)} disabled={generateFixturesMutation.isPending}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleGenerateConfirm}
-              disabled={generateFixturesMutation.isPending || !generatePassword.trim() || (teams?.length ?? 0) < 2}
-            >
-              {generateFixturesMutation.isPending ? "Generating..." : "Generate Fixtures"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Create Final Dialog */}
-      <Dialog open={finalDialogOpen} onOpenChange={(open) => { if (!createFinalMatchMutation.isPending) setFinalDialogOpen(open); }}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-amber-500">
-              <Crown className="h-5 w-5" /> Create Championship Final
-            </DialogTitle>
-            <DialogDescription>
-              This will create the final match between the top 2 teams from the league standings. The final match will be scheduled after the last league match.
-            </DialogDescription>
-          </DialogHeader>
           <div className="space-y-3 py-2">
-            <Label htmlFor="final-password" className="flex items-center gap-2">
+            <Label htmlFor="schedule-password" className="flex items-center gap-2">
               <Lock className="h-4 w-4" /> Enter admin password to confirm
             </Label>
             <PasswordInput
-              id="final-password"
+              id="schedule-password"
               placeholder="Admin password"
-              value={finalPassword}
-              onChange={(e) => { setFinalPassword(e.target.value); setFinalPasswordError(false); }}
-              onKeyDown={(e) => { if (e.key === "Enter") handleFinalConfirm(); }}
-              className={finalPasswordError ? "border-destructive focus-visible:ring-destructive" : ""}
+              value={schedulePassword}
+              onChange={(e) => { setSchedulePassword(e.target.value); setSchedulePasswordError(false); }}
+              onKeyDown={(e) => { if (e.key === "Enter") handleScheduleConfirm(); }}
+              className={schedulePasswordError ? "border-destructive focus-visible:ring-destructive" : ""}
               autoFocus
             />
-            {finalPasswordError && (
+            {schedulePasswordError && (
               <p className="text-sm text-destructive">Incorrect password. Please try again.</p>
             )}
           </div>
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setFinalDialogOpen(false)} disabled={createFinalMatchMutation.isPending}>
+            <Button variant="outline" onClick={() => setScheduleDialogOpen(false)} disabled={scheduleDialogPending}>
               Cancel
             </Button>
             <Button
-              className="bg-amber-500 hover:bg-amber-600 text-white"
-              onClick={handleFinalConfirm}
-              disabled={createFinalMatchMutation.isPending || !finalPassword.trim()}
+              className={scheduleMode === "final" ? "bg-amber-500 hover:bg-amber-600 text-white" : ""}
+              onClick={handleScheduleConfirm}
+              disabled={scheduleDialogPending || !schedulePassword.trim()}
             >
-              {createFinalMatchMutation.isPending ? "Creating..." : "Create Final Match"}
+              {scheduleDialogPending
+                ? (scheduleMode === "final" ? "Creating..." : "Generating...")
+                : (scheduleMode === "final" ? "Create Final Match" : "Generate Fixtures")}
             </Button>
           </DialogFooter>
         </DialogContent>

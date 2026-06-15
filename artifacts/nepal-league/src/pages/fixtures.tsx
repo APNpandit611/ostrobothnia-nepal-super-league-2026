@@ -6,18 +6,21 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import {
-  CalendarDays, Clock, MapPin, Loader2,
+  CalendarDays, Clock, MapPin, Loader2, Crown,
 } from "lucide-react";
 import { TeamLogo } from "@/components/team-logo";
 // ─── Shared match card ────────────────────────────────────────────────────────
 function MatchCard({ match, large = false }: { match: any; large?: boolean }) {
+  const isFinal = match.matchType === "final";
   if (large) {
     return (
-      <Card className="overflow-hidden border-primary/50 shadow-lg shadow-primary/5">
+      <Card className={`overflow-hidden shadow-lg ${isFinal ? "border-2 border-amber-500/50 shadow-amber-500/10" : "border-primary/50 shadow-primary/5"}`}>
         <CardContent className="p-0">
-          <div className="bg-primary text-primary-foreground p-2 text-center text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+          <div className={`text-white p-2 text-center text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2 ${isFinal ? "bg-amber-500" : "bg-primary"}`}>
             <span className="animate-pulse w-2 h-2 rounded-full bg-white" />
-            {match.matchType === "final" ? "🏆 FINAL" : `Pitch ${match.pitch}`} • Live
+            {isFinal ? (
+              <span className="flex items-center gap-1.5"><Crown className="h-4 w-4" /> FINAL</span>
+            ) : `Pitch ${match.pitch}`} • Live
           </div>
           <div className="p-6 md:p-10 grid grid-cols-[1fr_auto_1fr] items-center gap-6">
             <div className="flex items-center justify-end gap-3 min-w-0">
@@ -38,9 +41,9 @@ function MatchCard({ match, large = false }: { match: any; large?: boolean }) {
   }
 
   return (
-    <Card className="overflow-hidden hover:border-primary transition-colors">
+    <Card className={`overflow-hidden transition-colors ${isFinal ? "border-2 border-amber-500/50 shadow-md shadow-amber-500/10" : "hover:border-primary"}`}>
       <CardContent className="p-0">
-        <div className="flex justify-between items-center bg-muted/50 p-3 text-sm font-medium border-b">
+        <div className={`flex justify-between items-center p-3 text-sm font-medium border-b ${isFinal ? "bg-amber-500/10" : "bg-muted/50"}`}>
           <div className="flex items-center gap-4">
             <span className="text-muted-foreground flex items-center gap-1">
               <CalendarDays className="h-4 w-4" />
@@ -52,9 +55,9 @@ function MatchCard({ match, large = false }: { match: any; large?: boolean }) {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            {match.matchType === "final" && (
-              <Badge variant="outline" className="border-amber-500 text-amber-500 font-bold">
-                FINAL
+            {isFinal && (
+              <Badge variant="outline" className="border-amber-500 text-amber-500 font-bold bg-amber-500/10">
+                <Crown className="h-3 w-3 mr-1" /> FINAL
               </Badge>
             )}
             <Badge
@@ -94,20 +97,29 @@ function FixturesTab() {
   const { data: matches, isLoading } = useListMatches();
   if (isLoading) return <TabLoader />;
 
-  const upcoming = matches?.filter(m => m.status === "upcoming") ?? [];
-  const live     = matches?.filter(m => m.status === "live") ?? [];
-  const finished = matches?.filter(m => m.status === "finished") ?? [];
+  // Finals always shown first
+  const finalFirst = (list: any[]) =>
+    list.slice().sort((a, b) => {
+      if (a.matchType === "final" && b.matchType !== "final") return -1;
+      if (b.matchType === "final" && a.matchType !== "final") return 1;
+      return a.matchNumber - b.matchNumber;
+    });
+
+  const upcoming = finalFirst(matches?.filter(m => m.status === "upcoming") ?? []);
+  const live     = finalFirst(matches?.filter(m => m.status === "live") ?? []);
+  const finished = finalFirst(matches?.filter(m => m.status === "finished") ?? []);
+  const all      = finalFirst(matches ?? []);
 
   return (
     <Tabs defaultValue="all" className="w-full">
       <TabsList className="w-full grid grid-cols-4">
-        <TabsTrigger value="all">All ({matches?.length ?? 0})</TabsTrigger>
+        <TabsTrigger value="all">All ({all.length})</TabsTrigger>
         <TabsTrigger value="upcoming">Upcoming ({upcoming.length})</TabsTrigger>
         <TabsTrigger value="live" className="data-[state=active]:text-primary">Live ({live.length})</TabsTrigger>
         <TabsTrigger value="finished">Finished ({finished.length})</TabsTrigger>
       </TabsList>
       <TabsContent value="all" className="space-y-3 mt-4">
-        {matches?.length ? matches.map(m => <MatchCard key={m.id} match={m} />) : <Empty text="No matches yet" />}
+        {all.length ? all.map(m => <MatchCard key={m.id} match={m} />) : <Empty text="No matches yet" />}
       </TabsContent>
       <TabsContent value="upcoming" className="space-y-3 mt-4">
         {upcoming.length ? upcoming.map(m => <MatchCard key={m.id} match={m} />) : <Empty text="No upcoming matches" />}
