@@ -342,7 +342,7 @@ export default function AdminTeams() {
             <div key={team.id} className="relative group">
               <button
                 onClick={() => { setSelectedId(team.id); setConfirmDeleteId(null); }}
-                className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border-2 transition-all font-semibold text-sm pr-9 text-foreground"
+                className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border-2 transition-all font-semibold text-sm pr-9 text-foreground hover:bg-muted/70 hover:opacity-90"
                 style={{
                   borderColor: isSelected ? (edits[team.id]?.primaryColor || team.primaryColor) : isPendingSquad ? "#eab308" : "transparent",
                   backgroundColor: isSelected ? `${edits[team.id]?.primaryColor || team.primaryColor}18` : "hsl(var(--muted)/0.5)",
@@ -415,7 +415,7 @@ export default function AdminTeams() {
                       <Button
                         variant="link"
                         size="sm"
-                        className="h-auto p-0 gap-1.5 font-semibold text-destructive hover:text-destructive flex-shrink-0"
+                        className="h-auto p-0 gap-1.5 font-semibold text-destructive hover:opacity-80 flex-shrink-0"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                         Delete
