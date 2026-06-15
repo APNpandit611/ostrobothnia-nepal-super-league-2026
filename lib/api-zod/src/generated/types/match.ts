@@ -5,6 +5,8 @@
  * Nepal Summer League Finland 2026 Tournament API
  * OpenAPI spec version: 0.1.0
  */
+import type { Card } from './card';
+import type { Goal } from './goal';
 import type { MatchStatus } from './matchStatus';
 
 export interface Match {
@@ -30,4 +32,6 @@ export interface Match {
   /** @nullable */
   finishedAt?: string | null;
   createdAt?: string;
+  goals?: Goal[];
+  cards?: Card[];
 }

@@ -231,7 +231,28 @@ export const ListMatchesResponseItem = zod.object({
   "status": zod.enum(['upcoming', 'live', 'finished']),
   "startedAt": zod.string().nullish(),
   "finishedAt": zod.string().nullish(),
+  "createdAt": zod.string().optional(),
+  "goals": zod.array(zod.object({
+  "id": zod.number(),
+  "matchId": zod.number(),
+  "teamId": zod.number(),
+  "teamName": zod.string().nullish(),
+  "scorerName": zod.string().nullish(),
+  "assistName": zod.string().nullish(),
+  "minute": zod.number(),
+  "isOwnGoal": zod.boolean().optional(),
   "createdAt": zod.string().optional()
+})).optional(),
+  "cards": zod.array(zod.object({
+  "id": zod.number(),
+  "matchId": zod.number(),
+  "teamId": zod.number(),
+  "teamName": zod.string().nullish(),
+  "playerName": zod.string().nullish(),
+  "cardType": zod.enum(['yellow', 'red']),
+  "minute": zod.number(),
+  "createdAt": zod.string().optional()
+})).optional()
 })
 export const ListMatchesResponse = zod.array(ListMatchesResponseItem)
 
@@ -346,7 +367,28 @@ export const UpdateMatchResponse = zod.object({
   "status": zod.enum(['upcoming', 'live', 'finished']),
   "startedAt": zod.string().nullish(),
   "finishedAt": zod.string().nullish(),
+  "createdAt": zod.string().optional(),
+  "goals": zod.array(zod.object({
+  "id": zod.number(),
+  "matchId": zod.number(),
+  "teamId": zod.number(),
+  "teamName": zod.string().nullish(),
+  "scorerName": zod.string().nullish(),
+  "assistName": zod.string().nullish(),
+  "minute": zod.number(),
+  "isOwnGoal": zod.boolean().optional(),
   "createdAt": zod.string().optional()
+})).optional(),
+  "cards": zod.array(zod.object({
+  "id": zod.number(),
+  "matchId": zod.number(),
+  "teamId": zod.number(),
+  "teamName": zod.string().nullish(),
+  "playerName": zod.string().nullish(),
+  "cardType": zod.enum(['yellow', 'red']),
+  "minute": zod.number(),
+  "createdAt": zod.string().optional()
+})).optional()
 })
 
 
@@ -373,7 +415,28 @@ export const StartMatchResponse = zod.object({
   "status": zod.enum(['upcoming', 'live', 'finished']),
   "startedAt": zod.string().nullish(),
   "finishedAt": zod.string().nullish(),
+  "createdAt": zod.string().optional(),
+  "goals": zod.array(zod.object({
+  "id": zod.number(),
+  "matchId": zod.number(),
+  "teamId": zod.number(),
+  "teamName": zod.string().nullish(),
+  "scorerName": zod.string().nullish(),
+  "assistName": zod.string().nullish(),
+  "minute": zod.number(),
+  "isOwnGoal": zod.boolean().optional(),
   "createdAt": zod.string().optional()
+})).optional(),
+  "cards": zod.array(zod.object({
+  "id": zod.number(),
+  "matchId": zod.number(),
+  "teamId": zod.number(),
+  "teamName": zod.string().nullish(),
+  "playerName": zod.string().nullish(),
+  "cardType": zod.enum(['yellow', 'red']),
+  "minute": zod.number(),
+  "createdAt": zod.string().optional()
+})).optional()
 })
 
 
@@ -400,7 +463,28 @@ export const FinishMatchResponse = zod.object({
   "status": zod.enum(['upcoming', 'live', 'finished']),
   "startedAt": zod.string().nullish(),
   "finishedAt": zod.string().nullish(),
+  "createdAt": zod.string().optional(),
+  "goals": zod.array(zod.object({
+  "id": zod.number(),
+  "matchId": zod.number(),
+  "teamId": zod.number(),
+  "teamName": zod.string().nullish(),
+  "scorerName": zod.string().nullish(),
+  "assistName": zod.string().nullish(),
+  "minute": zod.number(),
+  "isOwnGoal": zod.boolean().optional(),
   "createdAt": zod.string().optional()
+})).optional(),
+  "cards": zod.array(zod.object({
+  "id": zod.number(),
+  "matchId": zod.number(),
+  "teamId": zod.number(),
+  "teamName": zod.string().nullish(),
+  "playerName": zod.string().nullish(),
+  "cardType": zod.enum(['yellow', 'red']),
+  "minute": zod.number(),
+  "createdAt": zod.string().optional()
+})).optional()
 })
 
 
@@ -427,7 +511,28 @@ export const ResetMatchResponse = zod.object({
   "status": zod.enum(['upcoming', 'live', 'finished']),
   "startedAt": zod.string().nullish(),
   "finishedAt": zod.string().nullish(),
+  "createdAt": zod.string().optional(),
+  "goals": zod.array(zod.object({
+  "id": zod.number(),
+  "matchId": zod.number(),
+  "teamId": zod.number(),
+  "teamName": zod.string().nullish(),
+  "scorerName": zod.string().nullish(),
+  "assistName": zod.string().nullish(),
+  "minute": zod.number(),
+  "isOwnGoal": zod.boolean().optional(),
   "createdAt": zod.string().optional()
+})).optional(),
+  "cards": zod.array(zod.object({
+  "id": zod.number(),
+  "matchId": zod.number(),
+  "teamId": zod.number(),
+  "teamName": zod.string().nullish(),
+  "playerName": zod.string().nullish(),
+  "cardType": zod.enum(['yellow', 'red']),
+  "minute": zod.number(),
+  "createdAt": zod.string().optional()
+})).optional()
 })
 
 

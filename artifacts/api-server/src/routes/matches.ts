@@ -49,9 +49,35 @@ router.get("/matches", async (req, res): Promise<void> => {
     .where(conditions.length > 0 ? and(...conditions) : undefined)
     .orderBy(matchesTable.matchNumber);
 
+  const matchIds = matches.map(m => m.id);
+
+  const allGoals = matchIds.length > 0
+    ? await db.select().from(goalsTable).where(inArray(goalsTable.matchId, matchIds)).orderBy(goalsTable.minute)
+    : [];
+  const allCards = matchIds.length > 0
+    ? await db.select().from(cardsTable).where(inArray(cardsTable.matchId, matchIds)).orderBy(cardsTable.minute)
+    : [];
+
+  const goalsByMatch = new Map<number, typeof allGoals>();
+  const cardsByMatch = new Map<number, typeof allCards>();
+  for (const g of allGoals) {
+    const list = goalsByMatch.get(g.matchId) ?? [];
+    list.push(g);
+    goalsByMatch.set(g.matchId, list);
+  }
+  for (const c of allCards) {
+    const list = cardsByMatch.get(c.matchId) ?? [];
+    list.push(c);
+    cardsByMatch.set(c.matchId, list);
+  }
+
   const enriched = matches
     .filter(m => registeredIds.has(m.homeTeamId) && registeredIds.has(m.awayTeamId))
-    .map(m => enrichMatch(m, teamsMap.get(m.homeTeamId), teamsMap.get(m.awayTeamId)));
+    .map(m => ({
+      ...enrichMatch(m, teamsMap.get(m.homeTeamId), teamsMap.get(m.awayTeamId)),
+      goals: (goalsByMatch.get(m.id) ?? []).map(g => ({ ...g, teamName: teamsMap.get(g.teamId)?.name ?? null })),
+      cards: (cardsByMatch.get(m.id) ?? []).map(c => ({ ...c, teamName: teamsMap.get(c.teamId)?.name ?? null })),
+    }));
   res.json(enriched);
 });
 

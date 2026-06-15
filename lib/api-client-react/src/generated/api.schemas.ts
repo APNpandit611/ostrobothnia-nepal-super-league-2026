@@ -93,40 +93,6 @@ export const MatchStatus = {
   finished: 'finished',
 } as const;
 
-export interface Match {
-  id: number;
-  matchNumber: number;
-  homeTeamId: number;
-  awayTeamId: number;
-  /** @nullable */
-  homeTeamName?: string | null;
-  /** @nullable */
-  awayTeamName?: string | null;
-  /** @nullable */
-  homeTeamShortName?: string | null;
-  /** @nullable */
-  awayTeamShortName?: string | null;
-  homeScore?: number;
-  awayScore?: number;
-  scheduledTime: string;
-  pitch: number;
-  status: MatchStatus;
-  /** @nullable */
-  startedAt?: string | null;
-  /** @nullable */
-  finishedAt?: string | null;
-  createdAt?: string;
-}
-
-export type MatchDetailStatus = typeof MatchDetailStatus[keyof typeof MatchDetailStatus];
-
-
-export const MatchDetailStatus = {
-  upcoming: 'upcoming',
-  live: 'live',
-  finished: 'finished',
-} as const;
-
 export interface Goal {
   id: number;
   matchId: number;
@@ -162,6 +128,42 @@ export interface Card {
   minute: number;
   createdAt?: string;
 }
+
+export interface Match {
+  id: number;
+  matchNumber: number;
+  homeTeamId: number;
+  awayTeamId: number;
+  /** @nullable */
+  homeTeamName?: string | null;
+  /** @nullable */
+  awayTeamName?: string | null;
+  /** @nullable */
+  homeTeamShortName?: string | null;
+  /** @nullable */
+  awayTeamShortName?: string | null;
+  homeScore?: number;
+  awayScore?: number;
+  scheduledTime: string;
+  pitch: number;
+  status: MatchStatus;
+  /** @nullable */
+  startedAt?: string | null;
+  /** @nullable */
+  finishedAt?: string | null;
+  createdAt?: string;
+  goals?: Goal[];
+  cards?: Card[];
+}
+
+export type MatchDetailStatus = typeof MatchDetailStatus[keyof typeof MatchDetailStatus];
+
+
+export const MatchDetailStatus = {
+  upcoming: 'upcoming',
+  live: 'live',
+  finished: 'finished',
+} as const;
 
 export type MatchEventEventType = typeof MatchEventEventType[keyof typeof MatchEventEventType];
 

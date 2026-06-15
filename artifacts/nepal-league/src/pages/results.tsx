@@ -1,8 +1,9 @@
-import { useListMatches, useGetTopScorers } from "@workspace/api-client-react";
+import { useListMatches } from "@workspace/api-client-react";
+import type { Match, Goal, Card as MatchCard } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MapPin, CalendarDays, ClipboardList } from "lucide-react";
-import { format } from "date-fns";
+import { Loader2, MapPin, CalendarDays, ClipboardList, Clock, Crosshair } from "lucide-react";
+import { format, differenceInMinutes } from "date-fns";
 
 export default function Results() {
   const { data: matches, isLoading } = useListMatches({ status: 'finished' });
@@ -34,42 +35,142 @@ export default function Results() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-5">
           {finishedMatches.map(match => (
-            <Card key={match.id} className="overflow-hidden">
-              <CardContent className="p-0">
-                <div className="flex justify-between items-center bg-muted/50 p-3 text-sm font-medium border-b">
-                  <div className="flex items-center gap-4">
-                    <span className="text-muted-foreground flex items-center gap-1">
-                      <CalendarDays className="h-4 w-4" />
-                      {format(new Date(match.scheduledTime), "HH:mm")}
-                    </span>
-                    <span className="text-muted-foreground flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      Pitch {match.pitch}
-                    </span>
-                  </div>
-                  <Badge variant="secondary">FULL TIME</Badge>
-                </div>
-                
-                <div className="p-4 md:p-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4 md:gap-8">
-                  <div className="text-right">
-                    <h2 className="text-lg md:text-2xl font-bold truncate">{match.homeTeamName}</h2>
-                  </div>
-                  
-                  <div className="bg-background border px-4 py-2 md:px-6 md:py-3 rounded-lg font-mono text-2xl md:text-4xl font-black tracking-tighter shadow-sm">
-                    {match.homeScore} - {match.awayScore}
-                  </div>
-                  
-                  <div className="text-left">
-                    <h2 className="text-lg md:text-2xl font-bold truncate">{match.awayTeamName}</h2>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <MatchResultCard key={match.id} match={match} />
           ))}
         </div>
       )}
     </div>
+  );
+}
+
+function MatchResultCard({ match }: { match: Match }) {
+  const goals = (match.goals ?? []) as Goal[];
+  const cards = (match.cards ?? []) as MatchCard[];
+
+  const homeGoals = goals.filter(g => !g.isOwnGoal && g.teamId === match.homeTeamId);
+  const awayGoals = goals.filter(g => !g.isOwnGoal && g.teamId === match.awayTeamId);
+  const ownGoalsForHome = goals.filter(g => g.isOwnGoal && g.teamId === match.awayTeamId);
+  const ownGoalsForAway = goals.filter(g => g.isOwnGoal && g.teamId === match.homeTeamId);
+
+  const homeCards = cards.filter(c => c.teamId === match.homeTeamId);
+  const awayCards = cards.filter(c => c.teamId === match.awayTeamId);
+
+  const duration =
+    match.startedAt && match.finishedAt
+      ? differenceInMinutes(new Date(match.finishedAt), new Date(match.startedAt))
+      : null;
+
+  return (
+    <Card className="overflow-hidden border-0 shadow-sm relative bg-slate-900 text-white">
+      {/* Subtle gradient top bar */}
+      <div className="h-1 w-full bg-gradient-to-r from-primary via-emerald-400 to-primary" />
+
+      <CardContent className="p-0 relative z-10">
+        {/* Meta header */}
+        <div className="flex justify-between items-center p-3 text-xs font-medium border-b border-white/5 bg-white/[0.02]">
+          <div className="flex items-center gap-3">
+            <span className="text-slate-400 flex items-center gap-1">
+              <CalendarDays className="h-3.5 w-3.5" />
+              {format(new Date(match.scheduledTime), "HH:mm")}
+            </span>
+            <span className="text-slate-400 flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" />
+              Pitch {match.pitch}
+            </span>
+            {duration !== null && (
+              <span className="text-slate-400 flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                {duration} min
+              </span>
+            )}
+          </div>
+          <Badge variant="secondary" className="bg-white/10 text-white hover:bg-white/15 border-0 text-[10px] tracking-wider uppercase">
+            FT
+          </Badge>
+        </div>
+
+        {/* Scoreboard */}
+        <div className="px-4 py-5 md:px-6 md:py-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-6">
+          {/* Home team */}
+          <div className="text-right space-y-2">
+            <h2 className="text-base md:text-xl font-bold truncate text-white">{match.homeTeamName}</h2>
+            <div className="space-y-0.5">
+              {homeGoals.map((g, i) => (
+                <div key={i} className="flex items-center justify-end gap-1.5 text-[11px] text-slate-300">
+                  <span className="truncate">{g.scorerName || "Unknown"}</span>
+                  <span className="text-slate-500 font-mono">{g.minute}'</span>
+                  <Crosshair className="h-3 w-3 text-emerald-400" />
+                </div>
+              ))}
+              {ownGoalsForHome.map((g, i) => (
+                <div key={`og-${i}`} className="flex items-center justify-end gap-1.5 text-[11px] text-slate-400">
+                  <span className="truncate">(OG) {g.scorerName || "Unknown"}</span>
+                  <span className="text-slate-500 font-mono">{g.minute}'</span>
+                  <Crosshair className="h-3 w-3 text-slate-500" />
+                </div>
+              ))}
+            </div>
+            {homeCards.length > 0 && (
+              <div className="flex justify-end gap-1 pt-1">
+                {homeCards.map((c, i) => (
+                  <span
+                    key={i}
+                    className={`inline-block w-2.5 h-3.5 rounded-sm border ${
+                      c.cardType === "red"
+                        ? "bg-red-500 border-red-400"
+                        : "bg-yellow-400 border-yellow-300"
+                    }`}
+                    title={`${c.playerName || "Unknown"} ${c.minute}'`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Score */}
+          <div className="bg-white/5 border border-white/10 px-4 py-2 md:px-6 md:py-3 rounded-lg font-mono text-3xl md:text-4xl font-black tracking-tighter text-white text-center shadow-sm">
+            {match.homeScore} - {match.awayScore}
+          </div>
+
+          {/* Away team */}
+          <div className="text-left space-y-2">
+            <h2 className="text-base md:text-xl font-bold truncate text-white">{match.awayTeamName}</h2>
+            <div className="space-y-0.5">
+              {awayGoals.map((g, i) => (
+                <div key={i} className="flex items-center gap-1.5 text-[11px] text-slate-300">
+                  <Crosshair className="h-3 w-3 text-emerald-400" />
+                  <span className="text-slate-500 font-mono">{g.minute}'</span>
+                  <span className="truncate">{g.scorerName || "Unknown"}</span>
+                </div>
+              ))}
+              {ownGoalsForAway.map((g, i) => (
+                <div key={`og-${i}`} className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                  <Crosshair className="h-3 w-3 text-slate-500" />
+                  <span className="text-slate-500 font-mono">{g.minute}'</span>
+                  <span className="truncate">(OG) {g.scorerName || "Unknown"}</span>
+                </div>
+              ))}
+            </div>
+            {awayCards.length > 0 && (
+              <div className="flex gap-1 pt-1">
+                {awayCards.map((c, i) => (
+                  <span
+                    key={i}
+                    className={`inline-block w-2.5 h-3.5 rounded-sm border ${
+                      c.cardType === "red"
+                        ? "bg-red-500 border-red-400"
+                        : "bg-yellow-400 border-yellow-300"
+                    }`}
+                    title={`${c.playerName || "Unknown"} ${c.minute}'`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
