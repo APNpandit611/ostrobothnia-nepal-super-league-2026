@@ -895,6 +895,14 @@ export type CreateFinalMatch201 = {
   finalists?: CreateFinalMatch201FinalistsItem[];
 };
 
+export type ResetMatchBody = {
+  password: string;
+};
+
+export type ResetMatch403 = {
+  error?: string;
+};
+
 export type ListAllAnnouncementsParams = {
 status?: ListAllAnnouncementsStatus;
 category?: string;

@@ -63,6 +63,8 @@ export * from './player';
 export * from './playerInput';
 export * from './playerUpdate';
 export * from './publishToggleInput';
+export * from './resetMatch403';
+export * from './resetMatchBody';
 export * from './resetTournamentBody';
 export * from './seasonArchive';
 export * from './seasonArchiveInput';

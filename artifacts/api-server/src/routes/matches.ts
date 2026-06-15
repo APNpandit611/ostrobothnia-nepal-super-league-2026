@@ -301,6 +301,19 @@ router.post("/matches/:id/reset", async (req, res): Promise<void> => {
     res.status(400).json({ error: params.error.message });
     return;
   }
+
+  const { password } = req.body as { password?: string };
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    req.log.error("ADMIN_PASSWORD is not configured");
+    res.status(503).json({ error: "Admin password is not configured" });
+    return;
+  }
+  if (!password || password !== adminPassword) {
+    res.status(403).json({ error: "Incorrect password" });
+    return;
+  }
+
   // Delete related events, goals, cards
   await db.delete(matchEventsTable).where(eq(matchEventsTable.matchId, params.data.id));
   await db.delete(goalsTable).where(eq(goalsTable.matchId, params.data.id));

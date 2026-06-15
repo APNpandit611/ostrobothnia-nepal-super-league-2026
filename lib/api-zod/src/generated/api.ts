@@ -530,6 +530,10 @@ export const ResetMatchParams = zod.object({
   "id": zod.coerce.number()
 })
 
+export const ResetMatchBody = zod.object({
+  "password": zod.string()
+})
+
 export const ResetMatchResponse = zod.object({
   "id": zod.number(),
   "matchNumber": zod.number(),

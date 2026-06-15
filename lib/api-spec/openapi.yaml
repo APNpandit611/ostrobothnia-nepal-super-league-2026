@@ -486,6 +486,16 @@ paths:
           required: true
           schema:
             type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [password]
+              properties:
+                password:
+                  type: string
       responses:
         "200":
           description: Match reset
@@ -493,6 +503,15 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Match"
+        "403":
+          description: Incorrect password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
 
   # ── Goals ─────────────────────────────────────────────────────────────
   /matches/{matchId}/goals:
