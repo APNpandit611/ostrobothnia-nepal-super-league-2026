@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -16,7 +16,9 @@ export const teamsTable = pgTable("teams", {
   // null = no squad submitted, 'pending' = submitted awaiting admin approval, 'approved' = visible publicly
   squadStatus: text("squad_status"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => [
+  index("teams_squad_status_idx").on(table.squadStatus),
+]);
 
 export const insertTeamSchema = createInsertSchema(teamsTable).omit({ id: true, createdAt: true });
 export type InsertTeam = z.infer<typeof insertTeamSchema>;

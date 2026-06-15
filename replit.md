@@ -37,6 +37,9 @@ A full-stack football tournament management app for the Nepal Summer League Finl
 - Goals update match scores directly via DB; deleting a goal recalculates score from scratch
 - Round-robin fixtures auto-generated via POST /api/matches/generate (clears old fixtures)
 - Live updates via 5-second polling on the frontend (no WebSocket needed for one-day tournament)
+- Every admin (and public) operation reads/writes the database directly via Drizzle — no server-side caching layer, so data is always authoritative
+- Performance for ~1000 concurrent users comes from explicit DB indexes on the FK/filter columns (Postgres does NOT auto-index FK referencing columns) plus a tuned pg connection pool — not from caching. Indexes live in `lib/db/src/schema/*` via Drizzle `.index()`
+- Connection pool size is `DB_POOL_MAX` (default 20) in `lib/db/src/index.ts`. Constraint: keep `instances × DB_POOL_MAX` below the DB's `max_connections` (currently 112) so autoscale can't exhaust connections
 
 ## Product
 

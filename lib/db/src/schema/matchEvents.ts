@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, index } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { matchesTable } from "./matches";
@@ -13,7 +13,10 @@ export const matchEventsTable = pgTable("match_events", {
   description: text("description"),
   playerName: text("player_name"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+}, (table) => [
+  index("match_events_match_id_idx").on(table.matchId),
+  index("match_events_team_id_idx").on(table.teamId),
+]);
 
 export const insertMatchEventSchema = createInsertSchema(matchEventsTable).omit({ id: true, createdAt: true });
 export type InsertMatchEvent = z.infer<typeof insertMatchEventSchema>;
