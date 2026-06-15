@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2, MapPin, CalendarDays, ClipboardList, Clock, ArrowDownWideNarrow, Crown } from "lucide-react";
+import { Loader2, MapPin, CalendarDays, ClipboardList, Clock, ArrowDownWideNarrow, Crown, Trophy, Star, Award } from "lucide-react";
 import { format, differenceInMinutes } from "date-fns";
 import { TeamLogo } from "@/components/team-logo";
 
@@ -155,8 +155,12 @@ function MatchResultCard({ match }: { match: Match }) {
 
   const isFinal = match.matchType === "final";
 
+  if (isFinal) {
+    return <FinalChampionCard match={match} homeColor={homeColor} awayColor={awayColor} homeGoals={homeGoals} awayGoals={awayGoals} ownGoalsForHome={ownGoalsForHome} ownGoalsForAway={ownGoalsForAway} homeCards={homeCards} awayCards={awayCards} duration={duration} />;
+  }
+
   return (
-    <Card className={`overflow-hidden border shadow-sm relative ${isFinal ? "border-2 border-amber-500/50 shadow-md shadow-amber-500/10" : ""}`}>
+    <Card className="overflow-hidden border shadow-sm relative">
       {/* Split top bar — left half home team color, right half away team color */}
       <div
         className="h-1.5 w-full"
@@ -167,7 +171,7 @@ function MatchResultCard({ match }: { match: Match }) {
 
       <CardContent className="p-0 relative z-10">
         {/* Meta header */}
-        <div className={`flex justify-between items-center p-3 text-xs font-medium border-b ${isFinal ? "bg-amber-500/10" : "bg-muted/50"}`}>
+        <div className="flex justify-between items-center p-3 text-xs font-medium border-b bg-muted/50">
           <div className="flex items-center gap-3">
             <span className="text-muted-foreground flex items-center gap-1">
               <CalendarDays className="h-3.5 w-3.5" />
@@ -184,16 +188,9 @@ function MatchResultCard({ match }: { match: Match }) {
               </span>
             )}
           </div>
-          <div className="flex items-center gap-1.5">
-            {isFinal && (
-              <Badge variant="outline" className="border-amber-500 text-amber-500 font-bold text-[10px] uppercase bg-amber-500/10">
-                <Crown className="h-3 w-3 mr-1" /> FINAL
-              </Badge>
-            )}
-            <Badge variant="secondary" className="text-[10px] tracking-wider uppercase">
-              Full Time
-            </Badge>
-          </div>
+          <Badge variant="secondary" className="text-[10px] tracking-wider uppercase">
+            Full Time
+          </Badge>
         </div>
 
         {/* Scoreboard */}
@@ -282,6 +279,198 @@ function MatchResultCard({ match }: { match: Match }) {
                   <span
                     key={i}
                     className={`inline-block w-2.5 h-3.5 rounded-sm border ${
+                      c.cardType === "red"
+                        ? "bg-red-500 border-red-400"
+                        : "bg-yellow-400 border-yellow-300"
+                    }`}
+                    title={`${c.playerName || "Unknown"} ${c.minute}'`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+function FinalChampionCard({
+  match,
+  homeColor,
+  awayColor,
+  homeGoals,
+  awayGoals,
+  ownGoalsForHome,
+  ownGoalsForAway,
+  homeCards,
+  awayCards,
+  duration,
+}: {
+  match: Match;
+  homeColor: string;
+  awayColor: string;
+  homeGoals: Goal[];
+  awayGoals: Goal[];
+  ownGoalsForHome: Goal[];
+  ownGoalsForAway: Goal[];
+  homeCards: MatchCard[];
+  awayCards: MatchCard[];
+  duration: number | null;
+}) {
+  const winner = (match.homeScore ?? 0) > (match.awayScore ?? 0)
+    ? { name: match.homeTeamName, shortName: match.homeTeamShortName, logo: match.homeTeamLogo, color: homeColor, teamId: match.homeTeamId }
+    : (match.homeScore ?? 0) < (match.awayScore ?? 0)
+      ? { name: match.awayTeamName, shortName: match.awayTeamShortName, logo: match.awayTeamLogo, color: awayColor, teamId: match.awayTeamId }
+      : null;
+
+  return (
+    <Card className="overflow-hidden border-2 border-amber-500/50 shadow-lg shadow-amber-500/10 relative">
+      {/* Champion banner */}
+      <div className="bg-amber-500 text-white p-3 text-center font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2">
+        <Trophy className="h-5 w-5" /> Championship Final
+      </div>
+
+      {/* Split top bar */}
+      <div
+        className="h-2 w-full"
+        style={{
+          background: `linear-gradient(to right, ${homeColor} 0%, ${homeColor} 50%, ${awayColor} 50%, ${awayColor} 100%)`,
+        }}
+      />
+
+      <CardContent className="p-0 relative z-10">
+        {/* Meta header */}
+        <div className="flex justify-between items-center p-3 text-xs font-medium border-b bg-amber-500/10">
+          <div className="flex items-center gap-3">
+            <span className="text-muted-foreground flex items-center gap-1">
+              <CalendarDays className="h-3.5 w-3.5" />
+              {format(new Date(match.scheduledTime), "HH:mm")}
+            </span>
+            <span className="text-muted-foreground flex items-center gap-1">
+              <MapPin className="h-3.5 w-3.5" />
+              Pitch {match.pitch}
+            </span>
+            {duration !== null && (
+              <span className="text-muted-foreground flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                {duration} min
+              </span>
+            )}
+            <span className="text-muted-foreground flex items-center gap-1">
+              <Star className="h-3.5 w-3.5" />
+              Match #{match.matchNumber}
+            </span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Badge variant="outline" className="border-amber-500 text-amber-500 font-bold text-xs uppercase bg-amber-500/10">
+              <Crown className="h-3 w-3 mr-1" /> FINAL
+            </Badge>
+            <Badge variant="secondary" className="text-xs tracking-wider uppercase">
+              Full Time
+            </Badge>
+          </div>
+        </div>
+
+        {/* Winner announcement */}
+        {winner && (
+          <div className="text-center p-4 md:p-6 bg-amber-500/5 border-b border-amber-500/20">
+            <div className="flex items-center justify-center gap-2 text-amber-500 font-bold uppercase tracking-wider text-xs mb-2">
+              <Award className="h-4 w-4" /> Champion
+            </div>
+            <div className="flex items-center justify-center gap-3">
+              <TeamLogo name={winner.name} shortName={winner.shortName} logoUrl={winner.logo} size="lg" />
+              <h2 className="text-xl md:text-3xl font-black text-amber-500 truncate">{winner.name}</h2>
+            </div>
+          </div>
+        )}
+
+        {/* Scoreboard */}
+        <div className="px-4 py-6 md:px-8 md:py-8 grid grid-cols-[1fr_auto_1fr] items-center gap-4 md:gap-10">
+          {/* Home team */}
+          <div className="text-right space-y-3 min-w-0">
+            <div className="flex items-center justify-end gap-3 min-w-0">
+              <TeamLogo name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} size="lg" />
+              <h2 className="text-lg md:text-2xl font-black truncate min-w-0">{match.homeTeamName}</h2>
+            </div>
+            <div className="space-y-0.5">
+              {groupGoals(homeGoals).map((g, i) => (
+                <div key={i} className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground">
+                  <span className="truncate">{g.name}</span>
+                  <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
+                  <span className="flex items-center gap-0.5 text-primary">
+                    <SoccerBall className="h-3.5 w-3.5" />
+                    {g.count > 1 && <span className="font-bold text-xs">×{g.count}</span>}
+                  </span>
+                </div>
+              ))}
+              {groupGoals(ownGoalsForHome).map((g, i) => (
+                <div key={`og-${i}`} className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground">
+                  <span className="truncate">(OG) {g.name}</span>
+                  <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
+                  <span className="flex items-center gap-0.5 text-muted-foreground/60">
+                    <SoccerBall className="h-3.5 w-3.5" />
+                    {g.count > 1 && <span className="font-bold text-xs">×{g.count}</span>}
+                  </span>
+                </div>
+              ))}
+            </div>
+            {homeCards.length > 0 && (
+              <div className="flex justify-end gap-1 pt-1">
+                {homeCards.map((c, i) => (
+                  <span
+                    key={i}
+                    className={`inline-block w-3 h-4 rounded-sm border ${
+                      c.cardType === "red"
+                        ? "bg-red-500 border-red-400"
+                        : "bg-yellow-400 border-yellow-300"
+                    }`}
+                    title={`${c.playerName || "Unknown"} ${c.minute}'`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Score */}
+          <div className="bg-background border-2 border-amber-500/30 px-6 py-3 md:px-8 md:py-4 rounded-xl font-mono text-4xl md:text-6xl font-black tracking-tighter text-center shadow-inner">
+            {match.homeScore} - {match.awayScore}
+          </div>
+
+          {/* Away team */}
+          <div className="text-left space-y-3 min-w-0">
+            <div className="flex items-center gap-3 min-w-0">
+              <h2 className="text-lg md:text-2xl font-black truncate min-w-0">{match.awayTeamName}</h2>
+              <TeamLogo name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} size="lg" />
+            </div>
+            <div className="space-y-0.5">
+              {groupGoals(awayGoals).map((g, i) => (
+                <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-0.5 text-primary">
+                    <SoccerBall className="h-3.5 w-3.5" />
+                    {g.count > 1 && <span className="font-bold text-xs">×{g.count}</span>}
+                  </span>
+                  <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
+                  <span className="truncate">{g.name}</span>
+                </div>
+              ))}
+              {groupGoals(ownGoalsForAway).map((g, i) => (
+                <div key={`og-${i}`} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-0.5 text-muted-foreground/60">
+                    <SoccerBall className="h-3.5 w-3.5" />
+                    {g.count > 1 && <span className="font-bold text-xs">×{g.count}</span>}
+                  </span>
+                  <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
+                  <span className="truncate">(OG) {g.name}</span>
+                </div>
+              ))}
+            </div>
+            {awayCards.length > 0 && (
+              <div className="flex gap-1 pt-1">
+                {awayCards.map((c, i) => (
+                  <span
+                    key={i}
+                    className={`inline-block w-3 h-4 rounded-sm border ${
                       c.cardType === "red"
                         ? "bg-red-500 border-red-400"
                         : "bg-yellow-400 border-yellow-300"

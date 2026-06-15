@@ -727,6 +727,80 @@ export interface ClubSettings {
   updatedAt: string;
 }
 
+/**
+ * @nullable
+ */
+export type SeasonArchiveStandings = { [key: string]: unknown } | null;
+
+/**
+ * @nullable
+ */
+export type SeasonArchiveMatches = { [key: string]: unknown } | null;
+
+export interface SeasonArchive {
+  id?: number;
+  name?: string;
+  seasonYear?: string;
+  /** @nullable */
+  winnerTeamId?: number | null;
+  /** @nullable */
+  winnerTeamName?: string | null;
+  /** @nullable */
+  winnerTeamShortName?: string | null;
+  /** @nullable */
+  winnerTeamLogo?: string | null;
+  finalScore?: string;
+  finalHomeTeam?: string;
+  finalAwayTeam?: string;
+  /** @nullable */
+  topScorerName?: string | null;
+  /** @nullable */
+  topScorerGoals?: string | null;
+  /** @nullable */
+  topScorerTeam?: string | null;
+  /** @nullable */
+  standings?: SeasonArchiveStandings;
+  /** @nullable */
+  matches?: SeasonArchiveMatches;
+  createdAt?: string;
+}
+
+/**
+ * @nullable
+ */
+export type SeasonArchiveInputStandings = { [key: string]: unknown } | null;
+
+/**
+ * @nullable
+ */
+export type SeasonArchiveInputMatches = { [key: string]: unknown } | null;
+
+export interface SeasonArchiveInput {
+  name: string;
+  seasonYear: string;
+  /** @nullable */
+  winnerTeamId?: number | null;
+  /** @nullable */
+  winnerTeamName?: string | null;
+  /** @nullable */
+  winnerTeamShortName?: string | null;
+  /** @nullable */
+  winnerTeamLogo?: string | null;
+  finalScore: string;
+  finalHomeTeam: string;
+  finalAwayTeam: string;
+  /** @nullable */
+  topScorerName?: string | null;
+  /** @nullable */
+  topScorerGoals?: string | null;
+  /** @nullable */
+  topScorerTeam?: string | null;
+  /** @nullable */
+  standings?: SeasonArchiveInputStandings;
+  /** @nullable */
+  matches?: SeasonArchiveInputMatches;
+}
+
 export interface ClubSettingsUpdate {
   storyParagraphs?: string[];
   /** @nullable */
@@ -810,6 +884,11 @@ export const ListClubApplicationsStatus = {
   accepted: 'accepted',
   rejected: 'rejected',
 } as const;
+
+export type ArchiveCurrentSeasonBody = {
+  name: string;
+  seasonYear: string;
+};
 
 export type ResetTournamentBody = {
   password: string;

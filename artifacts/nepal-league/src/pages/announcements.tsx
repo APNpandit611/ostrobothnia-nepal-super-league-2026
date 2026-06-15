@@ -1,12 +1,13 @@
-import { useListPublishedAnnouncements, useGetActiveTournament } from "@workspace/api-client-react";
+import { useListPublishedAnnouncements, useGetActiveTournament, useListSeasonArchives } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Megaphone, CalendarDays, Calendar, MapPin, Clock, Users,
-  ListChecks, Award,
+  ListChecks, Award, Trophy, Goal, Medal, Table,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Loader2 } from "lucide-react";
+import { TeamLogo } from "@/components/team-logo";
 
 const CATEGORY_COLORS: Record<string, string> = {
   General: "bg-slate-500/15 text-slate-400 border-slate-500/20",
@@ -33,6 +34,7 @@ function EventInfoCard({ icon: Icon, label, value }: { icon: React.ElementType; 
 export default function Announcements() {
   const { data: announcements, isLoading } = useListPublishedAnnouncements();
   const { data: tournament } = useGetActiveTournament();
+  const { data: archives } = useListSeasonArchives();
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -114,6 +116,67 @@ export default function Announcements() {
               </li>
             ))}
           </ol>
+        </div>
+      )}
+
+      {/* Past Season Archives */}
+      {archives && archives.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+              <Trophy className="h-4 w-4 text-amber-500" /> Past Seasons
+            </h2>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <div className="space-y-3">
+            {archives.map((archive) => (
+              <Card key={archive.id} className="overflow-hidden border-amber-500/30">
+                <CardContent className="p-0">
+                  <div className="flex gap-0">
+                    <div className="w-1.5 bg-amber-500 flex-shrink-0" />
+                    <div className="flex-1 p-5 space-y-3">
+                      <div className="flex items-start justify-between gap-3 flex-wrap">
+                        <h2 className="font-bold text-lg leading-tight">{archive.name}</h2>
+                        <Badge variant="outline" className="border-amber-500 text-amber-500 text-xs flex-shrink-0">
+                          <Trophy className="h-3 w-3 mr-1" /> {archive.seasonYear}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-3 bg-amber-500/5 rounded-lg p-3 border border-amber-500/10">
+                        <TeamLogo
+                          name={archive.winnerTeamName || ""}
+                          shortName={archive.winnerTeamShortName || ""}
+                          logoUrl={archive.winnerTeamLogo || ""}
+                          size="md"
+                        />
+                        <div>
+                          <p className="text-xs text-muted-foreground uppercase tracking-wider">Champion</p>
+                          <p className="font-bold text-amber-500">{archive.winnerTeamName || "Unknown"}</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1.5">
+                          <Goal className="h-3.5 w-3.5" />
+                          <span>Final: {archive.finalScore}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Medal className="h-3.5 w-3.5" />
+                          <span>Top scorer: {archive.topScorerName || "N/A"}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <Table className="h-3.5 w-3.5" />
+                          <span>{Array.isArray(archive.standings) ? archive.standings.length : 0} teams</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground pt-1 border-t">
+                        <CalendarDays className="h-3.5 w-3.5" />
+                        <span>Archived {archive.createdAt ? format(new Date(archive.createdAt), "d MMMM yyyy") : "Unknown"}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
 

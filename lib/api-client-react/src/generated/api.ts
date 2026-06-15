@@ -23,6 +23,7 @@ import type {
   Announcement,
   AnnouncementInput,
   AnnouncementUpdate,
+  ArchiveCurrentSeasonBody,
   AuthResponse,
   Card,
   CardInput,
@@ -55,6 +56,8 @@ import type {
   PlayerUpdate,
   PublishToggleInput,
   ResetTournamentBody,
+  SeasonArchive,
+  SeasonArchiveInput,
   StandingRow,
   Team,
   TeamInput,
@@ -3699,6 +3702,372 @@ export const useDeleteClubApplication = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getDeleteClubApplicationMutationOptions(options));
+    }
+
+export const getListSeasonArchivesUrl = () => {
+
+
+
+
+  return `/api/season-archives`
+}
+
+/**
+ * @summary List all archived seasons (public)
+ */
+export const listSeasonArchives = async ( options?: RequestInit): Promise<SeasonArchive[]> => {
+
+  return customFetch<SeasonArchive[]>(getListSeasonArchivesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSeasonArchivesQueryKey = () => {
+    return [
+    `/api/season-archives`
+    ] as const;
+    }
+
+
+export const getListSeasonArchivesQueryOptions = <TData = Awaited<ReturnType<typeof listSeasonArchives>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSeasonArchives>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSeasonArchivesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSeasonArchives>>> = ({ signal }) => listSeasonArchives({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSeasonArchives>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListSeasonArchivesQueryResult = NonNullable<Awaited<ReturnType<typeof listSeasonArchives>>>
+export type ListSeasonArchivesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List all archived seasons (public)
+ */
+
+export function useListSeasonArchives<TData = Awaited<ReturnType<typeof listSeasonArchives>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listSeasonArchives>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListSeasonArchivesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetSeasonArchiveUrl = (id: number,) => {
+
+
+
+
+  return `/api/season-archives/${id}`
+}
+
+/**
+ * @summary Get a single season archive
+ */
+export const getSeasonArchive = async (id: number, options?: RequestInit): Promise<SeasonArchive> => {
+
+  return customFetch<SeasonArchive>(getGetSeasonArchiveUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSeasonArchiveQueryKey = (id: number,) => {
+    return [
+    `/api/season-archives/${id}`
+    ] as const;
+    }
+
+
+export const getGetSeasonArchiveQueryOptions = <TData = Awaited<ReturnType<typeof getSeasonArchive>>, TError = ErrorType<void>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSeasonArchive>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSeasonArchiveQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSeasonArchive>>> = ({ signal }) => getSeasonArchive(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSeasonArchive>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetSeasonArchiveQueryResult = NonNullable<Awaited<ReturnType<typeof getSeasonArchive>>>
+export type GetSeasonArchiveQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get a single season archive
+ */
+
+export function useGetSeasonArchive<TData = Awaited<ReturnType<typeof getSeasonArchive>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSeasonArchive>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetSeasonArchiveQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateSeasonArchiveUrl = () => {
+
+
+
+
+  return `/api/admin/season-archives`
+}
+
+/**
+ * @summary Create a season archive manually (admin)
+ */
+export const createSeasonArchive = async (seasonArchiveInput: SeasonArchiveInput, options?: RequestInit): Promise<SeasonArchive> => {
+
+  return customFetch<SeasonArchive>(getCreateSeasonArchiveUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      seasonArchiveInput,)
+  }
+);}
+
+
+
+
+export const getCreateSeasonArchiveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSeasonArchive>>, TError,{data: BodyType<SeasonArchiveInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createSeasonArchive>>, TError,{data: BodyType<SeasonArchiveInput>}, TContext> => {
+
+const mutationKey = ['createSeasonArchive'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSeasonArchive>>, {data: BodyType<SeasonArchiveInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createSeasonArchive(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateSeasonArchiveMutationResult = NonNullable<Awaited<ReturnType<typeof createSeasonArchive>>>
+    export type CreateSeasonArchiveMutationBody = BodyType<SeasonArchiveInput>
+    export type CreateSeasonArchiveMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Create a season archive manually (admin)
+ */
+export const useCreateSeasonArchive = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSeasonArchive>>, TError,{data: BodyType<SeasonArchiveInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createSeasonArchive>>,
+        TError,
+        {data: BodyType<SeasonArchiveInput>},
+        TContext
+      > => {
+      return useMutation(getCreateSeasonArchiveMutationOptions(options));
+    }
+
+export const getDeleteSeasonArchiveUrl = (id: number,) => {
+
+
+
+
+  return `/api/admin/season-archives/${id}`
+}
+
+/**
+ * @summary Delete a season archive (admin)
+ */
+export const deleteSeasonArchive = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteSeasonArchiveUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteSeasonArchiveMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSeasonArchive>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSeasonArchive>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteSeasonArchive'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSeasonArchive>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteSeasonArchive(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSeasonArchiveMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSeasonArchive>>>
+
+    export type DeleteSeasonArchiveMutationError = ErrorType<void>
+
+    /**
+ * @summary Delete a season archive (admin)
+ */
+export const useDeleteSeasonArchive = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSeasonArchive>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSeasonArchive>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteSeasonArchiveMutationOptions(options));
+    }
+
+export const getArchiveCurrentSeasonUrl = () => {
+
+
+
+
+  return `/api/admin/season-archives/archive-current`
+}
+
+/**
+ * @summary Auto-archive current season data (admin)
+ */
+export const archiveCurrentSeason = async (archiveCurrentSeasonBody: ArchiveCurrentSeasonBody, options?: RequestInit): Promise<SeasonArchive> => {
+
+  return customFetch<SeasonArchive>(getArchiveCurrentSeasonUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      archiveCurrentSeasonBody,)
+  }
+);}
+
+
+
+
+export const getArchiveCurrentSeasonMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof archiveCurrentSeason>>, TError,{data: BodyType<ArchiveCurrentSeasonBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof archiveCurrentSeason>>, TError,{data: BodyType<ArchiveCurrentSeasonBody>}, TContext> => {
+
+const mutationKey = ['archiveCurrentSeason'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof archiveCurrentSeason>>, {data: BodyType<ArchiveCurrentSeasonBody>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  archiveCurrentSeason(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ArchiveCurrentSeasonMutationResult = NonNullable<Awaited<ReturnType<typeof archiveCurrentSeason>>>
+    export type ArchiveCurrentSeasonMutationBody = BodyType<ArchiveCurrentSeasonBody>
+    export type ArchiveCurrentSeasonMutationError = ErrorType<void>
+
+    /**
+ * @summary Auto-archive current season data (admin)
+ */
+export const useArchiveCurrentSeason = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof archiveCurrentSeason>>, TError,{data: BodyType<ArchiveCurrentSeasonBody>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof archiveCurrentSeason>>,
+        TError,
+        {data: BodyType<ArchiveCurrentSeasonBody>},
+        TContext
+      > => {
+      return useMutation(getArchiveCurrentSeasonMutationOptions(options));
     }
 
 export const getResetTournamentUrl = () => {

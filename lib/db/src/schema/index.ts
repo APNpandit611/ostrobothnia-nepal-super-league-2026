@@ -9,3 +9,4 @@ export * from "./tournaments";
 export * from "./announcements";
 export * from "./clubApplications";
 export * from "./clubSettings";
+export * from "./seasonArchives";

@@ -29,6 +29,7 @@ import Announcements from "./pages/announcements";
 import AdminAnnouncements from "./pages/admin/announcements";
 import AdminClubApplications from "./pages/admin/club-applications";
 import AdminClubSettings from "./pages/admin/club-settings";
+import AdminSeasons from "./pages/admin/seasons";
 import JoinKsb from "./pages/join-ksb";
 import RegisterTeam from "./pages/register-team";
 import UpdateSquad from "./pages/update-squad";
@@ -212,6 +213,9 @@ function Router() {
       </Route>
       <Route path="/admin/club-settings">
         <AuthGuard><Layout><AdminClubSettings /></Layout></AuthGuard>
+      </Route>
+      <Route path="/admin/seasons">
+        <AuthGuard><Layout><AdminSeasons /></Layout></AuthGuard>
       </Route>
       <Route>
         <Layout><NotFound /></Layout>

@@ -1127,6 +1127,107 @@ export const DeleteClubApplicationParams = zod.object({
 
 
 /**
+ * @summary List all archived seasons (public)
+ */
+export const ListSeasonArchivesResponseItem = zod.object({
+  "id": zod.number().optional(),
+  "name": zod.string().optional(),
+  "seasonYear": zod.string().optional(),
+  "winnerTeamId": zod.number().nullish(),
+  "winnerTeamName": zod.string().nullish(),
+  "winnerTeamShortName": zod.string().nullish(),
+  "winnerTeamLogo": zod.string().nullish(),
+  "finalScore": zod.string().optional(),
+  "finalHomeTeam": zod.string().optional(),
+  "finalAwayTeam": zod.string().optional(),
+  "topScorerName": zod.string().nullish(),
+  "topScorerGoals": zod.string().nullish(),
+  "topScorerTeam": zod.string().nullish(),
+  "standings": zod.object({
+
+}).passthrough().nullish(),
+  "matches": zod.object({
+
+}).passthrough().nullish(),
+  "createdAt": zod.string().optional()
+})
+export const ListSeasonArchivesResponse = zod.array(ListSeasonArchivesResponseItem)
+
+
+/**
+ * @summary Get a single season archive
+ */
+export const GetSeasonArchiveParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetSeasonArchiveResponse = zod.object({
+  "id": zod.number().optional(),
+  "name": zod.string().optional(),
+  "seasonYear": zod.string().optional(),
+  "winnerTeamId": zod.number().nullish(),
+  "winnerTeamName": zod.string().nullish(),
+  "winnerTeamShortName": zod.string().nullish(),
+  "winnerTeamLogo": zod.string().nullish(),
+  "finalScore": zod.string().optional(),
+  "finalHomeTeam": zod.string().optional(),
+  "finalAwayTeam": zod.string().optional(),
+  "topScorerName": zod.string().nullish(),
+  "topScorerGoals": zod.string().nullish(),
+  "topScorerTeam": zod.string().nullish(),
+  "standings": zod.object({
+
+}).passthrough().nullish(),
+  "matches": zod.object({
+
+}).passthrough().nullish(),
+  "createdAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Create a season archive manually (admin)
+ */
+export const CreateSeasonArchiveBody = zod.object({
+  "name": zod.string(),
+  "seasonYear": zod.string(),
+  "winnerTeamId": zod.number().nullish(),
+  "winnerTeamName": zod.string().nullish(),
+  "winnerTeamShortName": zod.string().nullish(),
+  "winnerTeamLogo": zod.string().nullish(),
+  "finalScore": zod.string(),
+  "finalHomeTeam": zod.string(),
+  "finalAwayTeam": zod.string(),
+  "topScorerName": zod.string().nullish(),
+  "topScorerGoals": zod.string().nullish(),
+  "topScorerTeam": zod.string().nullish(),
+  "standings": zod.object({
+
+}).passthrough().nullish(),
+  "matches": zod.object({
+
+}).passthrough().nullish()
+})
+
+
+/**
+ * @summary Delete a season archive (admin)
+ */
+export const DeleteSeasonArchiveParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
+ * @summary Auto-archive current season data (admin)
+ */
+export const ArchiveCurrentSeasonBody = zod.object({
+  "name": zod.string(),
+  "seasonYear": zod.string()
+})
+
+
+/**
  * @summary Reset the entire tournament (admin only)
  */
 export const ResetTournamentBody = zod.object({

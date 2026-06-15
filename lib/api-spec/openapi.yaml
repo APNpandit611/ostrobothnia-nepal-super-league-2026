@@ -1054,6 +1054,106 @@ paths:
         "404":
           description: Not found
 
+  # ── Season archives ───────────────────────────────────────────────────
+  /season-archives:
+    get:
+      operationId: listSeasonArchives
+      tags: [season-archives]
+      summary: List all archived seasons (public)
+      responses:
+        "200":
+          description: List of season archives
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SeasonArchive"
+
+  /season-archives/{id}:
+    get:
+      operationId: getSeasonArchive
+      tags: [season-archives]
+      summary: Get a single season archive
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Season archive
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeasonArchive"
+        "404":
+          description: Not found
+
+  /admin/season-archives:
+    post:
+      operationId: createSeasonArchive
+      tags: [season-archives]
+      summary: Create a season archive manually (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SeasonArchiveInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeasonArchive"
+
+  /admin/season-archives/{id}:
+    delete:
+      operationId: deleteSeasonArchive
+      tags: [season-archives]
+      summary: Delete a season archive (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /admin/season-archives/archive-current:
+    post:
+      operationId: archiveCurrentSeason
+      tags: [season-archives]
+      summary: Auto-archive current season data (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, seasonYear]
+              properties:
+                name:
+                  type: string
+                seasonYear:
+                  type: string
+      responses:
+        "201":
+          description: Archived
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SeasonArchive"
+        "400":
+          description: Not all matches finished
+
   # ── Tournament control ────────────────────────────────────────────────
   /tournament/reset:
     post:
@@ -1896,6 +1996,76 @@ components:
           type: string
         updatedAt:
           type: string
+
+    # ── Season Archives ───────────────────────────────────────────────
+    SeasonArchive:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        seasonYear:
+          type: string
+        winnerTeamId:
+          type: ["integer", "null"]
+        winnerTeamName:
+          type: ["string", "null"]
+        winnerTeamShortName:
+          type: ["string", "null"]
+        winnerTeamLogo:
+          type: ["string", "null"]
+        finalScore:
+          type: string
+        finalHomeTeam:
+          type: string
+        finalAwayTeam:
+          type: string
+        topScorerName:
+          type: ["string", "null"]
+        topScorerGoals:
+          type: ["string", "null"]
+        topScorerTeam:
+          type: ["string", "null"]
+        standings:
+          type: ["object", "null"]
+        matches:
+          type: ["object", "null"]
+        createdAt:
+          type: string
+
+    SeasonArchiveInput:
+      type: object
+      required: [name, seasonYear, finalScore, finalHomeTeam, finalAwayTeam]
+      properties:
+        name:
+          type: string
+        seasonYear:
+          type: string
+        winnerTeamId:
+          type: ["integer", "null"]
+        winnerTeamName:
+          type: ["string", "null"]
+        winnerTeamShortName:
+          type: ["string", "null"]
+        winnerTeamLogo:
+          type: ["string", "null"]
+        finalScore:
+          type: string
+        finalHomeTeam:
+          type: string
+        finalAwayTeam:
+          type: string
+        topScorerName:
+          type: ["string", "null"]
+        topScorerGoals:
+          type: ["string", "null"]
+        topScorerTeam:
+          type: ["string", "null"]
+        standings:
+          type: ["object", "null"]
+        matches:
+          type: ["object", "null"]
 
     ClubSettingsUpdate:
       type: object

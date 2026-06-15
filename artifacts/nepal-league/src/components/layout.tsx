@@ -4,7 +4,7 @@ import {
   CalendarDays, Activity, ListOrdered, ClipboardList, Users, BarChart3,
   Settings, Menu, X, Sun, Moon, Home, UserPlus, Mail, Phone, MapPin,
   Facebook, Info, Megaphone, ChevronDown, Heart, Shield,
-  ClipboardEdit, BookOpen, LogOut,
+  ClipboardEdit, BookOpen, LogOut, Archive,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useGetAdminMe, useAdminLogout, getGetAdminMeQueryKey, useListTeams, useListClubApplications } from "@workspace/api-client-react";
@@ -54,6 +54,7 @@ const ADMIN_NAV_ITEMS: NavItem[] = [
   { href: "/admin/club-applications", label: "Applications", icon: Heart },
   { href: "/admin/announcements", label: "Announcements", icon: Megaphone },
   { href: "/admin/club-settings", label: "About Us", icon: BookOpen },
+  { href: "/admin/seasons", label: "Seasons", icon: Archive },
 ];
 
 function isParentActive(item: NavItem, location: string): boolean {
