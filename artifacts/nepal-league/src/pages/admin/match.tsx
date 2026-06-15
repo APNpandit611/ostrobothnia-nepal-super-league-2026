@@ -196,19 +196,19 @@ export default function AdminMatchDetail() {
           </Badge>
           <div className="text-sm font-bold text-muted-foreground">Match {match.matchNumber} • Pitch {match.pitch}</div>
         </div>
-        <CardContent className="p-8 grid grid-cols-[1fr_auto_1fr] items-center gap-8">
-          <div className="flex items-center justify-end gap-3 md:gap-4 min-w-0">
-            <TeamLogo size="lg" name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} />
-            <h2 className="text-2xl md:text-4xl font-black truncate">{match.homeTeamName}</h2>
+        <CardContent className="p-5 md:p-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4 md:gap-6">
+          <div className="flex items-center justify-end gap-2.5 md:gap-3 min-w-0">
+            <TeamLogo size="md" name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} />
+            <h2 className="text-lg md:text-2xl font-black truncate min-w-0">{match.homeTeamName}</h2>
           </div>
           
-          <div className="bg-background border-2 border-border shadow-inner px-8 py-4 rounded-xl font-mono text-5xl md:text-7xl font-black tracking-tighter text-center">
+          <div className="bg-background border-2 border-border shadow-inner px-5 py-3 md:px-6 rounded-xl font-mono text-4xl md:text-5xl font-black tracking-tighter text-center">
             {match.homeScore} - {match.awayScore}
           </div>
           
-          <div className="flex items-center justify-start gap-3 md:gap-4 min-w-0">
-            <TeamLogo size="lg" name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} />
-            <h2 className="text-2xl md:text-4xl font-black truncate">{match.awayTeamName}</h2>
+          <div className="flex items-center justify-start gap-2.5 md:gap-3 min-w-0">
+            <h2 className="text-lg md:text-2xl font-black truncate min-w-0">{match.awayTeamName}</h2>
+            <TeamLogo size="md" name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} />
           </div>
         </CardContent>
       </Card>

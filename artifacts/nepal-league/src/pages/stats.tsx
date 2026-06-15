@@ -176,14 +176,14 @@ export default function Stats() {
                 <div className="flex justify-between items-center gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <TeamLogo size="md" name={stats.highestScoringMatch.homeTeam} shortName={findTeam(stats.highestScoringMatch.homeTeam)?.shortName} logoUrl={findTeam(stats.highestScoringMatch.homeTeam)?.logoUrl} />
-                    <div className="font-bold text-lg truncate">{stats.highestScoringMatch.homeTeam}</div>
+                    <div className="font-bold text-lg truncate min-w-0">{stats.highestScoringMatch.homeTeam}</div>
                   </div>
                   <div className="bg-muted px-4 py-2 rounded font-mono text-xl font-black whitespace-nowrap">
                     {stats.highestScoringMatch.homeScore} - {stats.highestScoringMatch.awayScore}
                   </div>
                   <div className="flex items-center gap-2 min-w-0 justify-end">
+                    <div className="font-bold text-lg truncate min-w-0">{stats.highestScoringMatch.awayTeam}</div>
                     <TeamLogo size="md" name={stats.highestScoringMatch.awayTeam} shortName={findTeam(stats.highestScoringMatch.awayTeam)?.shortName} logoUrl={findTeam(stats.highestScoringMatch.awayTeam)?.logoUrl} />
-                    <div className="font-bold text-lg truncate">{stats.highestScoringMatch.awayTeam}</div>
                   </div>
                 </div>
                 <div className="text-center mt-4 text-sm font-medium text-primary">

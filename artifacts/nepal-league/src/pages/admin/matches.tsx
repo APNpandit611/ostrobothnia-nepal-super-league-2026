@@ -78,13 +78,13 @@ function MatchRow({ match }: { match: any }) {
                 </div>
               )}
               <div className="flex items-center justify-start gap-2.5 min-w-0">
-                <TeamLogo size="md" name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} />
                 <div className="text-left min-w-0">
                   <div className="font-bold truncate">{match.awayTeamName}</div>
                   {match.awayTeamShortName && (
                     <div className="text-xs text-muted-foreground font-mono">{match.awayTeamShortName}</div>
                   )}
                 </div>
+                <TeamLogo size="md" name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} />
               </div>
             </div>
 

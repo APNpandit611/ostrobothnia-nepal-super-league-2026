@@ -278,8 +278,8 @@ export default function AdminDashboard() {
                               {match.homeScore} - {match.awayScore}
                             </span>
                             <div className="flex items-center gap-2 min-w-0 justify-end">
-                              <TeamLogo size="sm" name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} />
                               <span className="font-bold truncate">{match.awayTeamShortName}</span>
+                              <TeamLogo size="sm" name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} />
                             </div>
                           </div>
                         </div>
