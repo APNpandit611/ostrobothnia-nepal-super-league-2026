@@ -171,18 +171,18 @@ function MatchResultCard({ match }: { match: Match }) {
 
       <CardContent className="p-0 relative z-10">
         {/* Meta header */}
-        <div className="flex justify-between items-center p-3 text-xs font-medium border-b bg-muted/50">
-          <div className="flex items-center gap-3">
-            <span className="text-muted-foreground flex items-center gap-1">
+        <div className="flex justify-between items-center px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b bg-muted/50">
+          <div className="flex items-center gap-3 text-muted-foreground">
+            <span className="flex items-center gap-1">
               <CalendarDays className="h-3.5 w-3.5" />
               {format(new Date(match.scheduledTime), "HH:mm")}
             </span>
-            <span className="text-muted-foreground flex items-center gap-1">
+            <span className="flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" />
               Pitch {match.pitch}
             </span>
             {duration !== null && (
-              <span className="text-muted-foreground flex items-center gap-1">
+              <span className="flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" />
                 {duration} min
               </span>
@@ -193,42 +193,50 @@ function MatchResultCard({ match }: { match: Match }) {
           </Badge>
         </div>
 
-        {/* Scoreboard */}
-        <div className="px-4 py-5 md:px-6 md:py-6 grid grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-6">
-          {/* Home team */}
-          <div className="text-right space-y-2 min-w-0">
-            <div className="flex items-center justify-end gap-2 min-w-0">
-              <TeamLogo name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} size="md" />
-              <h2 className="text-base md:text-xl font-bold truncate min-w-0">{match.homeTeamName}</h2>
+        {/* Main content: 3 columns - Home | Score | Away */}
+        <div className="px-4 py-5 md:px-6 md:py-6 grid grid-cols-[1fr_auto_1fr] gap-4 md:gap-8">
+          {/* Home team column */}
+          <div className="flex flex-col items-end gap-3 min-w-0">
+            {/* Team name + logo */}
+            <div className="flex items-center justify-end gap-3 min-w-0">
+              <div className="text-right min-w-0 space-y-0.5">
+                <p className="font-bold text-sm md:text-lg truncate leading-tight">{match.homeTeamName}</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">{match.homeTeamShortName}</p>
+              </div>
+              <TeamLogo name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} size="lg" />
             </div>
-            <div className="space-y-0.5">
-              {groupGoals(homeGoals).map((g, i) => (
-                <div key={i} className="flex items-center justify-end gap-1.5 text-[11px] text-muted-foreground">
-                  <span className="truncate">{g.name}</span>
-                  <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
-                  <span className="flex items-center gap-0.5 text-primary">
-                    <SoccerBall className="h-3 w-3" />
-                    {g.count > 1 && <span className="font-bold text-[10px]">×{g.count}</span>}
-                  </span>
-                </div>
-              ))}
-              {groupGoals(ownGoalsForHome).map((g, i) => (
-                <div key={`og-${i}`} className="flex items-center justify-end gap-1.5 text-[11px] text-muted-foreground">
-                  <span className="truncate">(OG) {g.name}</span>
-                  <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
-                  <span className="flex items-center gap-0.5 text-muted-foreground/60">
-                    <SoccerBall className="h-3 w-3" />
-                    {g.count > 1 && <span className="font-bold text-[10px]">×{g.count}</span>}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {/* Scorers */}
+            {(homeGoals.length > 0 || ownGoalsForHome.length > 0) && (
+              <div className="text-right space-y-1 min-w-0">
+                {groupGoals(homeGoals).map((g, i) => (
+                  <div key={i} className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
+                    <span className="truncate">{g.name}</span>
+                    <span className="font-mono text-muted-foreground/70">{g.minutes.map(m => `${m}'`).join(", ")}</span>
+                    <span className="flex items-center gap-0.5 text-primary">
+                      <SoccerBall className="h-3.5 w-3.5" />
+                      {g.count > 1 && <span className="font-bold">×{g.count}</span>}
+                    </span>
+                  </div>
+                ))}
+                {groupGoals(ownGoalsForHome).map((g, i) => (
+                  <div key={`og-${i}`} className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
+                    <span className="truncate">(OG) {g.name}</span>
+                    <span className="font-mono text-muted-foreground/70">{g.minutes.map(m => `${m}'`).join(", ")}</span>
+                    <span className="flex items-center gap-0.5 text-muted-foreground/60">
+                      <SoccerBall className="h-3.5 w-3.5" />
+                      {g.count > 1 && <span className="font-bold">×{g.count}</span>}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* Cards */}
             {homeCards.length > 0 && (
-              <div className="flex justify-end gap-1 pt-1">
+              <div className="flex justify-end gap-1">
                 {homeCards.map((c, i) => (
                   <span
                     key={i}
-                    className={`inline-block w-2.5 h-3.5 rounded-sm border ${
+                    className={`inline-block w-3 h-4 rounded-sm border ${
                       c.cardType === "red"
                         ? "bg-red-500 border-red-400"
                         : "bg-yellow-400 border-yellow-300"
@@ -241,44 +249,52 @@ function MatchResultCard({ match }: { match: Match }) {
           </div>
 
           {/* Score */}
-          <div className="bg-background border-2 border-border px-4 py-2 md:px-6 md:py-3 rounded-lg font-mono text-3xl md:text-4xl font-black tracking-tighter text-center shadow-inner">
-            {match.homeScore} - {match.awayScore}
+          <div className="bg-background border-2 border-border shadow-inner px-4 py-3 md:px-5 md:py-3 rounded-xl font-mono text-3xl md:text-4xl font-black tracking-widest text-center flex-shrink-0 self-center">
+            {match.homeScore} – {match.awayScore}
           </div>
 
-          {/* Away team */}
-          <div className="text-left space-y-2 min-w-0">
-            <div className="flex items-center gap-2 min-w-0">
-              <h2 className="text-base md:text-xl font-bold truncate min-w-0">{match.awayTeamName}</h2>
-              <TeamLogo name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} size="md" />
+          {/* Away team column */}
+          <div className="flex flex-col items-start gap-3 min-w-0">
+            {/* Logo + team name */}
+            <div className="flex items-center justify-start gap-3 min-w-0">
+              <TeamLogo name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} size="lg" />
+              <div className="min-w-0 space-y-0.5">
+                <p className="font-bold text-sm md:text-lg truncate leading-tight">{match.awayTeamName}</p>
+                <p className="text-xs text-muted-foreground hidden sm:block">{match.awayTeamShortName}</p>
+              </div>
             </div>
-            <div className="space-y-0.5">
-              {groupGoals(awayGoals).map((g, i) => (
-                <div key={i} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <span className="flex items-center gap-0.5 text-primary">
-                    <SoccerBall className="h-3 w-3" />
-                    {g.count > 1 && <span className="font-bold text-[10px]">×{g.count}</span>}
-                  </span>
-                  <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
-                  <span className="truncate">{g.name}</span>
-                </div>
-              ))}
-              {groupGoals(ownGoalsForAway).map((g, i) => (
-                <div key={`og-${i}`} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                  <span className="flex items-center gap-0.5 text-muted-foreground/60">
-                    <SoccerBall className="h-3 w-3" />
-                    {g.count > 1 && <span className="font-bold text-[10px]">×{g.count}</span>}
-                  </span>
-                  <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
-                  <span className="truncate">(OG) {g.name}</span>
-                </div>
-              ))}
-            </div>
+            {/* Scorers */}
+            {(awayGoals.length > 0 || ownGoalsForAway.length > 0) && (
+              <div className="text-left space-y-1 min-w-0">
+                {groupGoals(awayGoals).map((g, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-0.5 text-primary">
+                      <SoccerBall className="h-3.5 w-3.5" />
+                      {g.count > 1 && <span className="font-bold">×{g.count}</span>}
+                    </span>
+                    <span className="font-mono text-muted-foreground/70">{g.minutes.map(m => `${m}'`).join(", ")}</span>
+                    <span className="truncate">{g.name}</span>
+                  </div>
+                ))}
+                {groupGoals(ownGoalsForAway).map((g, i) => (
+                  <div key={`og-${i}`} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-0.5 text-muted-foreground/60">
+                      <SoccerBall className="h-3.5 w-3.5" />
+                      {g.count > 1 && <span className="font-bold">×{g.count}</span>}
+                    </span>
+                    <span className="font-mono text-muted-foreground/70">{g.minutes.map(m => `${m}'`).join(", ")}</span>
+                    <span className="truncate">(OG) {g.name}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* Cards */}
             {awayCards.length > 0 && (
-              <div className="flex gap-1 pt-1">
+              <div className="flex gap-1">
                 {awayCards.map((c, i) => (
                   <span
                     key={i}
-                    className={`inline-block w-2.5 h-3.5 rounded-sm border ${
+                    className={`inline-block w-3 h-4 rounded-sm border ${
                       c.cardType === "red"
                         ? "bg-red-500 border-red-400"
                         : "bg-yellow-400 border-yellow-300"
@@ -393,24 +409,24 @@ function FinalChampionCard({
               <TeamLogo name={match.homeTeamName} shortName={match.homeTeamShortName} logoUrl={match.homeTeamLogo} size="lg" />
               <h2 className="text-lg md:text-2xl font-black truncate min-w-0">{match.homeTeamName}</h2>
             </div>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {groupGoals(homeGoals).map((g, i) => (
-                <div key={i} className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground">
+                <div key={i} className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
                   <span className="truncate">{g.name}</span>
                   <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
                   <span className="flex items-center gap-0.5 text-primary">
                     <SoccerBall className="h-3.5 w-3.5" />
-                    {g.count > 1 && <span className="font-bold text-xs">×{g.count}</span>}
+                    {g.count > 1 && <span className="font-bold">×{g.count}</span>}
                   </span>
                 </div>
               ))}
               {groupGoals(ownGoalsForHome).map((g, i) => (
-                <div key={`og-${i}`} className="flex items-center justify-end gap-1.5 text-xs text-muted-foreground">
+                <div key={`og-${i}`} className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
                   <span className="truncate">(OG) {g.name}</span>
                   <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
                   <span className="flex items-center gap-0.5 text-muted-foreground/60">
                     <SoccerBall className="h-3.5 w-3.5" />
-                    {g.count > 1 && <span className="font-bold text-xs">×{g.count}</span>}
+                    {g.count > 1 && <span className="font-bold">×{g.count}</span>}
                   </span>
                 </div>
               ))}
@@ -443,22 +459,22 @@ function FinalChampionCard({
               <h2 className="text-lg md:text-2xl font-black truncate min-w-0">{match.awayTeamName}</h2>
               <TeamLogo name={match.awayTeamName} shortName={match.awayTeamShortName} logoUrl={match.awayTeamLogo} size="lg" />
             </div>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {groupGoals(awayGoals).map((g, i) => (
-                <div key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span className="flex items-center gap-0.5 text-primary">
                     <SoccerBall className="h-3.5 w-3.5" />
-                    {g.count > 1 && <span className="font-bold text-xs">×{g.count}</span>}
+                    {g.count > 1 && <span className="font-bold">×{g.count}</span>}
                   </span>
                   <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
                   <span className="truncate">{g.name}</span>
                 </div>
               ))}
               {groupGoals(ownGoalsForAway).map((g, i) => (
-                <div key={`og-${i}`} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <div key={`og-${i}`} className="flex items-center gap-2 text-sm text-muted-foreground">
                   <span className="flex items-center gap-0.5 text-muted-foreground/60">
                     <SoccerBall className="h-3.5 w-3.5" />
-                    {g.count > 1 && <span className="font-bold text-xs">×{g.count}</span>}
+                    {g.count > 1 && <span className="font-bold">×{g.count}</span>}
                   </span>
                   <span className="text-muted-foreground/70 font-mono">{g.minutes.map(m => `${m}'`).join(", ")}</span>
                   <span className="truncate">(OG) {g.name}</span>

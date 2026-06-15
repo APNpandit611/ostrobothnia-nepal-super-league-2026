@@ -577,9 +577,9 @@ export default function Home() {
                           </div>
                         </div>
                         {/* Teams row */}
-                        <div className="px-4 py-5 md:py-6 grid grid-cols-[1fr_auto_1fr] items-center gap-8 md:gap-14">
+                        <div className="px-4 py-5 md:py-6 grid grid-cols-[1fr_auto_1fr] items-center gap-4 md:gap-8">
                           {/* Home */}
-                          <div className="flex items-center justify-end gap-4 min-w-0">
+                          <div className="flex items-center justify-end gap-3 min-w-0">
                             <div className="text-right min-w-0 space-y-0.5">
                               <p className="font-bold text-sm md:text-lg truncate leading-tight">{match.homeTeamName}</p>
                               <p className="text-xs text-muted-foreground hidden sm:block">{match.homeTeamShortName}</p>
@@ -594,17 +594,17 @@ export default function Home() {
                           {/* Score / VS */}
                           <div className="text-center flex-shrink-0 px-2">
                             {isUpcoming ? (
-                              <div className="bg-muted px-5 py-2.5 rounded-lg font-mono text-xl font-bold tracking-[0.2em] text-muted-foreground">
+                              <div className="bg-muted px-4 py-2 rounded-lg font-mono text-lg font-bold tracking-[0.2em] text-muted-foreground">
                                 VS
                               </div>
                             ) : (
-                              <div className="bg-background border-2 border-border shadow-inner px-5 py-2.5 rounded-xl font-mono text-3xl md:text-4xl font-black tracking-widest">
+                              <div className="bg-background border-2 border-border shadow-inner px-4 py-2 rounded-xl font-mono text-3xl md:text-4xl font-black tracking-widest">
                                 {match.homeScore} – {match.awayScore}
                               </div>
                             )}
                           </div>
                           {/* Away */}
-                          <div className="flex items-center justify-start gap-4 min-w-0">
+                          <div className="flex items-center justify-start gap-3 min-w-0">
                             <TeamLogo
                               name={match.awayTeamName}
                               shortName={match.awayTeamShortName}
