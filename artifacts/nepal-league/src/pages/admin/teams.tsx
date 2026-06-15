@@ -332,7 +332,11 @@ function PlayerSection({ teamId, teamColor }: { teamId: number; teamColor: strin
         </div>
       )}
 
-      {/* Add player */}
+      {/* Add player manually */}
+      <div className="flex items-center gap-2 mb-1">
+        <UserPlus className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Add Player Manually</span>
+      </div>
       <div className="flex flex-wrap gap-2 items-center p-3 rounded-xl bg-muted/40 border">
         <Input
           placeholder="Player name"
