@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   CalendarDays, MapPin, Clock, ArrowRight, Users,
   Trophy, Facebook, Mail, Phone, UserPlus, Activity,
-  Crown,
+  Crown, Goal,
 } from "lucide-react";
 import { Link } from "wouter";
 import { differenceInDays, differenceInHours, differenceInMinutes, format } from "date-fns";
@@ -510,6 +510,121 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* All Matches */}
+      {allMatches && allMatches.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
+              <Goal className="h-5 w-5 text-primary" />
+              All Matches
+            </h2>
+            <Link href="/fixtures">
+              <span className="text-sm text-primary font-medium flex items-center gap-1 hover:underline">
+                Full schedule <ArrowRight className="h-3.5 w-3.5" />
+              </span>
+            </Link>
+          </div>
+          <div className="space-y-3">
+            {allMatches
+              .slice()
+              .sort((a, b) => {
+                if (a.matchType === "final" && b.matchType !== "final") return -1;
+                if (b.matchType === "final" && a.matchType !== "final") return 1;
+                return a.matchNumber - b.matchNumber;
+              })
+              .map((match) => {
+                const isFinal = match.matchType === "final";
+                const isLive = match.status === "live";
+                const isFinished = match.status === "finished";
+                const isUpcoming = match.status === "upcoming";
+                const linkHref = isLive ? "/live" : isFinished ? "/results" : "/fixtures";
+                return (
+                  <Link key={match.id} href={linkHref}>
+                    <Card
+                      className={`overflow-hidden cursor-pointer transition-colors hover:border-primary/50 ${
+                        isFinal
+                          ? "border-amber-500/40 shadow-sm shadow-amber-500/10"
+                          : isLive
+                          ? "border-primary/40 shadow-sm shadow-primary/10"
+                          : ""
+                      }`}
+                    >
+                      <CardContent className="p-0">
+                        {/* Header bar */}
+                        <div className={`flex items-center justify-between px-4 py-2 text-xs font-bold uppercase tracking-wider text-white ${
+                          isFinal ? "bg-amber-500" : isLive ? "bg-primary" : "bg-muted text-muted-foreground"
+                        }`}>
+                          <div className="flex items-center gap-3">
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3 w-3" />
+                              {format(new Date(match.scheduledTime), "HH:mm")}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              Pitch {match.pitch}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {isFinal && <Crown className="h-3 w-3" />}
+                            {isLive && (
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
+                              </span>
+                            )}
+                            {isFinal ? "Final" : isLive ? "Live" : isFinished ? "Full Time" : "Upcoming"}
+                          </div>
+                        </div>
+                        {/* Teams row */}
+                        <div className="px-4 py-5 md:py-6 grid grid-cols-[1fr_auto_1fr] items-center gap-8 md:gap-14">
+                          {/* Home */}
+                          <div className="flex items-center justify-end gap-4 min-w-0">
+                            <div className="text-right min-w-0 space-y-0.5">
+                              <p className="font-bold text-sm md:text-lg truncate leading-tight">{match.homeTeamName}</p>
+                              <p className="text-xs text-muted-foreground hidden sm:block">{match.homeTeamShortName}</p>
+                            </div>
+                            <TeamLogo
+                              name={match.homeTeamName}
+                              shortName={match.homeTeamShortName}
+                              logoUrl={match.homeTeamLogo}
+                              size="lg"
+                            />
+                          </div>
+                          {/* Score / VS */}
+                          <div className="text-center flex-shrink-0 px-2">
+                            {isUpcoming ? (
+                              <div className="bg-muted px-5 py-2.5 rounded-lg font-mono text-xl font-bold tracking-[0.2em] text-muted-foreground">
+                                VS
+                              </div>
+                            ) : (
+                              <div className="bg-background border-2 border-border shadow-inner px-5 py-2.5 rounded-xl font-mono text-3xl md:text-4xl font-black tracking-widest">
+                                {match.homeScore} – {match.awayScore}
+                              </div>
+                            )}
+                          </div>
+                          {/* Away */}
+                          <div className="flex items-center justify-start gap-4 min-w-0">
+                            <TeamLogo
+                              name={match.awayTeamName}
+                              shortName={match.awayTeamShortName}
+                              logoUrl={match.awayTeamLogo}
+                              size="lg"
+                            />
+                            <div className="min-w-0 space-y-0.5">
+                              <p className="font-bold text-sm md:text-lg truncate leading-tight">{match.awayTeamName}</p>
+                              <p className="text-xs text-muted-foreground hidden sm:block">{match.awayTeamShortName}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                );
+              })}
+          </div>
+        </div>
+      )}
 
       {/* Quick links */}
       <div>
