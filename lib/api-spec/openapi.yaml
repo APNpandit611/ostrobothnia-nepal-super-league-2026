@@ -1279,6 +1279,123 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorEnvelope'
 
+  /tournament-images:
+    get:
+      operationId: listTournamentImages
+      tags: [TournamentImages]
+      summary: List tournament images
+      parameters:
+        - name: tournamentId
+          in: query
+          schema:
+            type: integer
+          description: Filter by tournament ID
+      responses:
+        '200':
+          description: List of tournament images
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TournamentImage'
+    post:
+      operationId: createTournamentImage
+      tags: [TournamentImages]
+      summary: Add a tournament image
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentImageInput'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentImage'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
+  /tournament-images/{id}:
+    get:
+      operationId: getTournamentImage
+      tags: [TournamentImages]
+      summary: Get a tournament image by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Tournament image
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentImage'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    patch:
+      operationId: updateTournamentImage
+      tags: [TournamentImages]
+      summary: Update a tournament image
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TournamentImageInput'
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TournamentImage'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+    delete:
+      operationId: deleteTournamentImage
+      tags: [TournamentImages]
+      summary: Delete a tournament image
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorEnvelope'
+
   /tournament/reset:
     post:
       operationId: resetTournament
@@ -2283,6 +2400,30 @@ components:
           description: Normalized object path (e.g. /objects/uploads/uuid). Store this in your database.
         metadata:
           $ref: '#/components/schemas/UploadUrlRequest'
+    TournamentImage:
+      type: object
+      required: [id, tournamentId, imageUrl]
+      properties:
+        id:
+          type: integer
+        tournamentId:
+          type: integer
+        imageUrl:
+          type: string
+        caption:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+    TournamentImageInput:
+      type: object
+      required: [tournamentId, imageUrl]
+      properties:
+        tournamentId:
+          type: integer
+        imageUrl:
+          type: string
+        caption:
+          type: ["string", "null"]
     ErrorEnvelope:
       type: object
       required: [error]

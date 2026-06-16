@@ -4,6 +4,10 @@ import {
   useUpdateTournamentInfo,
   useDeleteTournamentInfo,
   getListTournamentsQueryKey,
+  useListTournamentImages,
+  useCreateTournamentImage,
+  useDeleteTournamentImage,
+  getListTournamentImagesQueryKey,
 } from "@workspace/api-client-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -236,16 +240,158 @@ function TieSheetUploadSection({
   );
 }
 
+function TournamentImageGallery({
+  tournamentId,
+}: {
+  tournamentId: number;
+}) {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { data: images, isLoading: loadingImages } = useListTournamentImages({
+    tournamentId,
+  });
+  const [newCaption, setNewCaption] = useState("");
+  const [newObjectPath, setNewObjectPath] = useState<string | null>(null);
+
+  const { uploadFile, isUploading, progress } = useUpload({
+    onSuccess: (res) => setNewObjectPath(res.objectPath),
+  });
+
+  const createImage = useCreateTournamentImage({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: "Image added" });
+        setNewCaption("");
+        setNewObjectPath(null);
+        queryClient.invalidateQueries({ queryKey: getListTournamentImagesQueryKey() });
+      },
+      onError: () => toast({ variant: "destructive", title: "Failed to add image" }),
+    },
+  });
+
+  const deleteImage = useDeleteTournamentImage({
+    mutation: {
+      onSuccess: () => {
+        toast({ title: "Image removed" });
+        queryClient.invalidateQueries({ queryKey: getListTournamentImagesQueryKey() });
+      },
+      onError: () => toast({ variant: "destructive", title: "Failed to remove image" }),
+    },
+  });
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ variant: "destructive", title: "Please select an image file" });
+      return;
+    }
+    await uploadFile(file);
+  };
+
+  const baseUrl = import.meta.env.BASE_URL || "/";
+
+  const handleSave = () => {
+    if (!newObjectPath) return;
+    createImage.mutate({
+      data: {
+        tournamentId,
+        imageUrl: newObjectPath,
+        caption: newCaption.trim() || null,
+      },
+    });
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Image className="h-4 w-4 text-muted-foreground" />
+        <Label className="text-sm font-semibold">Tournament Images</Label>
+        <span className="text-xs text-muted-foreground">Upload any picture with a description</span>
+      </div>
+
+      {/* Add new image */}
+      <div className="space-y-2 rounded-xl border border-dashed border-border p-4">
+        {newObjectPath ? (
+          <div className="space-y-2">
+            <div className="rounded-lg border overflow-hidden bg-muted">
+              <img src={`${baseUrl}api/storage${newObjectPath}`} alt="Preview" className="w-full object-contain max-h-40" />
+            </div>
+            <div className="space-y-2">
+              <Input
+                placeholder="Image description / caption"
+                value={newCaption}
+                onChange={(e) => setNewCaption(e.target.value)}
+                className="text-sm"
+              />
+              <div className="flex gap-2">
+                <Button size="sm" onClick={handleSave} disabled={createImage.isPending}>
+                  {createImage.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                  Save Image
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => { setNewObjectPath(null); setNewCaption(""); }}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <label className="flex flex-col items-center gap-2 cursor-pointer hover:bg-muted/50 transition-colors">
+            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isUploading} />
+            <div className="p-2 rounded-lg bg-primary/10">
+              {isUploading ? <Loader2 className="h-5 w-5 animate-spin text-primary" /> : <Upload className="h-5 w-5 text-primary" />}
+            </div>
+            <div className="text-center">
+              <p className="text-sm font-semibold">
+                {isUploading ? `Uploading ${progress}%...` : "Upload an image"}
+              </p>
+              <p className="text-xs text-muted-foreground">Add a description after uploading</p>
+            </div>
+          </label>
+        )}
+      </div>
+
+      {/* Existing images */}
+      {loadingImages ? (
+        <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
+      ) : images && images.length > 0 ? (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {images.map((img) => (
+            <div key={img.id} className="relative group rounded-lg border overflow-hidden bg-muted">
+              <img src={`${baseUrl}api/storage${img.imageUrl}`} alt={img.caption ?? "Tournament image"} className="w-full object-cover h-32" />
+              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-2 gap-1">
+                <p className="text-xs text-white font-medium line-clamp-2">{img.caption ?? "No caption"}</p>
+                <div className="flex justify-end">
+                  <Button variant="ghost" size="sm" className="h-7 w-7 p-0 text-white hover:text-red-400"
+                    onClick={() => deleteImage.mutate({ id: img.id })}
+                    disabled={deleteImage.isPending}
+                  >
+                    <TrashIcon className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-xs text-muted-foreground">No images yet. Upload the first one above.</p>
+      )}
+    </div>
+  );
+}
+
 function TournamentFormPanel({
   initial,
   onSave,
   onCancel,
   isSaving,
+  tournamentId,
 }: {
   initial: TournamentForm;
   onSave: (f: TournamentForm) => void;
   onCancel: () => void;
   isSaving: boolean;
+  tournamentId?: number;
 }) {
   const [form, setForm] = useState<TournamentForm>(initial);
   const set = (key: keyof TournamentForm, val: unknown) =>
@@ -345,6 +491,13 @@ function TournamentFormPanel({
         </Button>
         <Button variant="outline" onClick={onCancel}>Cancel</Button>
       </div>
+
+      {/* Image Gallery — only shown when editing an existing tournament */}
+      {tournamentId && (
+        <div className="pt-4 border-t">
+          <TournamentImageGallery tournamentId={tournamentId} />
+        </div>
+      )}
     </div>
   );
 }
@@ -462,6 +615,7 @@ export default function AdminTournament() {
                       onSave={(f) => updateMutation.mutate({ id: t.id, data: formToPayload(f) })}
                       onCancel={() => setExpandedId(null)}
                       isSaving={updateMutation.isPending && (updateMutation.variables as { id: number })?.id === t.id}
+                      tournamentId={t.id}
                     />
                   </div>
                 )}

@@ -18,6 +18,7 @@ import clubApplicationsRouter from "./clubApplications";
 import clubSettingsRouter from "./clubSettings";
 import seasonArchivesRouter from "./seasonArchives";
 import storageRouter from "./storage";
+import tournamentImagesRouter from "./tournamentImages";
 
 const router: IRouter = Router();
 
@@ -70,5 +71,6 @@ router.use(clubApplicationsRouter);
 router.use(clubSettingsRouter);
 router.use(seasonArchivesRouter);
 router.use(storageRouter);
+router.use(tournamentImagesRouter);
 
 export default router;

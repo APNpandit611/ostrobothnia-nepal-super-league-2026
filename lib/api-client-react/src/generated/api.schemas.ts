@@ -885,6 +885,22 @@ export interface UploadUrlResponse {
   metadata?: UploadUrlRequest;
 }
 
+export interface TournamentImage {
+  id: number;
+  tournamentId: number;
+  imageUrl: string;
+  /** @nullable */
+  caption?: string | null;
+  createdAt?: string;
+}
+
+export interface TournamentImageInput {
+  tournamentId: number;
+  imageUrl: string;
+  /** @nullable */
+  caption?: string | null;
+}
+
 export interface ErrorEnvelope {
   error: string;
 }
@@ -969,6 +985,13 @@ export const ListClubApplicationsStatus = {
 export type ArchiveCurrentSeasonBody = {
   name: string;
   seasonYear: string;
+};
+
+export type ListTournamentImagesParams = {
+/**
+ * Filter by tournament ID
+ */
+tournamentId?: number;
 };
 
 export type ResetTournamentBody = {

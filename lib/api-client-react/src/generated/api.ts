@@ -44,6 +44,7 @@ import type {
   ListAllAnnouncementsParams,
   ListClubApplicationsParams,
   ListMatchesParams,
+  ListTournamentImagesParams,
   LoginInput,
   Match,
   MatchDetail,
@@ -66,6 +67,8 @@ import type {
   TeamInput,
   TeamUpdate,
   TopScorer,
+  TournamentImage,
+  TournamentImageInput,
   TournamentInfo,
   TournamentInfoInput,
   TournamentInfoUpdate,
@@ -4309,6 +4312,380 @@ export function useGetStorageObject<TData = Awaited<ReturnType<typeof getStorage
 
 
 
+
+export const getListTournamentImagesUrl = (params?: ListTournamentImagesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/tournament-images?${stringifiedParams}` : `/api/tournament-images`
+}
+
+/**
+ * @summary List tournament images
+ */
+export const listTournamentImages = async (params?: ListTournamentImagesParams, options?: RequestInit): Promise<TournamentImage[]> => {
+
+  return customFetch<TournamentImage[]>(getListTournamentImagesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListTournamentImagesQueryKey = (params?: ListTournamentImagesParams,) => {
+    return [
+    `/api/tournament-images`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListTournamentImagesQueryOptions = <TData = Awaited<ReturnType<typeof listTournamentImages>>, TError = ErrorType<unknown>>(params?: ListTournamentImagesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listTournamentImages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListTournamentImagesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listTournamentImages>>> = ({ signal }) => listTournamentImages(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listTournamentImages>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListTournamentImagesQueryResult = NonNullable<Awaited<ReturnType<typeof listTournamentImages>>>
+export type ListTournamentImagesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List tournament images
+ */
+
+export function useListTournamentImages<TData = Awaited<ReturnType<typeof listTournamentImages>>, TError = ErrorType<unknown>>(
+ params?: ListTournamentImagesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listTournamentImages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListTournamentImagesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateTournamentImageUrl = () => {
+
+
+
+
+  return `/api/tournament-images`
+}
+
+/**
+ * @summary Add a tournament image
+ */
+export const createTournamentImage = async (tournamentImageInput: TournamentImageInput, options?: RequestInit): Promise<TournamentImage> => {
+
+  return customFetch<TournamentImage>(getCreateTournamentImageUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      tournamentImageInput,)
+  }
+);}
+
+
+
+
+export const getCreateTournamentImageMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTournamentImage>>, TError,{data: BodyType<TournamentImageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createTournamentImage>>, TError,{data: BodyType<TournamentImageInput>}, TContext> => {
+
+const mutationKey = ['createTournamentImage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTournamentImage>>, {data: BodyType<TournamentImageInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createTournamentImage(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateTournamentImageMutationResult = NonNullable<Awaited<ReturnType<typeof createTournamentImage>>>
+    export type CreateTournamentImageMutationBody = BodyType<TournamentImageInput>
+    export type CreateTournamentImageMutationError = ErrorType<ErrorEnvelope>
+
+    /**
+ * @summary Add a tournament image
+ */
+export const useCreateTournamentImage = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTournamentImage>>, TError,{data: BodyType<TournamentImageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createTournamentImage>>,
+        TError,
+        {data: BodyType<TournamentImageInput>},
+        TContext
+      > => {
+      return useMutation(getCreateTournamentImageMutationOptions(options));
+    }
+
+export const getGetTournamentImageUrl = (id: number,) => {
+
+
+
+
+  return `/api/tournament-images/${id}`
+}
+
+/**
+ * @summary Get a tournament image by ID
+ */
+export const getTournamentImage = async (id: number, options?: RequestInit): Promise<TournamentImage> => {
+
+  return customFetch<TournamentImage>(getGetTournamentImageUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTournamentImageQueryKey = (id: number,) => {
+    return [
+    `/api/tournament-images/${id}`
+    ] as const;
+    }
+
+
+export const getGetTournamentImageQueryOptions = <TData = Awaited<ReturnType<typeof getTournamentImage>>, TError = ErrorType<ErrorEnvelope>>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTournamentImage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTournamentImageQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTournamentImage>>> = ({ signal }) => getTournamentImage(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTournamentImage>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetTournamentImageQueryResult = NonNullable<Awaited<ReturnType<typeof getTournamentImage>>>
+export type GetTournamentImageQueryError = ErrorType<ErrorEnvelope>
+
+
+/**
+ * @summary Get a tournament image by ID
+ */
+
+export function useGetTournamentImage<TData = Awaited<ReturnType<typeof getTournamentImage>>, TError = ErrorType<ErrorEnvelope>>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getTournamentImage>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetTournamentImageQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateTournamentImageUrl = (id: number,) => {
+
+
+
+
+  return `/api/tournament-images/${id}`
+}
+
+/**
+ * @summary Update a tournament image
+ */
+export const updateTournamentImage = async (id: number,
+    tournamentImageInput: TournamentImageInput, options?: RequestInit): Promise<TournamentImage> => {
+
+  return customFetch<TournamentImage>(getUpdateTournamentImageUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      tournamentImageInput,)
+  }
+);}
+
+
+
+
+export const getUpdateTournamentImageMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTournamentImage>>, TError,{id: number;data: BodyType<TournamentImageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateTournamentImage>>, TError,{id: number;data: BodyType<TournamentImageInput>}, TContext> => {
+
+const mutationKey = ['updateTournamentImage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateTournamentImage>>, {id: number;data: BodyType<TournamentImageInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateTournamentImage(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateTournamentImageMutationResult = NonNullable<Awaited<ReturnType<typeof updateTournamentImage>>>
+    export type UpdateTournamentImageMutationBody = BodyType<TournamentImageInput>
+    export type UpdateTournamentImageMutationError = ErrorType<ErrorEnvelope>
+
+    /**
+ * @summary Update a tournament image
+ */
+export const useUpdateTournamentImage = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTournamentImage>>, TError,{id: number;data: BodyType<TournamentImageInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateTournamentImage>>,
+        TError,
+        {id: number;data: BodyType<TournamentImageInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateTournamentImageMutationOptions(options));
+    }
+
+export const getDeleteTournamentImageUrl = (id: number,) => {
+
+
+
+
+  return `/api/tournament-images/${id}`
+}
+
+/**
+ * @summary Delete a tournament image
+ */
+export const deleteTournamentImage = async (id: number, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteTournamentImageUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteTournamentImageMutationOptions = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTournamentImage>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteTournamentImage>>, TError,{id: number}, TContext> => {
+
+const mutationKey = ['deleteTournamentImage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteTournamentImage>>, {id: number}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteTournamentImage(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteTournamentImageMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTournamentImage>>>
+
+    export type DeleteTournamentImageMutationError = ErrorType<ErrorEnvelope>
+
+    /**
+ * @summary Delete a tournament image
+ */
+export const useDeleteTournamentImage = <TError = ErrorType<ErrorEnvelope>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTournamentImage>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteTournamentImage>>,
+        TError,
+        {id: number},
+        TContext
+      > => {
+      return useMutation(getDeleteTournamentImageMutationOptions(options));
+    }
 
 export const getResetTournamentUrl = () => {
 

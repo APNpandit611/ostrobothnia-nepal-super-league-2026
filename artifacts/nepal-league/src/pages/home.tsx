@@ -4,6 +4,7 @@ import {
   useListMatches,
   useGetStandings,
   useGetActiveTournament,
+  useListTournamentImages,
 } from "@workspace/api-client-react";
 import type { Match } from "@workspace/api-client-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -52,6 +53,43 @@ function Countdown({ target }: { target: Date }) {
 }
 
 /* ─── Featured Match Card ───────────────────────────────────────────────── */
+function TournamentImagesSection({ tournamentId }: { tournamentId: number }) {
+  const { data: images } = useListTournamentImages({ tournamentId });
+  if (!images || images.length === 0) return null;
+
+  const baseUrl = import.meta.env.BASE_URL || "/";
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+          <Image className="h-4 w-4 text-primary" />
+          Tournament Pictures
+        </h2>
+        <div className="flex-1 h-px bg-border" />
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        {images.map((img) => (
+          <Card key={img.id} className="overflow-hidden">
+            <CardContent className="p-0">
+              <img
+                src={`${baseUrl}api/storage${img.imageUrl}`}
+                alt={img.caption ?? "Tournament image"}
+                className="w-full object-cover h-48"
+              />
+              {img.caption && (
+                <div className="p-3">
+                  <p className="text-sm text-muted-foreground">{img.caption}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function FeaturedMatch({ match }: { match: Match }) {
   const isFinal = match.matchType === "final";
   const isLive = match.status === "live";
@@ -419,6 +457,9 @@ export default function Home() {
           </Card>
         </div>
       )}
+
+      {/* Tournament Images Gallery */}
+      {tournament?.id && <TournamentImagesSection tournamentId={tournament.id} />}
 
       {/* About the tournament */}
       <div className="grid md:grid-cols-2 gap-6">

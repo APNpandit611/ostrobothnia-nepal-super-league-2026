@@ -1310,6 +1310,79 @@ export const GetStorageObjectParams = zod.object({
 
 
 /**
+ * @summary List tournament images
+ */
+export const ListTournamentImagesQueryParams = zod.object({
+  "tournamentId": zod.coerce.number().optional().describe('Filter by tournament ID')
+})
+
+export const ListTournamentImagesResponseItem = zod.object({
+  "id": zod.number(),
+  "tournamentId": zod.number(),
+  "imageUrl": zod.string(),
+  "caption": zod.string().nullish(),
+  "createdAt": zod.string().optional()
+})
+export const ListTournamentImagesResponse = zod.array(ListTournamentImagesResponseItem)
+
+
+/**
+ * @summary Add a tournament image
+ */
+export const CreateTournamentImageBody = zod.object({
+  "tournamentId": zod.number(),
+  "imageUrl": zod.string(),
+  "caption": zod.string().nullish()
+})
+
+
+/**
+ * @summary Get a tournament image by ID
+ */
+export const GetTournamentImageParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const GetTournamentImageResponse = zod.object({
+  "id": zod.number(),
+  "tournamentId": zod.number(),
+  "imageUrl": zod.string(),
+  "caption": zod.string().nullish(),
+  "createdAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Update a tournament image
+ */
+export const UpdateTournamentImageParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+export const UpdateTournamentImageBody = zod.object({
+  "tournamentId": zod.number(),
+  "imageUrl": zod.string(),
+  "caption": zod.string().nullish()
+})
+
+export const UpdateTournamentImageResponse = zod.object({
+  "id": zod.number(),
+  "tournamentId": zod.number(),
+  "imageUrl": zod.string(),
+  "caption": zod.string().nullish(),
+  "createdAt": zod.string().optional()
+})
+
+
+/**
+ * @summary Delete a tournament image
+ */
+export const DeleteTournamentImageParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+/**
  * @summary Reset the entire tournament (admin only)
  */
 export const ResetTournamentBody = zod.object({
