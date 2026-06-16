@@ -58,13 +58,13 @@ function ClubApplicationPicker({
   const [selectedApp, setSelectedApp] = useState<{ id: number; name: string; email: string } | null>(null);
   const [pickNumber, setPickNumber] = useState("");
   const [pickPosition, setPickPosition] = useState("");
-  const [importedIds, setImportedIds] = useState<Set<number>>(new Set());
+  const [pickedIds, setPickedIds] = useState<Set<number>>(new Set());
 
   const addMutation = useAddPlayer({
     mutation: {
       onSuccess: () => {
         toast({ title: `${selectedApp?.name} added to squad` });
-        if (selectedApp) setImportedIds((prev) => new Set(prev).add(selectedApp.id));
+        if (selectedApp) setPickedIds((prev) => new Set(prev).add(selectedApp.id));
         setDialogOpen(false);
         setSelectedApp(null);
         setPickNumber("");
@@ -93,73 +93,127 @@ function ClubApplicationPicker({
     });
   };
 
-  const acceptedApps = applications?.filter((a) => !importedIds.has(a.id)) ?? [];
   const isKsb = teamName === "Kokkola Soccer Boys";
-
   if (!isKsb) return null;
-  if (isLoading) return <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>;
-  if (!acceptedApps.length) return null;
+
+  const allApps = applications ?? [];
+  const pendingApps = allApps.filter((a) => !pickedIds.has(a.id));
+  const doneApps = allApps.filter((a) => pickedIds.has(a.id));
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 py-3">
+        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+        <span className="text-sm text-muted-foreground">Loading applications...</span>
+      </div>
+    );
+  }
+
+  if (!allApps.length) return null;
 
   return (
     <div className="mb-6">
-      <div className="flex items-center gap-2 mb-2">
-        <Heart className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Accepted Club Applications</span>
-      </div>
-      <div className="rounded-xl border divide-y overflow-hidden">
-        {acceptedApps.map((app) => (
-          <div key={app.id} className="flex items-center justify-between gap-3 px-4 py-3 bg-card hover:bg-muted/30 transition-colors">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                <UserPlus className="h-4 w-4 text-primary" />
-              </div>
-              <div className="min-w-0">
-                <span className="font-semibold text-sm">{app.name}</span>
-                <span className="ml-1 text-xs text-muted-foreground">{app.email}</span>
-              </div>
-            </div>
-            <Button
-              size="sm"
-              className="h-8 gap-1.5"
-              onClick={() => {
-                setSelectedApp({ id: app.id, name: app.name, email: app.email });
-                setPickNumber("");
-                setPickPosition("");
-                setDialogOpen(true);
-              }}
-            >
-              <UserPlus className="h-3.5 w-3.5" /> Pick for Squad
-            </Button>
-          </div>
-        ))}
+      {/* Section header */}
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+          <Heart className="h-4 w-4 text-primary" />
+        </div>
+        <div>
+          <h3 className="text-sm font-black uppercase tracking-wide">Accepted Club Applications</h3>
+          <p className="text-xs text-muted-foreground">Pick applicants to add them to KSB squad</p>
+        </div>
+        <span className="ml-auto text-xs font-bold bg-muted px-2 py-0.5 rounded-full border">
+          {pendingApps.length}
+        </span>
       </div>
 
+      {/* Pending applications — card grid */}
+      {pendingApps.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 mb-3">
+          {pendingApps.map((app) => (
+            <div
+              key={app.id}
+              className="rounded-xl border bg-card p-3 hover:border-primary/40 hover:shadow-sm transition-all group"
+            >
+              <div className="flex items-start gap-2.5">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-white font-bold text-xs" style={{ backgroundColor: teamColor }}>
+                  {app.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-sm truncate leading-tight">{app.name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{app.email}</p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                className="w-full mt-2.5 h-8 gap-1.5 text-xs"
+                onClick={() => {
+                  setSelectedApp({ id: app.id, name: app.name, email: app.email });
+                  setPickNumber("");
+                  setPickPosition("");
+                  setDialogOpen(true);
+                }}
+              >
+                <UserPlus className="h-3.5 w-3.5" /> Pick for Squad
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Already picked */}
+      {doneApps.length > 0 && (
+        <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-3">
+          <div className="flex items-center gap-2 mb-2">
+            <CheckCircle2 className="h-4 w-4 text-green-500" />
+            <span className="text-xs font-bold uppercase tracking-wide text-green-600">Picked for Squad</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {doneApps.map((app) => (
+              <span
+                key={app.id}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold bg-green-500/10 text-green-700 px-2.5 py-1 rounded-full border border-green-500/20"
+              >
+                <CheckCircle2 className="h-3 w-3" />
+                {app.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Import dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-sm">
           <DialogHeader>
-            <DialogTitle>Pick {selectedApp?.name} for Squad</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-xs" style={{ backgroundColor: teamColor }}>
+                {selectedApp?.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
+              </div>
+              <span className="truncate">{selectedApp?.name}</span>
+            </DialogTitle>
             <DialogDescription>
-              Assign a jersey number and tournament role before importing.
+              Assign a jersey number and tournament role before adding to the squad.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-2">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold w-28">Jersey Number</span>
+          <div className="space-y-3 py-2">
+            <div className="space-y-1">
+              <Label className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Jersey Number</Label>
               <Input
                 type="number"
                 min={1}
                 max={99}
-                placeholder="#"
+                placeholder="1-99"
                 value={pickNumber}
                 onChange={(e) => setPickNumber(e.target.value)}
-                className="w-20"
+                className="w-24"
               />
             </div>
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold w-28">Tournament Role</span>
+            <div className="space-y-1">
+              <Label className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Tournament Role</Label>
               <Select value={pickPosition} onValueChange={setPickPosition}>
-                <SelectTrigger className="w-32">
-                  <SelectValue placeholder="Select" />
+                <SelectTrigger className="w-40">
+                  <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
                   {POSITIONS.map((pos) => (
@@ -170,8 +224,9 @@ function ClubApplicationPicker({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" size="sm" onClick={() => setDialogOpen(false)}>Cancel</Button>
             <Button
+              size="sm"
               onClick={handleImport}
               disabled={!pickNumber.trim() || addMutation.isPending}
               className="gap-1.5"
