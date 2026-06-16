@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   CalendarDays, MapPin, Clock, ArrowRight, Users,
   Trophy, Facebook, Mail, Phone, UserPlus, Activity,
-  Crown, Goal,
+  Crown, Goal, Image,
 } from "lucide-react";
 import { Link } from "wouter";
 import { differenceInDays, differenceInHours, differenceInMinutes, format } from "date-fns";
@@ -397,6 +397,28 @@ export default function Home() {
           </Link>
         </CardContent>
       </Card>
+
+      {/* Tie Sheet */}
+      {tournament?.tieSheetUrl && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2">
+            <h2 className="text-sm font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+              <Image className="h-4 w-4 text-primary" />
+              Tournament Tie Sheet
+            </h2>
+            <div className="flex-1 h-px bg-border" />
+          </div>
+          <Card className="overflow-hidden">
+            <CardContent className="p-0">
+              <img
+                src={`${import.meta.env.BASE_URL || "/"}api/storage${tournament.tieSheetUrl}`}
+                alt="Tournament Tie Sheet"
+                className="w-full object-contain"
+              />
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       {/* About the tournament */}
       <div className="grid md:grid-cols-2 gap-6">

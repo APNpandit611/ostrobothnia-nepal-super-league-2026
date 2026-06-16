@@ -35,6 +35,7 @@ router.post("/tournaments", async (req, res): Promise<void> => {
     prizes: body.prizes ?? null,
     status: body.status ?? "upcoming",
     isActive: body.isActive ?? false,
+    tieSheetUrl: body.tieSheetUrl ?? null,
   }).returning();
   res.status(201).json(row);
 });
@@ -56,6 +57,7 @@ router.patch("/tournaments/:id", async (req, res): Promise<void> => {
   if (body.prizes !== undefined) updateData.prizes = body.prizes;
   if (body.status !== undefined) updateData.status = body.status;
   if (body.isActive !== undefined) updateData.isActive = body.isActive;
+  if (body.tieSheetUrl !== undefined) updateData.tieSheetUrl = body.tieSheetUrl;
   const [row] = await db.update(tournamentsTable).set(updateData).where(eq(tournamentsTable.id, id)).returning();
   if (!row) { res.status(404).json({ message: "Not found" }); return; }
   res.json(row);

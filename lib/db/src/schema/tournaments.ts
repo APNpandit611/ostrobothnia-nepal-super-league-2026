@@ -17,6 +17,7 @@ export const tournamentsTable = pgTable("tournaments", {
   prizes: text("prizes").array(),
   status: text("status").notNull().default("upcoming"),
   isActive: boolean("is_active").default(false),
+  tieSheetUrl: text("tie_sheet_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 

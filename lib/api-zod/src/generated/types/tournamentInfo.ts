@@ -30,5 +30,7 @@ export interface TournamentInfo {
   status: TournamentInfoStatus;
   /** @nullable */
   isActive?: boolean | null;
+  /** @nullable */
+  tieSheetUrl?: string | null;
   createdAt?: string;
 }

@@ -32,7 +32,11 @@ import {
   Trophy,
   CheckSquare,
   PlusCircle,
+  Upload,
+  Image,
+  Trash2 as TrashIcon,
 } from "lucide-react";
+import { useUpload } from "@workspace/object-storage-web";
 
 interface TournamentForm {
   name: string;
@@ -48,6 +52,7 @@ interface TournamentForm {
   prizes: string[];
   status: "upcoming" | "active" | "completed";
   isActive: boolean;
+  tieSheetUrl: string | null;
 }
 
 const EMPTY_FORM: TournamentForm = {
@@ -64,6 +69,7 @@ const EMPTY_FORM: TournamentForm = {
   prizes: [],
   status: "upcoming",
   isActive: false,
+  tieSheetUrl: null,
 };
 
 function formToPayload(f: TournamentForm) {
@@ -81,6 +87,7 @@ function formToPayload(f: TournamentForm) {
     prizes: f.prizes.filter(Boolean).length > 0 ? f.prizes.filter(Boolean) : null,
     status: f.status,
     isActive: f.isActive,
+    tieSheetUrl: f.tieSheetUrl || null,
   };
 }
 
@@ -90,6 +97,7 @@ function tournamentToForm(t: {
   kickoffTime?: string | null; description?: string | null;
   rules?: string[] | null; prizes?: string[] | null;
   status: string; isActive?: boolean | null;
+  tieSheetUrl?: string | null;
 }): TournamentForm {
   return {
     name: t.name,
@@ -105,6 +113,7 @@ function tournamentToForm(t: {
     prizes: t.prizes ?? [],
     status: (t.status as "upcoming" | "active" | "completed") ?? "upcoming",
     isActive: t.isActive ?? false,
+    tieSheetUrl: t.tieSheetUrl ?? null,
   };
 }
 
@@ -150,6 +159,79 @@ function ArrayEditor({ label, icon: Icon, items, onChange, placeholder }: {
           <PlusCircle className="h-3.5 w-3.5" /> Add {label.replace(/s$/, "")}
         </Button>
       </div>
+    </div>
+  );
+}
+
+function TieSheetUploadSection({
+  tieSheetUrl,
+  onUpload,
+  onRemove,
+}: {
+  tieSheetUrl: string | null;
+  onUpload: (url: string) => void;
+  onRemove: () => void;
+}) {
+  const { uploadFile, isUploading, progress } = useUpload({
+    onSuccess: (res) => onUpload(res.objectPath),
+  });
+  const { toast } = useToast();
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast({ variant: "destructive", title: "Please select an image file" });
+      return;
+    }
+    await uploadFile(file);
+  };
+
+  const baseUrl = import.meta.env.BASE_URL || "/";
+  const previewUrl = tieSheetUrl ? `${baseUrl}api/storage${tieSheetUrl}` : null;
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Image className="h-4 w-4 text-muted-foreground" />
+        <Label className="text-sm font-semibold">Tie Sheet (Image)</Label>
+      </div>
+      {tieSheetUrl ? (
+        <div className="space-y-2">
+          <div className="rounded-xl border overflow-hidden bg-muted">
+            {previewUrl && (
+              <img src={previewUrl} alt="Tie Sheet" className="w-full object-contain max-h-64" />
+            )}
+          </div>
+          <div className="flex gap-2">
+            <label className="cursor-pointer">
+              <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isUploading} />
+              <Button variant="outline" size="sm" className="gap-1.5" asChild>
+                <span>
+                  {isUploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+                  {isUploading ? `Uploading ${progress}%` : "Replace"}
+                </span>
+              </Button>
+            </label>
+            <Button variant="ghost" size="sm" className="gap-1.5 text-destructive" onClick={onRemove}>
+              <TrashIcon className="h-3.5 w-3.5" /> Remove
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <label className="flex flex-col items-center gap-2 rounded-xl border border-dashed border-border p-6 cursor-pointer hover:bg-muted/50 transition-colors">
+          <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} disabled={isUploading} />
+          <div className="p-2 rounded-lg bg-primary/10">
+            {isUploading ? <Loader2 className="h-5 w-5 animate-spin text-primary" /> : <Upload className="h-5 w-5 text-primary" />}
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold">
+              {isUploading ? `Uploading ${progress}%...` : "Upload tie sheet image"}
+            </p>
+            <p className="text-xs text-muted-foreground">PNG, JPG, JPEG. Max 10MB.</p>
+          </div>
+        </label>
+      )}
     </div>
   );
 }
@@ -246,6 +328,13 @@ function TournamentFormPanel({
         items={form.prizes}
         onChange={(v) => set("prizes", v)}
         placeholder="e.g. 1st place — Champions Trophy"
+      />
+
+      {/* Tie Sheet Image */}
+      <TieSheetUploadSection
+        tieSheetUrl={form.tieSheetUrl}
+        onUpload={(url) => set("tieSheetUrl", url)}
+        onRemove={() => set("tieSheetUrl", null)}
       />
 
       {/* Actions */}

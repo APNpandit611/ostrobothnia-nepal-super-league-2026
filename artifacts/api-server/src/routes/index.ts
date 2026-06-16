@@ -17,6 +17,7 @@ import announcementsRouter from "./announcements";
 import clubApplicationsRouter from "./clubApplications";
 import clubSettingsRouter from "./clubSettings";
 import seasonArchivesRouter from "./seasonArchives";
+import storageRouter from "./storage";
 
 const router: IRouter = Router();
 
@@ -68,5 +69,6 @@ router.use(announcementsRouter);
 router.use(clubApplicationsRouter);
 router.use(clubSettingsRouter);
 router.use(seasonArchivesRouter);
+router.use(storageRouter);
 
 export default router;
